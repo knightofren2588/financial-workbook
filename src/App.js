@@ -87,6 +87,18 @@ const FinancialWorkbook = () => {
     }
   };
 
+  // Clear all data function
+  const clearAllData = () => {
+    if (window.confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+      setBills([]);
+      setIncome([]);
+      localStorage.removeItem('financial-workbook-bills');
+      localStorage.removeItem('financial-workbook-income');
+      setLastSaved(null);
+      alert('🗑️ All data has been cleared!');
+    }
+  };
+
   // All the calculation functions remain the same
   const getDaysUntilDue = (dueDay) => {
     const today = new Date();
@@ -207,6 +219,9 @@ const FinancialWorkbook = () => {
             <button onClick={handleManualSave} className="manual-save-btn">
               <Save size={16} />
               Save Data
+            </button>
+            <button onClick={clearAllData} className="manual-save-btn" style={{background: '#ef4444', marginLeft: '0.5rem'}}>
+              🗑️ Clear All Data
             </button>
             {lastSaved && <span className="last-saved">Last saved: {lastSaved}</span>}
           </div>
