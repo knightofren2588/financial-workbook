@@ -836,3 +836,285 @@ body {
     color: black;
   }
 }
+
+/* Enhanced Features CSS */
+
+/* View Toggle Buttons */
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  justify-content: center;
+}
+
+.toggle-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.toggle-btn:hover {
+  border-color: #8b5cf6;
+  background: #f3f4f6;
+}
+
+.toggle-btn.active {
+  background: #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
+}
+
+/* Enhanced Summary Cards */
+.card-sublabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Payment Status Buttons */
+.payment-status-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  margin-right: 0.5rem;
+}
+
+.payment-status-btn.paid {
+  background: #10b981;
+  color: white;
+}
+
+.payment-status-btn.paid:hover {
+  background: #059669;
+}
+
+.payment-status-btn.unpaid {
+  background: #f59e0b;
+  color: white;
+}
+
+.payment-status-btn.unpaid:hover {
+  background: #d97706;
+}
+
+/* Paid Bill Styling */
+.paid-bill {
+  opacity: 0.7;
+  background: #f0fdf4 !important;
+  border-left: 4px solid #10b981 !important;
+}
+
+.paid-date {
+  color: #10b981;
+  font-weight: 500;
+}
+
+/* Pay Periods View */
+.pay-periods-view {
+  margin-top: 2rem;
+}
+
+.pay-periods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.pay-period-card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.pay-period-header {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pay-period-header h3 {
+  margin: 0 0 0.5rem 0;
+  color: #1f2937;
+  font-size: 1.125rem;
+}
+
+.pay-date, .pay-amount {
+  margin: 0.25rem 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.pay-amount {
+  font-weight: 600;
+  color: #059669;
+}
+
+.assigned-bills h4 {
+  margin: 0 0 0.75rem 0;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.no-bills {
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0.5rem 0;
+}
+
+.assigned-bill {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.assigned-bill:last-child {
+  border-bottom: none;
+}
+
+.period-summary {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.5rem 0;
+}
+
+.summary-row.remaining {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.summary-row .positive {
+  color: #10b981;
+}
+
+.summary-row .negative {
+  color: #ef4444;
+}
+
+/* Unassigned Bills Section */
+.unassigned-bills-section {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: #fef3c7;
+  border-radius: 0.75rem;
+  border: 1px solid #fbbf24;
+}
+
+.unassigned-bills-section h3 {
+  margin: 0 0 1rem 0;
+  color: #92400e;
+}
+
+.unassigned-bills {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.unassigned-bill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.bill-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bill-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.bill-amount {
+  font-weight: 600;
+  color: #059669;
+}
+
+.assign-select {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background: white;
+  min-width: 200px;
+}
+
+/* Mobile Responsiveness for New Features */
+@media (max-width: 768px) {
+  .view-toggle {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .toggle-btn {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+  
+  .pay-periods-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .pay-period-card {
+    padding: 1rem;
+  }
+  
+  .unassigned-bill {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .bill-info {
+    justify-content: space-between;
+  }
+  
+  .assign-select {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .payment-status-btn {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+}
+
+/* Enhanced Mobile Touch Targets */
+@media (max-width: 768px) {
+  .payment-status-btn {
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+  
+  .assign-select {
+    min-height: 48px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
