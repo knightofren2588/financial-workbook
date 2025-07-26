@@ -1,9 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, DollarSign, TrendingUp, AlertCircle, Trash2 } from 'lucide-react';
 
 const FinancialWorkbook = () => {
-  // Bills state
-  const [bills, setBills] = useState([
+  // Load data from localStorage or use defaults
+  const loadFromStorage = (key, defaultValue) => {
+    try {
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : defaultValue;
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+      return defaultValue;
+    }
+  };
+
+  // Save data to localStorage
+  const saveToStorage = (key, data) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  };
+
+  // Bills state with localStorage
+  const [bills, setBills] = useState(() => loadFromStorage('financial-workbook-bills', [
     {
       id: 1,
       name: 'Rent',
@@ -28,10 +48,10 @@ const FinancialWorkbook = () => {
       isPaid: false,
       assignedPaycheckId: null
     }
-  ]);
+  ]));
 
-  // Individual paychecks state
-  const [paychecks, setPaychecks] = useState([
+  // Individual paychecks state with localStorage
+  const [paychecks, setPaychecks] = useState(() => loadFromStorage('financial-workbook-paychecks', [
     {
       id: 1,
       date: '2025-08-01',
@@ -44,8 +64,66 @@ const FinancialWorkbook = () => {
       amount: 1450,
       source: 'Equitas Health - Payroll'
     }
-  ]);
+  ]));
 
+  // Save bills to localStorage whenever bills change
+  useEffect(() => {
+    saveToStorage('financial-workbook-bills', bills);
+  }, [bills]);
+
+  // Save paychecks to localStorage whenever paychecks change
+  useEffect(() => {
+    saveToStorage('financial-workbook-paychecks', paychecks);
+  }, [paychecks]);
+
+  // Data management functions
+  const exportData = () => {
+    const data = {
+      bills,
+      paychecks,
+      exportDate: new Date().toISOString()
+    };
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `financial-workbook-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importData = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.bills && data.paychecks) {
+            setBills(data.bills);
+            setPaychecks(data.paychecks);
+            alert('Data imported successfully!');
+          } else {
+            alert('Invalid file format!');
+          }
+        } catch (error) {
+          alert('Error importing data!');
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const resetAllData = () => {
+    if (window.confirm('Are you sure you want to reset all data? This cannot be undone!')) {
+      localStorage.removeItem('financial-workbook-bills');
+      localStorage.removeItem('financial-workbook-paychecks');
+      setBills([]);
+      setPaychecks([]);
+      alert('All data has been reset!');
+    }
+  };
   const [activeView, setActiveView] = useState('overview');
   const [newBill, setNewBill] = useState({ name: '', amount: '', dueDate: '' });
   const [newPaycheck, setNewPaycheck] = useState({ date: '', amount: '', source: '' });
@@ -456,6 +534,50 @@ const FinancialWorkbook = () => {
         <div style={{...styles.glassCard, ...styles.header}}>
           <h1 style={styles.title}>💰 Financial Workbook</h1>
           <p style={styles.subtitle}>Smart budget planning for your financial success</p>
+          
+          {/* Data Management */}
+          <div style={{display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px', flexWrap: 'wrap'}}>
+            <button
+              onClick={exportData}
+              style={{
+                ...styles.btn,
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                color: 'white',
+                padding: '8px 16px',
+                fontSize: '0.9rem'
+              }}
+            >
+              📥 Export Data
+            </button>
+            <label style={{
+              ...styles.btn,
+              background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+              color: 'white',
+              padding: '8px 16px',
+              fontSize: '0.9rem',
+              cursor: 'pointer'
+            }}>
+              📤 Import Data
+              <input
+                type="file"
+                accept=".json"
+                onChange={importData}
+                style={{display: 'none'}}
+              />
+            </label>
+            <button
+              onClick={resetAllData}
+              style={{
+                ...styles.btn,
+                background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                color: 'white',
+                padding: '8px 16px',
+                fontSize: '0.9rem'
+              }}
+            >
+              🗑️ Reset All
+            </button>
+          </div>
           
           {/* View Toggle */}
           <div style={styles.viewToggle}>
