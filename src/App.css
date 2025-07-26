@@ -1,7 +1,11 @@
+/* Enhanced Financial Workbook CSS */
+
+/* Reset and base styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  transition: all 0.2s ease-in-out;
 }
 
 body {
@@ -12,1109 +16,320 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.financial-app {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1rem;
+/* Utility Classes (Tailwind-like) */
+.max-w-6xl { max-width: 72rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.p-4 { padding: 1rem; }
+.p-6 { padding: 1.5rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mt-4 { margin-top: 1rem; }
+.ml-2 { margin-left: 0.5rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-4 { gap: 1rem; }
+.flex { display: flex; }
+.grid { display: grid; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.space-y-2 > * + * { margin-top: 0.5rem; }
+.space-y-3 > * + * { margin-top: 0.75rem; }
+.space-y-4 > * + * { margin-top: 1rem; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
+
+/* Colors */
+.bg-gray-50 { background-color: #f9fafb; }
+.bg-white { background-color: white; }
+.bg-green-100 { background-color: #dcfce7; }
+.bg-red-100 { background-color: #fee2e2; }
+.bg-orange-100 { background-color: #ffedd5; }
+.bg-blue-100 { background-color: #dbeafe; }
+.bg-yellow-50 { background-color: #fefce8; }
+.bg-yellow-100 { background-color: #fef3c7; }
+
+.text-gray-600 { color: #4b5563; }
+.text-gray-700 { color: #374151; }
+.text-gray-800 { color: #1f2937; }
+.text-green-600 { color: #16a34a; }
+.text-green-800 { color: #166534; }
+.text-red-600 { color: #dc2626; }
+.text-red-800 { color: #991b1b; }
+.text-orange-600 { color: #ea580c; }
+.text-orange-800 { color: #9a3412; }
+.text-blue-600 { color: #2563eb; }
+.text-blue-800 { color: #1e40af; }
+.text-yellow-700 { color: #a16207; }
+.text-yellow-800 { color: #854d0e; }
+.text-gray-500 { color: #6b7280; }
+
+/* Typography */
+.text-sm { font-size: 0.875rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-3xl { font-size: 1.875rem; }
+.font-medium { font-weight: 500; }
+.font-bold { font-weight: 700; }
+
+/* Layout */
+.min-h-screen { min-height: 100vh; }
+.rounded-lg { border-radius: 0.5rem; }
+.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+
+/* Grid layouts */
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* Responsive grid */
+@media (min-width: 768px) {
+  .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .md\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
+@media (min-width: 1024px) {
+  .lg\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-.app-header {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: white;
-}
+/* Borders */
+.border { border-width: 1px; }
+.border-t { border-top-width: 1px; }
+.border-gray-300 { border-color: #d1d5db; }
+.pt-1 { padding-top: 0.25rem; }
+.pt-3 { padding-top: 0.75rem; }
 
-.app-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  font-weight: 700;
-}
-
-.app-header p {
-  font-size: 1.1rem;
-  opacity: 0.9;
-}
-
-.summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.summary-card {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-}
-
-.summary-card.income {
-  border-left-color: #10b981;
-}
-
-.summary-card.expenses {
-  border-left-color: #ef4444;
-}
-
-.summary-card.remaining-positive {
-  border-left-color: #3b82f6;
-}
-
-.summary-card.remaining-negative {
-  border-left-color: #ef4444;
-}
-
-.card-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-label {
+/* Form elements */
+input, select, button {
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
   font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
-  font-weight: 500;
 }
 
-.card-value {
-  font-size: 1.875rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.income .card-value {
-  color: #10b981;
-}
-
-.expenses .card-value {
-  color: #ef4444;
-}
-
-.remaining-positive .card-value {
-  color: #3b82f6;
-}
-
-.remaining-negative .card-value {
-  color: #ef4444;
-}
-
-.card-icon {
-  width: 2rem;
-  height: 2rem;
-  opacity: 0.7;
-}
-
-.income .card-icon {
-  color: #10b981;
-}
-
-.expenses .card-icon {
-  color: #ef4444;
-}
-
-.remaining-positive .card-icon {
-  color: #3b82f6;
-}
-
-.remaining-negative .card-icon {
-  color: #ef4444;
-}
-
-.main-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.section {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  font-size: 1.5rem;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-}
-
-.section-icon {
-  margin-right: 0.5rem;
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.add-form {
-  background: #f9fafb;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.add-form h3 {
-  margin-bottom: 1rem;
-  color: #374151;
-  font-weight: 600;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.form-column {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.form-input {
-  padding: 0.75rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  transition: border-color 0.2s ease;
-}
-
-.form-input:focus {
+input:focus, select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border: 2px solid rgb(59, 130, 246);
+  border-color: rgb(59, 130, 246);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.add-button {
-  display: flex;
-  align-items: center;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  font-weight: 500;
+button {
   cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.add-button:hover {
-  background: #2563eb;
-}
-
-.income-button {
-  background: #10b981;
-}
-
-.income-button:hover {
-  background: #059669;
-}
-
-.button-icon {
-  width: 1rem;
-  height: 1rem;
-  margin-right: 0.5rem;
-}
-
-.items-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.item-card {
-  border-radius: 0.75rem;
-  padding: 1rem;
-  border: 2px solid;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.item-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.item-card.urgent {
-  background: #fef2f2;
-  border-color: #fca5a5;
-  color: #991b1b;
-}
-
-.item-card.warning {
-  background: #fffbeb;
-  border-color: #fcd34d;
-  color: #92400e;
-}
-
-.item-card.safe {
-  background: #f0fdf4;
-  border-color: #86efac;
-  color: #166534;
-}
-
-.item-card.income-item {
-  background: #f0fdf4;
-  border-color: #86efac;
-  color: #166534;
-}
-
-.item-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.item-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.25rem;
-}
-
-.item-name {
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.item-category {
-  background: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
   font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.item-details {
-  font-size: 0.875rem;
-  margin: 0;
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.item-actions {
-  text-align: right;
-}
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
 
-.item-amount {
-  font-weight: 700;
-  font-size: 1.25rem;
-  margin: 0 0 0.25rem 0;
-}
+/* Button variants */
+.bg-blue-500 { background-color: #3b82f6; }
+.bg-green-500 { background-color: #10b981; }
+.bg-red-500 { background-color: #ef4444; }
+.text-white { color: white; }
 
-.remove-button {
-  background: none;
-  border: none;
-  color: #dc2626;
-  font-size: 0.75rem;
-  cursor: pointer;
-  padding: 0.25rem 0;
-  text-decoration: underline;
-}
+.bg-blue-500:hover { background-color: #2563eb; }
+.bg-green-500:hover { background-color: #059669; }
+.bg-red-500:hover { background-color: #dc2626; }
 
-.remove-button:hover {
-  color: #991b1b;
-}
+.bg-gray-200 { background-color: #e5e7eb; }
+.bg-gray-300 { background-color: #d1d5db; }
 
-.tips-section {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
+/* Transition utilities */
+.transition-colors { transition: color 0.2s ease, background-color 0.2s ease; }
+
+/* Enhanced card hover effects */
+.bg-white:hover {
+  transform: translateY(-1px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.tips-section h3 {
-  color: #1f2937;
-  margin-bottom: 1rem;
-  font-size: 1.25rem;
-  font-weight: 600;
+/* Button hover effects */
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.tips-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+/* Enhanced form inputs */
+input:focus, select:focus {
+  outline: none;
+  border: 2px solid rgb(59, 130, 246);
+  border-color: rgb(59, 130, 246);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.tip-card {
-  padding: 1rem;
-  border-radius: 0.5rem;
-  border-left: 3px solid;
+/* Paycheck cards enhanced styling */
+.paycheck-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #e2e8f0;
+  position: relative;
+  overflow: hidden;
 }
 
-.tip-card:nth-child(1) {
-  background: #eff6ff;
-  border-left-color: #3b82f6;
+.paycheck-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981, #34d399);
 }
 
-.tip-card:nth-child(2) {
-  background: #fffbeb;
-  border-left-color: #f59e0b;
+/* Bill status indicators */
+.bill-paid {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  border-left: 4px solid #10b981;
 }
 
-.tip-card:nth-child(3) {
-  background: #f0fdf4;
-  border-left-color: #10b981;
+.bill-unpaid {
+  background: linear-gradient(135deg, #fed7aa, #fdba74);
+  border-left: 4px solid #f59e0b;
 }
 
-.tip-card h4 {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #374151;
+/* Enhanced summary cards */
+.summary-card {
+  position: relative;
+  overflow: hidden;
 }
 
-.tip-card p {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0;
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 100%);
+  pointer-events: none;
 }
 
-/* Responsive Design */
+/* Responsive improvements */
 @media (max-width: 768px) {
-  .financial-app {
-    padding: 0.5rem;
-  }
-  
-  .app-header h1 {
-    font-size: 2rem;
-  }
-  
-  .summary-cards {
+  .grid {
     grid-template-columns: 1fr;
   }
   
-  .main-content {
-    grid-template-columns: 1fr;
+  .text-3xl {
+    font-size: 1.875rem;
   }
   
-  .form-grid {
-    grid-template-columns: 1fr;
+  .p-6 {
+    padding: 1rem;
   }
   
-  .form-row {
+  /* Mobile-friendly form layout */
+  .grid-cols-4 {
     grid-template-columns: 1fr;
-  }
-  
-  .item-content {
-    flex-direction: column;
-    align-items: flex-start;
     gap: 0.75rem;
   }
   
-  .item-actions {
-    text-align: left;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  /* Stack paycheck cards on mobile */
+  .lg\\:grid-cols-2 {
+    grid-template-columns: 1fr;
   }
-}
-/* PWA Install Prompt Styles */
-.pwa-install-prompt {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  border: 2px solid #667eea;
-  z-index: 1000;
-  animation: slideUp 0.3s ease-out;
-  max-width: 90vw;
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateX(-50%) translateY(100px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(-50%) translateY(0);
+/* Unassigned bills warning */
+.unassigned-warning {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
     opacity: 1;
   }
-}
-
-.pwa-install-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  gap: 16px;
-}
-
-.pwa-install-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.pwa-install-icon {
-  width: 24px;
-  height: 24px;
-  color: #667eea;
-  flex-shrink: 0;
-}
-
-.pwa-install-info h4 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.pwa-install-info p {
-  margin: 0;
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.pwa-install-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.pwa-install-button {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.pwa-install-button:hover {
-  background: #5a67d8;
-}
-
-.pwa-dismiss-button {
-  background: none;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pwa-dismiss-button:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-@media (max-width: 768px) {
-  .pwa-install-prompt {
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
-    transform: none;
-    max-width: none;
-  }
-  
-  .pwa-install-content {
-    padding: 12px;
-  }
-  
-  .pwa-install-info h4 {
-    font-size: 13px;
-  }
-  
-  .pwa-install-info p {
-    font-size: 11px;
-  }
-}
-/* Loading Screen */
-.loading-screen {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: white;
-}
-
-.loading-screen h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-/* Save Controls */
-.save-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.manual-save-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #10b981;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.manual-save-btn:hover {
-  background: #059669;
-}
-
-.last-saved {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-}
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 2rem;
-  background: #f9fafb;
-  border-radius: 0.75rem;
-  border: 2px dashed #d1d5db;
-  color: #6b7280;
-}
-
-.empty-state p {
-  margin: 0;
-  font-size: 1rem;
-}
-
-/* Mobile Optimizations */
-.mobile-stack {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-.mobile-column {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.mobile-button {
-  width: 100%;
-  padding: 1rem;
-  font-size: 1.1rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-}
-
-.mobile-card {
-  padding: 1.25rem;
-}
-
-.mobile-remove {
-  padding: 0.5rem 1rem;
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.mobile-remove:hover {
-  background: #fee2e2;
-  border-color: #fca5a5;
-}
-
-.mobile-tips {
-  grid-template-columns: 1fr;
-}
-
-/* Enhanced Mobile Responsive Design */
-@media (max-width: 768px) {
-  .financial-app {
-    padding: 0.5rem;
-  }
-  
-  .app-header h1 {
-    font-size: 2rem;
-  }
-  
-  .app-header p {
-    font-size: 1rem;
-  }
-  
-  .save-info {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .summary-cards {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .summary-card {
-    padding: 1.25rem;
-  }
-  
-  .card-value {
-    font-size: 1.5rem;
-  }
-  
-  .main-content {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .section {
-    padding: 1.25rem;
-  }
-  
-  .section-title {
-    font-size: 1.25rem;
-  }
-  
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .form-input {
-    padding: 1rem;
-    font-size: 1rem;
-    border-radius: 0.75rem;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  
-  /* Better mobile input styling */
-  .form-input:focus {
-    transform: scale(1.02);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-  
-  .item-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .item-actions {
-    text-align: left;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .item-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  
-  .tips-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .tip-card {
-    padding: 1.25rem;
+  50% {
+    opacity: 0.8;
   }
 }
 
-/* Extra Small Screens */
-@media (max-width: 480px) {
-  .container {
-    padding: 0;
-  }
-  
-  .financial-app {
-    padding: 0.25rem;
-  }
-  
-  .app-header {
-    padding: 1rem;
-  }
-  
-  .app-header h1 {
-    font-size: 1.75rem;
-  }
-  
-  .summary-cards {
-    gap: 0.75rem;
-  }
-  
-  .main-content {
-    gap: 1rem;
-  }
-  
-  .section {
-    padding: 1rem;
-  }
-  
-  .form-input {
-    padding: 0.875rem;
-  }
-  
-  .mobile-button {
-    padding: 0.875rem;
-    font-size: 1rem;
-  }
+/* Enhanced delete button */
+.delete-btn {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
 }
 
-/* Touch-friendly improvements */
-@media (hover: none) and (pointer: coarse) {
-  .form-input {
-    min-height: 48px;
-  }
-  
-  .add-button, .mobile-button {
-    min-height: 48px;
-  }
-  
-  .remove-button, .mobile-remove {
-    min-height: 44px;
-    min-width: 80px;
-  }
-  
-  .summary-card:hover {
-    transform: none;
-  }
-  
-  .item-card:hover {
-    transform: none;
-  }
-}
-
-/* PWA specific styles */
-@media (display-mode: standalone) {
-  .app-header {
-    padding-top: 2rem; /* Account for status bar */
-  }
-  
-  .pwa-install-prompt {
-    display: none; /* Hide install prompt in standalone mode */
-  }
-}
-
-/* Dark mode support for system preference */
-@media (prefers-color-scheme: dark) {
-  .form-input {
-    background: white;
-    color: black;
-  }
-}
-
-/* Enhanced Features CSS */
-
-/* View Toggle Buttons */
-.view-toggle {
-  display: flex;
-  gap: 0.5rem;
-  margin: 1rem 0;
-  justify-content: center;
-}
-
-.toggle-btn {
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #e5e7eb;
-  background: white;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-}
-
-.toggle-btn:hover {
-  border-color: #8b5cf6;
-  background: #f3f4f6;
-}
-
-.toggle-btn.active {
-  background: #8b5cf6;
-  color: white;
-  border-color: #8b5cf6;
-}
-
-/* Enhanced Summary Cards */
-.card-sublabel {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin-top: 0.25rem;
-}
-
-/* Payment Status Buttons */
-.payment-status-btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-  margin-right: 0.5rem;
-}
-
-.payment-status-btn.paid {
-  background: #10b981;
-  color: white;
-}
-
-.payment-status-btn.paid:hover {
-  background: #059669;
-}
-
-.payment-status-btn.unpaid {
-  background: #f59e0b;
-  color: white;
-}
-
-.payment-status-btn.unpaid:hover {
-  background: #d97706;
-}
-
-/* Paid Bill Styling */
-.paid-bill {
-  opacity: 0.7;
-  background: #f0fdf4 !important;
-  border-left: 4px solid #10b981 !important;
-}
-
-.paid-date {
-  color: #10b981;
-  font-weight: 500;
-}
-
-/* Pay Periods View */
-.pay-periods-view {
-  margin-top: 2rem;
-}
-
-.pay-periods-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-
-.pay-period-card {
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
-}
-
-.pay-period-header {
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.pay-period-header h3 {
-  margin: 0 0 0.5rem 0;
-  color: #1f2937;
-  font-size: 1.125rem;
-}
-
-.pay-date, .pay-amount {
-  margin: 0.25rem 0;
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
-.pay-amount {
-  font-weight: 600;
-  color: #059669;
-}
-
-.assigned-bills h4 {
-  margin: 0 0 0.75rem 0;
-  color: #374151;
-  font-size: 1rem;
-}
-
-.no-bills {
-  color: #9ca3af;
-  font-style: italic;
-  margin: 0.5rem 0;
-}
-
-.assigned-bill {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.assigned-bill:last-child {
-  border-bottom: none;
-}
-
-.period-summary {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 2px solid #e5e7eb;
-}
-
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  margin: 0.5rem 0;
-}
-
-.summary-row.remaining {
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.summary-row .positive {
-  color: #10b981;
-}
-
-.summary-row .negative {
+.delete-btn:hover {
+  opacity: 1;
   color: #ef4444;
 }
 
-/* Unassigned Bills Section */
-.unassigned-bills-section {
-  margin-top: 3rem;
-  padding: 2rem;
-  background: #fef3c7;
-  border-radius: 0.75rem;
-  border: 1px solid #fbbf24;
+/* Loading state for buttons */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.unassigned-bills-section h3 {
-  margin: 0 0 1rem 0;
-  color: #92400e;
+/* Enhanced dropdown styling */
+select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  appearance: none;
 }
 
-.unassigned-bills {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* Success/Error states */
+.success-state {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  border: 1px solid #10b981;
+  color: #047857;
 }
 
-.unassigned-bill {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  background: white;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
+.error-state {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  border: 1px solid #ef4444;
+  color: #dc2626;
 }
 
-.bill-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.bill-name {
-  font-weight: 500;
-  color: #1f2937;
-}
-
-.bill-amount {
+/* Enhanced typography */
+.font-bold {
   font-weight: 600;
-  color: #059669;
 }
 
-.assign-select {
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  background: white;
-  min-width: 200px;
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
 }
 
-/* Mobile Responsiveness for New Features */
-@media (max-width: 768px) {
-  .view-toggle {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
-  .toggle-btn {
-    padding: 1rem;
-    font-size: 1rem;
-  }
-  
-  .pay-periods-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .pay-period-card {
-    padding: 1rem;
-  }
-  
-  .unassigned-bill {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-  }
-  
-  .bill-info {
-    justify-content: space-between;
-  }
-  
-  .assign-select {
-    min-width: auto;
-    width: 100%;
-  }
-  
-  .payment-status-btn {
-    margin-right: 0;
-    margin-bottom: 0.5rem;
-    width: 100%;
-  }
+/* Improved spacing and layout */
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
 }
 
-/* Enhanced Mobile Touch Targets */
-@media (max-width: 768px) {
-  .payment-status-btn {
-    min-height: 48px;
-    touch-action: manipulation;
-  }
-  
-  .assign-select {
-    min-height: 48px;
-    font-size: 16px; /* Prevents zoom on iOS */
-  }
+.space-y-3 > * + * {
+  margin-top: 0.75rem;
+}
+
+/* Enhanced shadow system */
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

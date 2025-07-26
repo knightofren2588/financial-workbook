@@ -1,702 +1,404 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Calendar, DollarSign, TrendingUp, AlertCircle, CheckCircle, Save, Eye, CreditCard } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, DollarSign, TrendingUp, AlertCircle, Trash2 } from 'lucide-react';
 import './App.css';
-import PWAInstaller from './PWAInstaller';
 
 const FinancialWorkbook = () => {
-  // Enhanced State with Pay Period Tracking
-  const [bills, setBills] = useState([]);
-  const [income, setIncome] = useState([]);
-  const [payPeriods, setPayPeriods] = useState([]);
-  const [newBill, setNewBill] = useState({ name: '', amount: '', dueDay: '', category: 'Other' });
-  const [newIncome, setNewIncome] = useState({ source: '', amount: '', frequency: 'bi-weekly' });
-  const [lastSaved, setLastSaved] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentView, setCurrentView] = useState('overview'); // 'overview' or 'payperiods'
+  // Bills state
+  const [bills, setBills] = useState([
+    {
+      id: 1,
+      name: 'Rent',
+      amount: 1200,
+      dueDate: '2025-08-01',
+      isPaid: false,
+      assignedPaycheckId: null
+    },
+    {
+      id: 2,
+      name: 'Electric',
+      amount: 150,
+      dueDate: '2025-08-05',
+      isPaid: false,
+      assignedPaycheckId: null
+    },
+    {
+      id: 3,
+      name: 'Car Insurance',
+      amount: 180,
+      dueDate: '2025-08-10',
+      isPaid: false,
+      assignedPaycheckId: null
+    }
+  ]);
 
-  // Improved localStorage functions with error handling
-  const saveToStorage = (key, data) => {
-    try {
-      const jsonData = JSON.stringify(data);
-      localStorage.setItem(key, jsonData);
-      setLastSaved(new Date().toLocaleTimeString());
-      console.log(`✅ Saved ${key}:`, data);
-      return true;
-    } catch (error) {
-      console.error(`❌ Failed to save ${key}:`, error);
-      return false;
+  // Individual paychecks state
+  const [paychecks, setPaychecks] = useState([
+    {
+      id: 1,
+      date: '2025-08-01',
+      amount: 1500,
+      source: 'Equitas Health - Payroll'
+    },
+    {
+      id: 2,
+      date: '2025-08-15',
+      amount: 1450,
+      source: 'Equitas Health - Payroll'
+    }
+  ]);
+
+  const [activeView, setActiveView] = useState('overview');
+  const [newBill, setNewBill] = useState({ name: '', amount: '', dueDate: '' });
+  const [newPaycheck, setNewPaycheck] = useState({ date: '', amount: '', source: '' });
+
+  // Calculate totals
+  const totalBills = bills.reduce((sum, bill) => sum + bill.amount, 0);
+  const totalIncome = paychecks.reduce((sum, paycheck) => sum + paycheck.amount, 0);
+  const unpaidBills = bills.filter(bill => !bill.isPaid);
+  const totalUnpaid = unpaidBills.reduce((sum, bill) => sum + bill.amount, 0);
+
+  // Add new bill
+  const addBill = () => {
+    if (newBill.name && newBill.amount && newBill.dueDate) {
+      setBills([...bills, {
+        id: Date.now(),
+        name: newBill.name,
+        amount: parseFloat(newBill.amount),
+        dueDate: newBill.dueDate,
+        isPaid: false,
+        assignedPaycheckId: null
+      }]);
+      setNewBill({ name: '', amount: '', dueDate: '' });
     }
   };
 
-  const loadFromStorage = (key, defaultValue = []) => {
-    try {
-      const saved = localStorage.getItem(key);
-      if (saved && saved !== 'undefined' && saved !== 'null') {
-        const parsed = JSON.parse(saved);
-        console.log(`✅ Loaded ${key}:`, parsed);
-        return Array.isArray(parsed) ? parsed : defaultValue;
-      }
-      return defaultValue;
-    } catch (error) {
-      console.error(`❌ Failed to load ${key}:`, error);
-      return defaultValue;
-    }
-  };
-
-  // Generate pay periods based on income frequency
-  const generatePayPeriods = () => {
-    const periods = [];
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    
-    income.forEach(inc => {
-      if (inc.frequency === 'bi-weekly') {
-        // Generate 2 pay periods per month for bi-weekly
-        const firstPay = new Date(startOfMonth);
-        firstPay.setDate(1); // 1st of month
-        const secondPay = new Date(startOfMonth);
-        secondPay.setDate(15); // 15th of month
-        
-        periods.push({
-          id: `${inc.id}-1`,
-          date: firstPay.toISOString().split('T')[0],
-          amount: inc.amount,
-          source: inc.source,
-          assignedBills: [],
-          remaining: inc.amount
-        });
-        
-        periods.push({
-          id: `${inc.id}-2`,
-          date: secondPay.toISOString().split('T')[0],
-          amount: inc.amount,
-          source: inc.source,
-          assignedBills: [],
-          remaining: inc.amount
-        });
-      } else if (inc.frequency === 'weekly') {
-        // Generate 4 pay periods for weekly
-        for (let week = 0; week < 4; week++) {
-          const payDate = new Date(startOfMonth);
-          payDate.setDate(1 + (week * 7));
-          periods.push({
-            id: `${inc.id}-${week + 1}`,
-            date: payDate.toISOString().split('T')[0],
-            amount: inc.amount,
-            source: inc.source,
-            assignedBills: [],
-            remaining: inc.amount
-          });
-        }
-      } else if (inc.frequency === 'monthly') {
-        // Generate 1 pay period for monthly
-        periods.push({
-          id: `${inc.id}-1`,
-          date: startOfMonth.toISOString().split('T')[0],
-          amount: inc.amount,
-          source: inc.source,
-          assignedBills: [],
-          remaining: inc.amount
-        });
-      }
-    });
-    
-    return periods.sort((a, b) => new Date(a.date) - new Date(b.date));
-  };
-
-  // Load data when app starts - enhanced version with pay periods
-  useEffect(() => {
-    console.log('🚀 App starting, loading data...');
-    const loadedBills = loadFromStorage('financial-workbook-bills', []);
-    const loadedIncome = loadFromStorage('financial-workbook-income', []);
-    
-    // Add new fields to existing bills if they don't have them
-    const enhancedBills = loadedBills.map(bill => ({
-      ...bill,
-      isPaid: bill.isPaid || false,
-      payPeriodAssigned: bill.payPeriodAssigned || null,
-      datePaid: bill.datePaid || null
-    }));
-    
-    setBills(enhancedBills);
-    setIncome(loadedIncome);
-    setIsLoading(false);
-    console.log('✅ App loaded successfully');
-  }, []);
-
-  // Generate pay periods when income changes
-  useEffect(() => {
-    if (income.length > 0) {
-      const periods = generatePayPeriods();
-      setPayPeriods(periods);
-    }
-  }, [income]);
-
-  // Auto-save bills with debouncing
-  useEffect(() => {
-    if (!isLoading && bills.length >= 0) {
-      const timeoutId = setTimeout(() => {
-        saveToStorage('financial-workbook-bills', bills);
-      }, 500);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [bills, isLoading]);
-
-  // Auto-save income with debouncing
-  useEffect(() => {
-    if (!isLoading && income.length >= 0) {
-      const timeoutId = setTimeout(() => {
-        saveToStorage('financial-workbook-income', income);
-      }, 500);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [income, isLoading]);
-
-  // Manual save function
-  const handleManualSave = () => {
-    const billsSaved = saveToStorage('financial-workbook-bills', bills);
-    const incomeSaved = saveToStorage('financial-workbook-income', income);
-    
-    if (billsSaved && incomeSaved) {
-      alert('✅ Data saved successfully!');
-    } else {
-      alert('❌ Failed to save data. Please try again.');
-    }
-  };
-
-  // Clear all data function
-  const clearAllData = () => {
-    if (window.confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-      setBills([]);
-      setIncome([]);
-      setPayPeriods([]);
-      localStorage.removeItem('financial-workbook-bills');
-      localStorage.removeItem('financial-workbook-income');
-      setLastSaved(null);
-      alert('🗑️ All data has been cleared!');
+  // Add new paycheck
+  const addPaycheck = () => {
+    if (newPaycheck.date && newPaycheck.amount && newPaycheck.source) {
+      setPaychecks([...paychecks, {
+        id: Date.now(),
+        date: newPaycheck.date,
+        amount: parseFloat(newPaycheck.amount),
+        source: newPaycheck.source
+      }]);
+      setNewPaycheck({ date: '', amount: '', source: '' });
     }
   };
 
   // Toggle bill payment status
   const toggleBillPayment = (billId) => {
-    setBills(prevBills => prevBills.map(bill => 
+    setBills(bills.map(bill => 
       bill.id === billId 
-        ? { 
-            ...bill, 
-            isPaid: !bill.isPaid,
-            datePaid: !bill.isPaid ? new Date().toISOString().split('T')[0] : null
-          }
+        ? { ...bill, isPaid: !bill.isPaid }
         : bill
     ));
   };
 
-  // Assign bill to pay period
-  const assignBillToPayPeriod = (billId, periodId) => {
-    setBills(prevBills => prevBills.map(bill => 
+  // Assign bill to paycheck
+  const assignBillToPaycheck = (billId, paycheckId) => {
+    setBills(bills.map(bill => 
       bill.id === billId 
-        ? { ...bill, payPeriodAssigned: periodId }
+        ? { ...bill, assignedPaycheckId: paycheckId ? parseInt(paycheckId) : null }
         : bill
     ));
   };
 
-  // All the calculation functions remain the same
-  const getDaysUntilDue = (dueDay) => {
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    const currentDay = today.getDate();
-    
-    let dueDate = new Date(currentYear, currentMonth, dueDay);
-    
-    if (dueDay < currentDay) {
-      dueDate = new Date(currentYear, currentMonth + 1, dueDay);
-    }
-    
-    const timeDiff = dueDate.getTime() - today.getTime();
-    return Math.ceil(timeDiff / (1000 * 3600 * 24));
+  // Delete bill
+  const deleteBill = (billId) => {
+    setBills(bills.filter(bill => bill.id !== billId));
   };
 
-  const calculateMonthlyIncome = () => {
-    return income.reduce((total, item) => {
-      switch (item.frequency) {
-        case 'weekly': return total + (item.amount * 4.33);
-        case 'bi-weekly': return total + (item.amount * 2.17);
-        case 'monthly': return total + item.amount;
-        default: return total + item.amount;
-      }
-    }, 0);
+  // Delete paycheck
+  const deletePaycheck = (paycheckId) => {
+    setPaychecks(paychecks.filter(paycheck => paycheck.id !== paycheckId));
+    // Unassign bills from deleted paycheck
+    setBills(bills.map(bill => 
+      bill.assignedPaycheckId === paycheckId 
+        ? { ...bill, assignedPaycheckId: null }
+        : bill
+    ));
   };
 
-  const calculateTotalBills = () => {
-    return bills.reduce((total, bill) => total + bill.amount, 0);
+  // Calculate paycheck remaining amounts
+  const getPaycheckDetails = (paycheck) => {
+    const assignedBills = bills.filter(bill => bill.assignedPaycheckId === paycheck.id);
+    const totalAssigned = assignedBills.reduce((sum, bill) => sum + bill.amount, 0);
+    const remaining = paycheck.amount - totalAssigned;
+    return { assignedBills, totalAssigned, remaining };
   };
 
-  const calculatePaidBills = () => {
-    return bills.filter(bill => bill.isPaid).reduce((total, bill) => total + bill.amount, 0);
-  };
-
-  const calculateUnpaidBills = () => {
-    return bills.filter(bill => !bill.isPaid).reduce((total, bill) => total + bill.amount, 0);
-  };
-
-  const monthlyIncome = calculateMonthlyIncome();
-  const totalBills = calculateTotalBills();
-  const paidBills = calculatePaidBills();
-  const unpaidBills = calculateUnpaidBills();
-  const remainingMoney = monthlyIncome - totalBills;
-
-  // Improved add functions with validation
-  const addBill = () => {
-    if (newBill.name && newBill.amount && newBill.dueDay) {
-      const bill = {
-        id: Date.now(),
-        name: newBill.name.trim(),
-        amount: parseFloat(newBill.amount),
-        dueDay: parseInt(newBill.dueDay),
-        category: newBill.category,
-        isPaid: false,
-        payPeriodAssigned: null,
-        datePaid: null
-      };
-      
-      setBills(prevBills => [...prevBills, bill]);
-      setNewBill({ name: '', amount: '', dueDay: '', category: 'Other' });
-    } else {
-      alert('Please fill in all bill fields');
-    }
-  };
-
-  const addIncome = () => {
-    if (newIncome.source && newIncome.amount) {
-      const income_item = {
-        id: Date.now(),
-        source: newIncome.source.trim(),
-        amount: parseFloat(newIncome.amount),
-        frequency: newIncome.frequency
-      };
-      
-      setIncome(prevIncome => [...prevIncome, income_item]);
-      setNewIncome({ source: '', amount: '', frequency: 'bi-weekly' });
-    } else {
-      alert('Please fill in all income fields');
-    }
-  };
-
-  const removeBill = (id) => {
-    setBills(prevBills => prevBills.filter(bill => bill.id !== id));
-  };
-
-  const removeIncome = (id) => {
-    setIncome(prevIncome => prevIncome.filter(inc => inc.id !== id));
-  };
-
-  const getPriorityColor = (days) => {
-    if (days <= 3) return 'urgent';
-    if (days <= 7) return 'warning';
-    return 'safe';
-  };
-
-  // Handle form submission with Enter key (mobile-friendly)
-  const handleBillKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      addBill();
-    }
-  };
-
-  const handleIncomeKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      addIncome();
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="financial-app">
-        <div className="container">
-          <div className="loading-screen">
-            <h2>💰 Loading Financial Workbook...</h2>
-            <p>Retrieving your data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const formatCurrency = (amount) => `$${amount.toFixed(2)}`;
+  const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
 
   return (
-    <div className="financial-app">
-      <div className="container">
-        <header className="app-header">
-          <h1>💰 Financial Workbook</h1>
-          <p>Track your bills, income, and financial health</p>
-          
-          {/* View Toggle Buttons */}
-          <div className="view-toggle">
-            <button 
-              onClick={() => setCurrentView('overview')} 
-              className={`toggle-btn ${currentView === 'overview' ? 'active' : ''}`}
-            >
-              📊 Overview
-            </button>
-            <button 
-              onClick={() => setCurrentView('payperiods')} 
-              className={`toggle-btn ${currentView === 'payperiods' ? 'active' : ''}`}
-            >
-              📅 Pay Periods
-            </button>
-          </div>
+    <div className="max-w-6xl mx-auto p-4 bg-gray-50 min-h-screen">
+      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Financial Workbook</h1>
+        <p className="text-gray-600">Track your bills, paychecks, and budget planning</p>
+        
+        {/* View Toggle */}
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => setActiveView('overview')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeView === 'overview'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            📊 Overview
+          </button>
+          <button
+            onClick={() => setActiveView('paychecks')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeView === 'paychecks'
+                ? 'bg-green-500 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            💰 Paycheck Planning
+          </button>
+        </div>
+      </div>
 
-          <div className="save-info">
-            <button onClick={handleManualSave} className="manual-save-btn">
-              <Save size={16} />
-              Save Data
-            </button>
-            <button onClick={clearAllData} className="manual-save-btn" style={{background: '#ef4444', marginLeft: '0.5rem'}}>
-              🗑️ Clear All Data
-            </button>
-            {lastSaved && <span className="last-saved">Last saved: {lastSaved}</span>}
-          </div>
-        </header>
-
-        {currentView === 'overview' ? (
-          <>
-            {/* Enhanced Financial Summary Cards */}
-            <div className="summary-cards">
-              <div className="summary-card income">
-                <div className="card-content">
-                  <div className="card-info">
-                    <p className="card-label">Monthly Income</p>
-                    <p className="card-value">${monthlyIncome.toFixed(2)}</p>
-                  </div>
-                  <TrendingUp className="card-icon" />
-                </div>
+      {activeView === 'overview' && (
+        <div className="space-y-6">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-green-100 p-4 rounded-lg">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="text-green-600" size={20} />
+                <span className="font-medium text-green-800">Total Income</span>
               </div>
-
-              <div className="summary-card expenses">
-                <div className="card-content">
-                  <div className="card-info">
-                    <p className="card-label">Total Bills</p>
-                    <p className="card-value">${totalBills.toFixed(2)}</p>
-                    <p className="card-sublabel">Paid: ${paidBills.toFixed(2)} | Unpaid: ${unpaidBills.toFixed(2)}</p>
-                  </div>
-                  <DollarSign className="card-icon" />
-                </div>
-              </div>
-
-              <div className={`summary-card ${remainingMoney >= 0 ? 'remaining-positive' : 'remaining-negative'}`}>
-                <div className="card-content">
-                  <div className="card-info">
-                    <p className="card-label">Remaining</p>
-                    <p className="card-value">${remainingMoney.toFixed(2)}</p>
-                  </div>
-                  {remainingMoney >= 0 ? 
-                    <CheckCircle className="card-icon" /> : 
-                    <AlertCircle className="card-icon" />
-                  }
-                </div>
-              </div>
+              <div className="text-2xl font-bold text-green-800">{formatCurrency(totalIncome)}</div>
             </div>
-
-            <div className="main-content">
-              {/* Enhanced Bills Section */}
-              <div className="section bills-section">
-                <h2 className="section-title">
-                  <Calendar className="section-icon" />
-                  Bills & Expenses ({bills.length})
-                </h2>
-
-                <div className="add-form">
-                  <h3>Add New Bill</h3>
-                  <div className="form-grid mobile-stack">
-                    <input
-                      type="text"
-                      placeholder="Bill name"
-                      value={newBill.name}
-                      onChange={(e) => setNewBill({...newBill, name: e.target.value})}
-                      onKeyPress={handleBillKeyPress}
-                      className="form-input"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Amount ($)"
-                      value={newBill.amount}
-                      onChange={(e) => setNewBill({...newBill, amount: e.target.value})}
-                      onKeyPress={handleBillKeyPress}
-                      className="form-input"
-                      inputMode="decimal"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Due day (1-31)"
-                      min="1"
-                      max="31"
-                      value={newBill.dueDay}
-                      onChange={(e) => setNewBill({...newBill, dueDay: e.target.value})}
-                      onKeyPress={handleBillKeyPress}
-                      className="form-input"
-                      inputMode="numeric"
-                    />
-                    <select
-                      value={newBill.category}
-                      onChange={(e) => setNewBill({...newBill, category: e.target.value})}
-                      className="form-input"
-                    >
-                      <option value="Housing">🏠 Housing</option>
-                      <option value="Utilities">⚡ Utilities</option>
-                      <option value="Insurance">🛡️ Insurance</option>
-                      <option value="Transportation">🚗 Transportation</option>
-                      <option value="Food">🍔 Food</option>
-                      <option value="Other">📋 Other</option>
-                    </select>
-                  </div>
-                  <button onClick={addBill} className="add-button mobile-button">
-                    <Plus className="button-icon" />
-                    Add Bill
-                  </button>
-                </div>
-
-                <div className="items-list">
-                  {bills.length === 0 ? (
-                    <div className="empty-state">
-                      <p>📋 No bills added yet. Add your first bill above!</p>
-                    </div>
-                  ) : (
-                    bills.map(bill => {
-                      const daysUntil = getDaysUntilDue(bill.dueDay);
-                      const priorityClass = getPriorityColor(daysUntil);
-                      return (
-                        <div key={bill.id} className={`item-card ${priorityClass} mobile-card ${bill.isPaid ? 'paid-bill' : ''}`}>
-                          <div className="item-content">
-                            <div className="item-info">
-                              <div className="item-header">
-                                <h4 className="item-name">{bill.name} {bill.isPaid && '✅'}</h4>
-                                <span className="item-category">{bill.category}</span>
-                              </div>
-                              <p className="item-details">
-                                Due: Day {bill.dueDay} ({daysUntil} days)
-                                {bill.isPaid && bill.datePaid && (
-                                  <span className="paid-date"> - Paid: {bill.datePaid}</span>
-                                )}
-                              </p>
-                            </div>
-                            <div className="item-actions">
-                              <p className="item-amount">${bill.amount}</p>
-                              <button
-                                onClick={() => toggleBillPayment(bill.id)}
-                                className={`payment-status-btn ${bill.isPaid ? 'paid' : 'unpaid'}`}
-                              >
-                                {bill.isPaid ? '✅ Paid' : '⏳ Unpaid'}
-                              </button>
-                              <button
-                                onClick={() => removeBill(bill.id)}
-                                className="remove-button mobile-remove"
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
-              {/* Income Section */}
-              <div className="section income-section">
-                <h2 className="section-title">
-                  <TrendingUp className="section-icon" />
-                  Income Sources ({income.length})
-                </h2>
-
-                <div className="add-form">
-                  <h3>Add Income Source</h3>
-                  <div className="form-column mobile-column">
-                    <input
-                      type="text"
-                      placeholder="Income source"
-                      value={newIncome.source}
-                      onChange={(e) => setNewIncome({...newIncome, source: e.target.value})}
-                      onKeyPress={handleIncomeKeyPress}
-                      className="form-input"
-                    />
-                    <div className="form-row mobile-stack">
-                      <input
-                        type="number"
-                        placeholder="Amount ($)"
-                        value={newIncome.amount}
-                        onChange={(e) => setNewIncome({...newIncome, amount: e.target.value})}
-                        onKeyPress={handleIncomeKeyPress}
-                        className="form-input"
-                        inputMode="decimal"
-                      />
-                      <select
-                        value={newIncome.frequency}
-                        onChange={(e) => setNewIncome({...newIncome, frequency: e.target.value})}
-                        className="form-input"
-                      >
-                        <option value="weekly">📅 Weekly</option>
-                        <option value="bi-weekly">📅 Bi-weekly</option>
-                        <option value="monthly">📅 Monthly</option>
-                      </select>
-                    </div>
-                  </div>
-                  <button onClick={addIncome} className="add-button income-button mobile-button">
-                    <Plus className="button-icon" />
-                    Add Income
-                  </button>
-                </div>
-
-                <div className="items-list">
-                  {income.length === 0 ? (
-                    <div className="empty-state">
-                      <p>💰 No income sources added yet. Add your income above!</p>
-                    </div>
-                  ) : (
-                    income.map(inc => (
-                      <div key={inc.id} className="item-card income-item mobile-card">
-                        <div className="item-content">
-                          <div className="item-info">
-                            <h4 className="item-name">{inc.source}</h4>
-                            <p className="item-details">
-                              ${inc.amount} {inc.frequency}
-                            </p>
-                          </div>
-                          <div className="item-actions">
-                            <p className="item-amount">
-                              ${((inc.frequency === 'weekly' ? inc.amount * 4.33 : 
-                                  inc.frequency === 'bi-weekly' ? inc.amount * 2.17 : 
-                                  inc.amount)).toFixed(2)}/mo
-                            </p>
-                            <button
-                              onClick={() => removeIncome(inc.id)}
-                              className="remove-button mobile-remove"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </>
-        ) : (
-          // Pay Periods View
-          <div className="pay-periods-view">
-            <h2 className="section-title">
-              <CreditCard className="section-icon" />
-              Pay Period Planning
-            </h2>
             
-            {payPeriods.length === 0 ? (
-              <div className="empty-state">
-                <p>📅 Add income sources to see your pay periods!</p>
+            <div className="bg-red-100 p-4 rounded-lg">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="text-red-600" size={20} />
+                <span className="font-medium text-red-800">Total Bills</span>
               </div>
-            ) : (
-              <>
-                <div className="pay-periods-grid">
-                  {payPeriods.map(period => {
-                    const assignedBills = bills.filter(bill => bill.payPeriodAssigned === period.id);
-                    const totalAssigned = assignedBills.reduce((sum, bill) => sum + bill.amount, 0);
-                    const remaining = period.amount - totalAssigned;
-                    
-                    return (
-                      <div key={period.id} className="pay-period-card">
-                        <div className="pay-period-header">
-                          <h3>💰 {period.source}</h3>
-                          <p className="pay-date">Date: {new Date(period.date).toLocaleDateString()}</p>
-                          <p className="pay-amount">Amount: ${period.amount}</p>
-                        </div>
-                        
-                        <div className="assigned-bills">
-                          <h4>Assigned Bills:</h4>
-                          {assignedBills.length === 0 ? (
-                            <p className="no-bills">No bills assigned</p>
-                          ) : (
-                            assignedBills.map(bill => (
-                              <div key={bill.id} className="assigned-bill">
-                                <span>{bill.name}</span>
-                                <span>${bill.amount}</span>
-                              </div>
-                            ))
-                          )}
-                          
-                          <div className="period-summary">
-                            <div className="summary-row">
-                              <span>Total Assigned:</span>
-                              <span>${totalAssigned.toFixed(2)}</span>
-                            </div>
-                            <div className="summary-row remaining">
-                              <span>Remaining:</span>
-                              <span className={remaining >= 0 ? 'positive' : 'negative'}>
-                                ${remaining.toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                
-                {/* Unassigned Bills Section */}
-                <div className="unassigned-bills-section">
-                  <h3>📋 Unassigned Bills</h3>
-                  <div className="unassigned-bills">
-                    {bills.filter(bill => !bill.payPeriodAssigned).length === 0 ? (
-                      <p>✅ All bills have been assigned to pay periods!</p>
-                    ) : (
-                      bills.filter(bill => !bill.payPeriodAssigned).map(bill => (
-                        <div key={bill.id} className="unassigned-bill">
-                          <div className="bill-info">
-                            <span className="bill-name">{bill.name}</span>
-                            <span className="bill-amount">${bill.amount}</span>
-                          </div>
-                          <select
-                            onChange={(e) => assignBillToPayPeriod(bill.id, e.target.value)}
-                            className="assign-select"
-                          >
-                            <option value="">Assign to pay period...</option>
-                            {payPeriods.map(period => (
-                              <option key={period.id} value={period.id}>
-                                {period.source} - {new Date(period.date).toLocaleDateString()}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      ))
-                    )}
+              <div className="text-2xl font-bold text-red-800">{formatCurrency(totalBills)}</div>
+            </div>
+            
+            <div className="bg-orange-100 p-4 rounded-lg">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="text-orange-600" size={20} />
+                <span className="font-medium text-orange-800">Unpaid Bills</span>
+              </div>
+              <div className="text-2xl font-bold text-orange-800">{formatCurrency(totalUnpaid)}</div>
+            </div>
+            
+            <div className="bg-blue-100 p-4 rounded-lg">
+              <div className="flex items-center gap-2">
+                <DollarSign className="text-blue-600" size={20} />
+                <span className="font-medium text-blue-800">Remaining</span>
+              </div>
+              <div className="text-2xl font-bold text-blue-800">{formatCurrency(totalIncome - totalBills)}</div>
+            </div>
+          </div>
+
+          {/* Bills List */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-bold mb-4">Bills & Expenses</h2>
+            
+            {/* Add New Bill */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 p-4 bg-gray-50 rounded-lg">
+              <input
+                type="text"
+                placeholder="Bill name"
+                value={newBill.name}
+                onChange={(e) => setNewBill({...newBill, name: e.target.value})}
+                className="px-3 py-2 border rounded-lg"
+              />
+              <input
+                type="number"
+                placeholder="Amount"
+                value={newBill.amount}
+                onChange={(e) => setNewBill({...newBill, amount: e.target.value})}
+                className="px-3 py-2 border rounded-lg"
+              />
+              <input
+                type="date"
+                value={newBill.dueDate}
+                onChange={(e) => setNewBill({...newBill, dueDate: e.target.value})}
+                className="px-3 py-2 border rounded-lg"
+              />
+              <button
+                onClick={addBill}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2"
+              >
+                <Plus size={16} /> Add Bill
+              </button>
+            </div>
+
+            {/* Bills List */}
+            <div className="space-y-3">
+              {bills.map(bill => (
+                <div key={bill.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                  <div className="flex-1">
+                    <div className="font-medium">{bill.name}</div>
+                    <div className="text-sm text-gray-600">Due: {formatDate(bill.dueDate)}</div>
+                  </div>
+                  <div className="text-lg font-bold">{formatCurrency(bill.amount)}</div>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={bill.assignedPaycheckId || ''}
+                      onChange={(e) => assignBillToPaycheck(bill.id, e.target.value)}
+                      className="px-2 py-1 border rounded text-sm"
+                    >
+                      <option value="">Unassigned</option>
+                      {paychecks.map(paycheck => (
+                        <option key={paycheck.id} value={paycheck.id}>
+                          {formatDate(paycheck.date)} - {paycheck.source}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => toggleBillPayment(bill.id)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                        bill.isPaid
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-orange-100 text-orange-800'
+                      }`}
+                    >
+                      {bill.isPaid ? '✅ Paid' : '⏳ Unpaid'}
+                    </button>
+                    <button
+                      onClick={() => deleteBill(bill.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </div>
-              </>
-            )}
-          </div>
-        )}
-
-        <div className="tips-section">
-          <h3>💡 Financial Tips</h3>
-          <div className="tips-grid mobile-tips">
-            <div className="tip-card">
-              <h4>Emergency Fund</h4>
-              <p>Try to save 3-6 months of expenses for emergencies.</p>
-            </div>
-            <div className="tip-card">
-              <h4>Bill Automation</h4>
-              <p>Set up automatic payments to avoid late fees.</p>
-            </div>
-            <div className="tip-card">
-              <h4>Pay Period Planning</h4>
-              <p>Assign bills to specific paychecks to avoid overspending.</p>
+              ))}
             </div>
           </div>
         </div>
+      )}
 
-        <PWAInstaller />
-      </div>
+      {activeView === 'paychecks' && (
+        <div className="space-y-6">
+          {/* Add New Paycheck */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-bold mb-4">Add New Paycheck</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <input
+                type="date"
+                value={newPaycheck.date}
+                onChange={(e) => setNewPaycheck({...newPaycheck, date: e.target.value})}
+                className="px-3 py-2 border rounded-lg"
+                placeholder="Pay date"
+              />
+              <input
+                type="number"
+                placeholder="Amount"
+                value={newPaycheck.amount}
+                onChange={(e) => setNewPaycheck({...newPaycheck, amount: e.target.value})}
+                className="px-3 py-2 border rounded-lg"
+              />
+              <input
+                type="text"
+                placeholder="Source (e.g., Equitas Health)"
+                value={newPaycheck.source}
+                onChange={(e) => setNewPaycheck({...newPaycheck, source: e.target.value})}
+                className="px-3 py-2 border rounded-lg"
+              />
+              <button
+                onClick={addPaycheck}
+                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2"
+              >
+                <Plus size={16} /> Add Paycheck
+              </button>
+            </div>
+          </div>
+
+          {/* Paycheck Planning */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {paychecks.map(paycheck => {
+              const details = getPaycheckDetails(paycheck);
+              return (
+                <div key={paycheck.id} className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-bold">{paycheck.source}</h3>
+                      <p className="text-gray-600">{formatDate(paycheck.date)}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-green-600">
+                        {formatCurrency(paycheck.amount)}
+                      </div>
+                      <button
+                        onClick={() => deletePaycheck(paycheck.id)}
+                        className="text-red-500 hover:text-red-700 mt-1"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Assigned Bills */}
+                  <div className="space-y-2 mb-4">
+                    <h4 className="font-medium text-gray-700">Assigned Bills:</h4>
+                    {details.assignedBills.length > 0 ? (
+                      details.assignedBills.map(bill => (
+                        <div key={bill.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                          <span className={bill.isPaid ? 'line-through text-gray-500' : ''}>
+                            {bill.name}
+                          </span>
+                          <span className="font-medium">{formatCurrency(bill.amount)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm">No bills assigned</p>
+                    )}
+                  </div>
+
+                  {/* Summary */}
+                  <div className="border-t pt-3 space-y-1">
+                    <div className="flex justify-between">
+                      <span>Paycheck Amount:</span>
+                      <span className="font-medium">{formatCurrency(paycheck.amount)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Assigned Bills:</span>
+                      <span className="font-medium text-red-600">-{formatCurrency(details.totalAssigned)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold border-t pt-1">
+                      <span>Remaining:</span>
+                      <span className={details.remaining >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        {formatCurrency(details.remaining)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Unassigned Bills */}
+          {bills.filter(bill => !bill.assignedPaycheckId).length > 0 && (
+            <div className="bg-yellow-50 rounded-lg shadow-lg p-6">
+              <h3 className="text-lg font-bold mb-4 text-yellow-800">Unassigned Bills</h3>
+              <div className="space-y-2">
+                {bills.filter(bill => !bill.assignedPaycheckId).map(bill => (
+                  <div key={bill.id} className="flex justify-between items-center p-3 bg-yellow-100 rounded">
+                    <div>
+                      <span className="font-medium">{bill.name}</span>
+                      <span className="text-sm text-gray-600 ml-2">Due: {formatDate(bill.dueDate)}</span>
+                    </div>
+                    <span className="font-bold">{formatCurrency(bill.amount)}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-yellow-700 mt-3">
+                💡 Assign these bills to specific paychecks in the Overview tab for better planning!
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
