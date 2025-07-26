@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, DollarSign, TrendingUp, AlertCircle, Trash2 } from 'lucide-react';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { Plus, Calendar, DollarSign, TrendingUp, AlertCircle, CheckCircle, Save, Trash2, Edit3 } from 'lucide-react';
 
 const FinancialWorkbook = () => {
   // Bills state
@@ -54,7 +53,9 @@ const FinancialWorkbook = () => {
   // Calculate totals
   const totalBills = bills.reduce((sum, bill) => sum + bill.amount, 0);
   const totalIncome = paychecks.reduce((sum, paycheck) => sum + paycheck.amount, 0);
+  const paidBills = bills.filter(bill => bill.isPaid);
   const unpaidBills = bills.filter(bill => !bill.isPaid);
+  const totalPaid = paidBills.reduce((sum, bill) => sum + bill.amount, 0);
   const totalUnpaid = unpaidBills.reduce((sum, bill) => sum + bill.amount, 0);
 
   // Add new bill
@@ -131,30 +132,24 @@ const FinancialWorkbook = () => {
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
 
   return (
-    <div className="max-w-6xl mx-auto p-4 bg-gray-50 min-h-screen">
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Financial Workbook</h1>
-        <p className="text-gray-600">Track your bills, paychecks, and budget planning</p>
+    <div className="app-container">
+      <div className="header-card">
+        <div className="header-content">
+          <h1 className="app-title">💰 Financial Workbook</h1>
+          <p className="app-subtitle">Smart budget planning for your financial success</p>
+        </div>
         
         {/* View Toggle */}
-        <div className="flex gap-2 mt-4">
+        <div className="view-toggle">
           <button
             onClick={() => setActiveView('overview')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeView === 'overview'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            className={`toggle-btn ${activeView === 'overview' ? 'active overview' : ''}`}
           >
             📊 Overview
           </button>
           <button
             onClick={() => setActiveView('paychecks')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeView === 'paychecks'
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            className={`toggle-btn ${activeView === 'paychecks' ? 'active paychecks' : ''}`}
           >
             💰 Paycheck Planning
           </button>
@@ -162,90 +157,98 @@ const FinancialWorkbook = () => {
       </div>
 
       {activeView === 'overview' && (
-        <div className="space-y-6">
+        <div className="content-section">
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-green-100 p-4 rounded-lg">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="text-green-600" size={20} />
-                <span className="font-medium text-green-800">Total Income</span>
+          <div className="stats-grid">
+            <div className="stat-card income">
+              <div className="stat-icon">
+                <TrendingUp size={24} />
               </div>
-              <div className="text-2xl font-bold text-green-800">{formatCurrency(totalIncome)}</div>
+              <div className="stat-content">
+                <span className="stat-label">Total Income</span>
+                <span className="stat-value">{formatCurrency(totalIncome)}</span>
+              </div>
             </div>
             
-            <div className="bg-red-100 p-4 rounded-lg">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="text-red-600" size={20} />
-                <span className="font-medium text-red-800">Total Bills</span>
+            <div className="stat-card bills">
+              <div className="stat-icon">
+                <AlertCircle size={24} />
               </div>
-              <div className="text-2xl font-bold text-red-800">{formatCurrency(totalBills)}</div>
+              <div className="stat-content">
+                <span className="stat-label">Total Bills</span>
+                <span className="stat-value">{formatCurrency(totalBills)}</span>
+              </div>
             </div>
             
-            <div className="bg-orange-100 p-4 rounded-lg">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="text-orange-600" size={20} />
-                <span className="font-medium text-orange-800">Unpaid Bills</span>
+            <div className="stat-card unpaid">
+              <div className="stat-icon">
+                <AlertCircle size={24} />
               </div>
-              <div className="text-2xl font-bold text-orange-800">{formatCurrency(totalUnpaid)}</div>
+              <div className="stat-content">
+                <span className="stat-label">Unpaid Bills</span>
+                <span className="stat-value">{formatCurrency(totalUnpaid)}</span>
+              </div>
             </div>
             
-            <div className="bg-blue-100 p-4 rounded-lg">
-              <div className="flex items-center gap-2">
-                <DollarSign className="text-blue-600" size={20} />
-                <span className="font-medium text-blue-800">Remaining</span>
+            <div className="stat-card remaining">
+              <div className="stat-icon">
+                <DollarSign size={24} />
               </div>
-              <div className="text-2xl font-bold text-blue-800">{formatCurrency(totalIncome - totalBills)}</div>
+              <div className="stat-content">
+                <span className="stat-label">Remaining</span>
+                <span className="stat-value">{formatCurrency(totalIncome - totalBills)}</span>
+              </div>
             </div>
           </div>
 
-          {/* Bills List */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-bold mb-4">Bills & Expenses</h2>
+          {/* Bills Section */}
+          <div className="section-card">
+            <h2 className="section-title">💳 Bills & Expenses</h2>
             
             {/* Add New Bill */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4 p-4 bg-gray-50 rounded-lg">
+            <div className="add-form">
               <input
                 type="text"
                 placeholder="Bill name"
                 value={newBill.name}
                 onChange={(e) => setNewBill({...newBill, name: e.target.value})}
-                className="px-3 py-2 border rounded-lg"
+                className="form-input"
               />
               <input
                 type="number"
                 placeholder="Amount"
                 value={newBill.amount}
                 onChange={(e) => setNewBill({...newBill, amount: e.target.value})}
-                className="px-3 py-2 border rounded-lg"
+                className="form-input"
               />
               <input
                 type="date"
                 value={newBill.dueDate}
                 onChange={(e) => setNewBill({...newBill, dueDate: e.target.value})}
-                className="px-3 py-2 border rounded-lg"
+                className="form-input"
               />
               <button
                 onClick={addBill}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                className="add-btn primary"
               >
                 <Plus size={16} /> Add Bill
               </button>
             </div>
 
             {/* Bills List */}
-            <div className="space-y-3">
+            <div className="bills-list">
               {bills.map(bill => (
-                <div key={bill.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                  <div className="flex-1">
-                    <div className="font-medium">{bill.name}</div>
-                    <div className="text-sm text-gray-600">Due: {formatDate(bill.dueDate)}</div>
+                <div key={bill.id} className={`bill-item ${bill.isPaid ? 'paid' : 'unpaid'}`}>
+                  <div className="bill-info">
+                    <div className="bill-name">{bill.name}</div>
+                    <div className="bill-due">Due: {formatDate(bill.dueDate)}</div>
                   </div>
-                  <div className="text-lg font-bold">{formatCurrency(bill.amount)}</div>
-                  <div className="flex items-center gap-2">
+                  <div className="bill-amount">{formatCurrency(bill.amount)}</div>
+                  <div className="bill-actions">
                     <select
                       value={bill.assignedPaycheckId || ''}
                       onChange={(e) => assignBillToPaycheck(bill.id, e.target.value)}
-                      className="px-2 py-1 border rounded text-sm"
+                      className="bill-select"
                     >
                       <option value="">Unassigned</option>
                       {paychecks.map(paycheck => (
@@ -256,17 +259,13 @@ const FinancialWorkbook = () => {
                     </select>
                     <button
                       onClick={() => toggleBillPayment(bill.id)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                        bill.isPaid
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-orange-100 text-orange-800'
-                      }`}
+                      className={`status-btn ${bill.isPaid ? 'paid' : 'unpaid'}`}
                     >
                       {bill.isPaid ? '✅ Paid' : '⏳ Unpaid'}
                     </button>
                     <button
                       onClick={() => deleteBill(bill.id)}
-                      className="text-red-500 hover:text-red-700"
+                      className="delete-btn"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -279,16 +278,16 @@ const FinancialWorkbook = () => {
       )}
 
       {activeView === 'paychecks' && (
-        <div className="space-y-6">
+        <div className="content-section">
           {/* Add New Paycheck */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-bold mb-4">Add New Paycheck</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="section-card">
+            <h2 className="section-title">➕ Add New Paycheck</h2>
+            <div className="add-form">
               <input
                 type="date"
                 value={newPaycheck.date}
                 onChange={(e) => setNewPaycheck({...newPaycheck, date: e.target.value})}
-                className="px-3 py-2 border rounded-lg"
+                className="form-input"
                 placeholder="Pay date"
               />
               <input
@@ -296,42 +295,40 @@ const FinancialWorkbook = () => {
                 placeholder="Amount"
                 value={newPaycheck.amount}
                 onChange={(e) => setNewPaycheck({...newPaycheck, amount: e.target.value})}
-                className="px-3 py-2 border rounded-lg"
+                className="form-input"
               />
               <input
                 type="text"
                 placeholder="Source (e.g., Equitas Health)"
                 value={newPaycheck.source}
                 onChange={(e) => setNewPaycheck({...newPaycheck, source: e.target.value})}
-                className="px-3 py-2 border rounded-lg"
+                className="form-input"
               />
               <button
                 onClick={addPaycheck}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2"
+                className="add-btn success"
               >
                 <Plus size={16} /> Add Paycheck
               </button>
             </div>
           </div>
 
-          {/* Paycheck Planning */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Paycheck Cards */}
+          <div className="paychecks-grid">
             {paychecks.map(paycheck => {
               const details = getPaycheckDetails(paycheck);
               return (
-                <div key={paycheck.id} className="bg-white rounded-lg shadow-lg p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-bold">{paycheck.source}</h3>
-                      <p className="text-gray-600">{formatDate(paycheck.date)}</p>
+                <div key={paycheck.id} className="paycheck-card">
+                  <div className="paycheck-header">
+                    <div className="paycheck-info">
+                      <h3 className="paycheck-source">{paycheck.source}</h3>
+                      <p className="paycheck-date">{formatDate(paycheck.date)}</p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-green-600">
-                        {formatCurrency(paycheck.amount)}
-                      </div>
+                    <div className="paycheck-controls">
+                      <div className="paycheck-amount">{formatCurrency(paycheck.amount)}</div>
                       <button
                         onClick={() => deletePaycheck(paycheck.id)}
-                        className="text-red-500 hover:text-red-700 mt-1"
+                        className="delete-btn"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -339,35 +336,33 @@ const FinancialWorkbook = () => {
                   </div>
 
                   {/* Assigned Bills */}
-                  <div className="space-y-2 mb-4">
-                    <h4 className="font-medium text-gray-700">Assigned Bills:</h4>
+                  <div className="assigned-bills">
+                    <h4 className="bills-title">Assigned Bills:</h4>
                     {details.assignedBills.length > 0 ? (
                       details.assignedBills.map(bill => (
-                        <div key={bill.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                          <span className={bill.isPaid ? 'line-through text-gray-500' : ''}>
-                            {bill.name}
-                          </span>
-                          <span className="font-medium">{formatCurrency(bill.amount)}</span>
+                        <div key={bill.id} className={`assigned-bill ${bill.isPaid ? 'paid' : ''}`}>
+                          <span className="assigned-bill-name">{bill.name}</span>
+                          <span className="assigned-bill-amount">{formatCurrency(bill.amount)}</span>
                         </div>
                       ))
                     ) : (
-                      <p className="text-gray-500 text-sm">No bills assigned</p>
+                      <p className="no-bills">No bills assigned</p>
                     )}
                   </div>
 
                   {/* Summary */}
-                  <div className="border-t pt-3 space-y-1">
-                    <div className="flex justify-between">
+                  <div className="paycheck-summary">
+                    <div className="summary-row">
                       <span>Paycheck Amount:</span>
-                      <span className="font-medium">{formatCurrency(paycheck.amount)}</span>
+                      <span className="amount">{formatCurrency(paycheck.amount)}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="summary-row">
                       <span>Assigned Bills:</span>
-                      <span className="font-medium text-red-600">-{formatCurrency(details.totalAssigned)}</span>
+                      <span className="amount negative">-{formatCurrency(details.totalAssigned)}</span>
                     </div>
-                    <div className="flex justify-between font-bold border-t pt-1">
+                    <div className="summary-row total">
                       <span>Remaining:</span>
-                      <span className={details.remaining >= 0 ? 'text-green-600' : 'text-red-600'}>
+                      <span className={`amount ${details.remaining >= 0 ? 'positive' : 'negative'}`}>
                         {formatCurrency(details.remaining)}
                       </span>
                     </div>
@@ -379,20 +374,20 @@ const FinancialWorkbook = () => {
 
           {/* Unassigned Bills */}
           {bills.filter(bill => !bill.assignedPaycheckId).length > 0 && (
-            <div className="bg-yellow-50 rounded-lg shadow-lg p-6">
-              <h3 className="text-lg font-bold mb-4 text-yellow-800">Unassigned Bills</h3>
-              <div className="space-y-2">
+            <div className="section-card warning">
+              <h3 className="section-title">⚠️ Unassigned Bills</h3>
+              <div className="unassigned-bills">
                 {bills.filter(bill => !bill.assignedPaycheckId).map(bill => (
-                  <div key={bill.id} className="flex justify-between items-center p-3 bg-yellow-100 rounded">
-                    <div>
-                      <span className="font-medium">{bill.name}</span>
-                      <span className="text-sm text-gray-600 ml-2">Due: {formatDate(bill.dueDate)}</span>
+                  <div key={bill.id} className="unassigned-bill">
+                    <div className="unassigned-info">
+                      <span className="unassigned-name">{bill.name}</span>
+                      <span className="unassigned-due">Due: {formatDate(bill.dueDate)}</span>
                     </div>
-                    <span className="font-bold">{formatCurrency(bill.amount)}</span>
+                    <span className="unassigned-amount">{formatCurrency(bill.amount)}</span>
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-yellow-700 mt-3">
+              <p className="warning-text">
                 💡 Assign these bills to specific paychecks in the Overview tab for better planning!
               </p>
             </div>
