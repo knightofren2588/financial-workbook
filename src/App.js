@@ -133,11 +133,10 @@ const FinancialWorkbook = () => {
 
   return (
     <div className="app-container">
-      <div className="header-card">
-        <div className="header-content">
-          <h1 className="app-title">💰 Financial Workbook</h1>
-          <p className="app-subtitle">Smart budget planning for your financial success</p>
-        </div>
+      {/* Header */}
+      <div className="glass-card header">
+        <h1 className="app-title">💰 Financial Workbook</h1>
+        <p className="app-subtitle">Smart budget planning for your financial success</p>
         
         {/* View Toggle */}
         <div className="view-toggle">
@@ -160,52 +159,60 @@ const FinancialWorkbook = () => {
         <div className="content-section">
           {/* Summary Cards */}
           <div className="stats-grid">
-            <div className="stat-card income">
-              <div className="stat-icon">
-                <TrendingUp size={24} />
-              </div>
+            <div className="glass-card stat-card income">
               <div className="stat-content">
-                <span className="stat-label">Total Income</span>
-                <span className="stat-value">{formatCurrency(totalIncome)}</span>
+                <div className="stat-icon">
+                  <TrendingUp size={24} />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-label">Total Income</div>
+                  <div className="stat-value">{formatCurrency(totalIncome)}</div>
+                </div>
               </div>
             </div>
             
-            <div className="stat-card bills">
-              <div className="stat-icon">
-                <AlertCircle size={24} />
-              </div>
+            <div className="glass-card stat-card bills">
               <div className="stat-content">
-                <span className="stat-label">Total Bills</span>
-                <span className="stat-value">{formatCurrency(totalBills)}</span>
+                <div className="stat-icon">
+                  <AlertCircle size={24} />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-label">Total Bills</div>
+                  <div className="stat-value">{formatCurrency(totalBills)}</div>
+                </div>
               </div>
             </div>
             
-            <div className="stat-card unpaid">
-              <div className="stat-icon">
-                <AlertCircle size={24} />
-              </div>
+            <div className="glass-card stat-card unpaid">
               <div className="stat-content">
-                <span className="stat-label">Unpaid Bills</span>
-                <span className="stat-value">{formatCurrency(totalUnpaid)}</span>
+                <div className="stat-icon">
+                  <AlertCircle size={24} />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-label">Unpaid Bills</div>
+                  <div className="stat-value">{formatCurrency(totalUnpaid)}</div>
+                </div>
               </div>
             </div>
             
-            <div className="stat-card remaining">
-              <div className="stat-icon">
-                <DollarSign size={24} />
-              </div>
+            <div className="glass-card stat-card remaining">
               <div className="stat-content">
-                <span className="stat-label">Remaining</span>
-                <span className="stat-value">{formatCurrency(totalIncome - totalBills)}</span>
+                <div className="stat-icon">
+                  <DollarSign size={24} />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-label">Remaining</div>
+                  <div className="stat-value">{formatCurrency(totalIncome - totalBills)}</div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Bills Section */}
-          <div className="section-card">
+          <div className="glass-card section-card">
             <h2 className="section-title">💳 Bills & Expenses</h2>
             
-            {/* Add New Bill */}
+            {/* Add New Bill Form */}
             <div className="add-form">
               <input
                 type="text"
@@ -229,9 +236,10 @@ const FinancialWorkbook = () => {
               />
               <button
                 onClick={addBill}
-                className="add-btn primary"
+                className="btn btn-primary"
               >
-                <Plus size={16} /> Add Bill
+                <Plus size={16} />
+                <span>Add Bill</span>
               </button>
             </div>
 
@@ -239,36 +247,38 @@ const FinancialWorkbook = () => {
             <div className="bills-list">
               {bills.map(bill => (
                 <div key={bill.id} className={`bill-item ${bill.isPaid ? 'paid' : 'unpaid'}`}>
-                  <div className="bill-info">
-                    <div className="bill-name">{bill.name}</div>
-                    <div className="bill-due">Due: {formatDate(bill.dueDate)}</div>
-                  </div>
-                  <div className="bill-amount">{formatCurrency(bill.amount)}</div>
-                  <div className="bill-actions">
-                    <select
-                      value={bill.assignedPaycheckId || ''}
-                      onChange={(e) => assignBillToPaycheck(bill.id, e.target.value)}
-                      className="bill-select"
-                    >
-                      <option value="">Unassigned</option>
-                      {paychecks.map(paycheck => (
-                        <option key={paycheck.id} value={paycheck.id}>
-                          {formatDate(paycheck.date)} - {paycheck.source}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      onClick={() => toggleBillPayment(bill.id)}
-                      className={`status-btn ${bill.isPaid ? 'paid' : 'unpaid'}`}
-                    >
-                      {bill.isPaid ? '✅ Paid' : '⏳ Unpaid'}
-                    </button>
-                    <button
-                      onClick={() => deleteBill(bill.id)}
-                      className="delete-btn"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <div className="bill-content">
+                    <div className="bill-info">
+                      <div className="bill-name">{bill.name}</div>
+                      <div className="bill-due">Due: {formatDate(bill.dueDate)}</div>
+                    </div>
+                    <div className="bill-amount">{formatCurrency(bill.amount)}</div>
+                    <div className="bill-actions">
+                      <select
+                        value={bill.assignedPaycheckId || ''}
+                        onChange={(e) => assignBillToPaycheck(bill.id, e.target.value)}
+                        className="bill-select"
+                      >
+                        <option value="">Unassigned</option>
+                        {paychecks.map(paycheck => (
+                          <option key={paycheck.id} value={paycheck.id}>
+                            {formatDate(paycheck.date)} - {paycheck.source}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => toggleBillPayment(bill.id)}
+                        className={`status-btn ${bill.isPaid ? 'paid' : 'unpaid'}`}
+                      >
+                        {bill.isPaid ? '✅ Paid' : '⏳ Unpaid'}
+                      </button>
+                      <button
+                        onClick={() => deleteBill(bill.id)}
+                        className="btn btn-danger"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -280,7 +290,7 @@ const FinancialWorkbook = () => {
       {activeView === 'paychecks' && (
         <div className="content-section">
           {/* Add New Paycheck */}
-          <div className="section-card">
+          <div className="glass-card section-card">
             <h2 className="section-title">➕ Add New Paycheck</h2>
             <div className="add-form">
               <input
@@ -306,9 +316,10 @@ const FinancialWorkbook = () => {
               />
               <button
                 onClick={addPaycheck}
-                className="add-btn success"
+                className="btn btn-success"
               >
-                <Plus size={16} /> Add Paycheck
+                <Plus size={16} />
+                <span>Add Paycheck</span>
               </button>
             </div>
           </div>
@@ -318,17 +329,18 @@ const FinancialWorkbook = () => {
             {paychecks.map(paycheck => {
               const details = getPaycheckDetails(paycheck);
               return (
-                <div key={paycheck.id} className="paycheck-card">
+                <div key={paycheck.id} className="glass-card paycheck-card">
                   <div className="paycheck-header">
                     <div className="paycheck-info">
-                      <h3 className="paycheck-source">{paycheck.source}</h3>
-                      <p className="paycheck-date">{formatDate(paycheck.date)}</p>
+                      <h3>{paycheck.source}</h3>
+                      <p>{formatDate(paycheck.date)}</p>
                     </div>
-                    <div className="paycheck-controls">
+                    <div>
                       <div className="paycheck-amount">{formatCurrency(paycheck.amount)}</div>
                       <button
                         onClick={() => deletePaycheck(paycheck.id)}
-                        className="delete-btn"
+                        className="btn btn-danger"
+                        style={{ marginTop: '8px', padding: '8px' }}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -354,7 +366,7 @@ const FinancialWorkbook = () => {
                   <div className="paycheck-summary">
                     <div className="summary-row">
                       <span>Paycheck Amount:</span>
-                      <span className="amount">{formatCurrency(paycheck.amount)}</span>
+                      <span>{formatCurrency(paycheck.amount)}</span>
                     </div>
                     <div className="summary-row">
                       <span>Assigned Bills:</span>
@@ -374,7 +386,7 @@ const FinancialWorkbook = () => {
 
           {/* Unassigned Bills */}
           {bills.filter(bill => !bill.assignedPaycheckId).length > 0 && (
-            <div className="section-card warning">
+            <div className="glass-card section-card warning-section">
               <h3 className="section-title">⚠️ Unassigned Bills</h3>
               <div className="unassigned-bills">
                 {bills.filter(bill => !bill.assignedPaycheckId).map(bill => (
