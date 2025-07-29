@@ -1,952 +1,2441 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, DollarSign, TrendingUp, AlertCircle, Trash2 } from 'lucide-react';
 
-const FinancialWorkbook = () => {
-  // Load data from localStorage or use defaults
-  const loadFromStorage = (key, defaultValue) => {
+const FinanceHubPro = () => {
+  // Load data from localStorage
+  const loadData = () => {
     try {
-      const saved = localStorage.getItem(key);
-      return saved ? JSON.parse(saved) : defaultValue;
+      const savedData = localStorage.getItem('financeHubProData');
+      if (savedData) {
+        return JSON.parse(savedData);
+      }
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
-      return defaultValue;
+      console.error('Error loading data:', error);
     }
+    
+    return {
+      user: {
+        id: 'user-1',
+        name: 'John Doe',
+        email: 'john@equitashealth.com',
+        company: 'Equitas Health',
+        createdAt: '2025-07-01',
+        settings: {
+          notifications: true,
+          darkMode: false,
+          currency: 'USD'
+        }
+      },
+      currentMonthId: 'july-2025',
+      months: {
+        'july-2025': {
+          id: 'july-2025',
+          name: 'July',
+          year: 2025,
+          bills: [
+            { id: 1, name: 'Rent', amount: 826.00, dueDate: 11, category: 'Housing', assignedPaycheck: 1, isPaid: false, isSubscription: false },
+            { id: 2, name: 'Electric', amount: 46.00, dueDate: 18, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 3, name: 'Gas', amount: 46.00, dueDate: 3, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 4, name: 'Internet', amount: 50.00, dueDate: 20, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 5, name: 'Car Payment', amount: 570.00, dueDate: 28, category: 'Transportation', assignedPaycheck: null, isPaid: false, isSubscription: false },
+            { id: 6, name: 'Health Insurance', amount: 160.00, dueDate: 28, category: 'Health', assignedPaycheck: 1, isPaid: false, isSubscription: false },
+            { id: 7, name: 'Dental Insurance', amount: 80.00, dueDate: 21, category: 'Health', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 8, name: 'Netflix', amount: 15.99, dueDate: 4, category: 'Entertainment', assignedPaycheck: null, isPaid: false, isSubscription: true },
+            { id: 9, name: 'Spotify Premium', amount: 10.99, dueDate: 13, category: 'Entertainment', assignedPaycheck: null, isPaid: false, isSubscription: true },
+            { id: 10, name: 'Student Loan', amount: 50.32, dueDate: 29, category: 'Debt', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 11, name: 'Groceries', amount: 400.00, dueDate: 15, category: 'Food', assignedPaycheck: 1, isPaid: false, isSubscription: false }
+          ],
+          paychecks: [
+            { id: 1, date: '2025-07-11', amount: 1600.00, source: 'Equitas Health', label: 'First Paycheck' },
+            { id: 2, date: '2025-07-25', amount: 2100.00, source: 'Equitas Health', label: 'Second Paycheck' }
+          ]
+        },
+        'august-2025': {
+          id: 'august-2025',
+          name: 'August',
+          year: 2025,
+          bills: [
+            { id: 1, name: 'Rent', amount: 826.00, dueDate: 1, category: 'Housing', assignedPaycheck: 1, isPaid: false, isSubscription: false },
+            { id: 2, name: 'Electric', amount: 46.00, dueDate: 10, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 3, name: 'Car Payment', amount: 570.00, dueDate: 28, category: 'Transportation', assignedPaycheck: null, isPaid: false, isSubscription: false }
+          ],
+          paychecks: [
+            { id: 1, date: '2025-08-08', amount: 1600.00, source: 'Equitas Health', label: 'First Paycheck' },
+            { id: 2, date: '2025-08-22', amount: 1600.00, source: 'Equitas Health', label: 'Second Paycheck' }
+          ]
+        }
+      },
+      subscriptions: [
+        {
+          id: 'sub-1',
+          name: 'Netflix',
+          amount: 15.99,
+          billingCycle: 'monthly',
+          nextBilling: '2025-08-04',
+          category: 'Entertainment',
+          status: 'active',
+          provider: 'Netflix',
+          cancellationUrl: 'https://netflix.com/cancelplan',
+          description: 'Standard Plan',
+          connectedAccount: 'Chase Credit Card ****1234',
+          lastCharged: '2025-07-04',
+          autoRenew: true,
+          trialEnds: null,
+          yearlyDiscount: 0
+        },
+        {
+          id: 'sub-2',
+          name: 'Spotify Premium',
+          amount: 10.99,
+          billingCycle: 'monthly',
+          nextBilling: '2025-08-13',
+          category: 'Entertainment',
+          status: 'active',
+          provider: 'Spotify',
+          cancellationUrl: 'https://spotify.com/account/subscription',
+          description: 'Individual Plan',
+          connectedAccount: 'Chase Credit Card ****1234',
+          lastCharged: '2025-07-13',
+          autoRenew: true,
+          trialEnds: null,
+          yearlyDiscount: 10.99 * 2
+        },
+        {
+          id: 'sub-3',
+          name: 'Apple iCloud+',
+          amount: 2.99,
+          billingCycle: 'monthly',
+          nextBilling: '2025-08-18',
+          category: 'Productivity',
+          status: 'active',
+          provider: 'Apple',
+          cancellationUrl: 'https://apple.com/icloud/settings',
+          description: '200GB Storage',
+          connectedAccount: 'Apple ID Payment',
+          lastCharged: '2025-07-18',
+          autoRenew: true,
+          trialEnds: null,
+          yearlyDiscount: 0
+        },
+        {
+          id: 'sub-4',
+          name: 'Adobe Creative Cloud',
+          amount: 54.99,
+          billingCycle: 'monthly',
+          nextBilling: '2025-08-22',
+          category: 'Productivity',
+          status: 'trial',
+          provider: 'Adobe',
+          cancellationUrl: 'https://adobe.com/account/cancel',
+          description: 'All Apps Plan',
+          connectedAccount: 'Chase Credit Card ****1234',
+          lastCharged: null,
+          autoRenew: true,
+          trialEnds: '2025-08-22',
+          yearlyDiscount: 120.00
+        }
+      ],
+      connectedAccounts: [
+        {
+          id: 'acc-1',
+          type: 'credit_card',
+          name: 'Chase Freedom',
+          last4: '1234',
+          provider: 'Chase',
+          status: 'connected'
+        },
+        {
+          id: 'acc-2',
+          type: 'bank_account',
+          name: 'Checking Account',
+          last4: '5678',
+          provider: 'Wells Fargo',
+          status: 'connected'
+        }
+      ]
+    };
   };
+
+  const [data, setData] = useState(loadData);
+  const [activeView, setActiveView] = useState('overview');
+  const [editingItem, setEditingItem] = useState(null);
+  const [editType, setEditType] = useState(null);
+  const [showNewMonthForm, setShowNewMonthForm] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(null);
+  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+  const [showAddSubscriptionModal, setShowAddSubscriptionModal] = useState(false);
+  const [editingAccount, setEditingAccount] = useState(null);
+  const [newAccount, setNewAccount] = useState({ name: '', type: 'checking', provider: '', last4: '' });
+  const [newSubscription, setNewSubscription] = useState({ 
+    name: '', 
+    amount: '', 
+    provider: '', 
+    description: '', 
+    billingCycle: 'monthly',
+    category: 'Entertainment',
+    nextBilling: ''
+  });
+  const [newUser, setNewUser] = useState({ name: '', email: '', company: '' });
+  const [newMonth, setNewMonth] = useState({ name: '', year: new Date().getFullYear() });
+  const [newBill, setNewBill] = useState({ name: '', amount: '', dueDate: '', category: 'Other', isSubscription: false });
+  const [newPaycheck, setNewPaycheck] = useState({ date: '', amount: '', source: 'Equitas Health', label: '' });
+
+  const currentMonth = data.months[data.currentMonthId];
 
   // Save data to localStorage
-  const saveToStorage = (key, data) => {
+  useEffect(() => {
     try {
-      localStorage.setItem(key, JSON.stringify(data));
+      localStorage.setItem('financeHubProData', JSON.stringify(data));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error('Error saving data:', error);
     }
+  }, [data]);
+
+  // Switch to different month
+  const switchMonth = (monthId) => {
+    setData(prev => ({ ...prev, currentMonthId: monthId }));
   };
 
-  // Bills state with localStorage
-  const [bills, setBills] = useState(() => loadFromStorage('financial-workbook-bills', [
-    {
-      id: 1,
-      name: 'Rent',
-      amount: 1200,
-      dueDate: '2025-08-01',
-      isPaid: false,
-      assignedPaycheckId: null
-    },
-    {
-      id: 2,
-      name: 'Electric',
-      amount: 150,
-      dueDate: '2025-08-05',
-      isPaid: false,
-      assignedPaycheckId: null
-    },
-    {
-      id: 3,
-      name: 'Car Insurance',
-      amount: 180,
-      dueDate: '2025-08-10',
-      isPaid: false,
-      assignedPaycheckId: null
-    }
-  ]));
-
-  // Individual paychecks state with localStorage
-  const [paychecks, setPaychecks] = useState(() => loadFromStorage('financial-workbook-paychecks', [
-    {
-      id: 1,
-      date: '2025-08-01',
-      amount: 1500,
-      source: 'Equitas Health - Payroll'
-    },
-    {
-      id: 2,
-      date: '2025-08-15',
-      amount: 1450,
-      source: 'Equitas Health - Payroll'
-    }
-  ]));
-
-  // Save bills to localStorage whenever bills change
-  useEffect(() => {
-    saveToStorage('financial-workbook-bills', bills);
-  }, [bills]);
-
-  // Save paychecks to localStorage whenever paychecks change
-  useEffect(() => {
-    saveToStorage('financial-workbook-paychecks', paychecks);
-  }, [paychecks]);
-
-  // Data management functions
-  const exportData = () => {
-    const data = {
-      bills,
-      paychecks,
-      exportDate: new Date().toISOString()
+  // Create new month
+  const createNewMonth = () => {
+    if (!newMonth.name) return;
+    
+    const monthId = `${newMonth.name.toLowerCase()}-${newMonth.year}`;
+    const month = {
+      id: monthId,
+      name: newMonth.name,
+      year: parseInt(newMonth.year),
+      bills: [],
+      paychecks: []
     };
-    const dataStr = JSON.stringify(data, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `financial-workbook-backup-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    
+    setData(prev => ({
+      ...prev,
+      months: { ...prev.months, [monthId]: month },
+      currentMonthId: monthId
+    }));
+    
+    setNewMonth({ name: '', year: new Date().getFullYear() });
+    setShowNewMonthForm(false);
   };
 
-  const importData = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const data = JSON.parse(e.target.result);
-          if (data.bills && data.paychecks) {
-            setBills(data.bills);
-            setPaychecks(data.paychecks);
-            alert('Data imported successfully!');
-          } else {
-            alert('Invalid file format!');
+  // Copy previous month's recurring bills
+  const copyFromPreviousMonth = () => {
+    const monthIds = Object.keys(data.months);
+    const currentIndex = monthIds.indexOf(data.currentMonthId);
+    if (currentIndex > 0) {
+      const previousMonth = data.months[monthIds[currentIndex - 1]];
+      const recurringBills = previousMonth.bills.map(bill => ({
+        ...bill,
+        id: Date.now() + Math.random(),
+        isPaid: false,
+        assignedPaycheck: null
+      }));
+      
+      setData(prev => ({
+        ...prev,
+        months: {
+          ...prev.months,
+          [data.currentMonthId]: {
+            ...currentMonth,
+            bills: [...currentMonth.bills, ...recurringBills]
           }
-        } catch (error) {
-          alert('Error importing data!');
         }
-      };
-      reader.readAsText(file);
+      }));
     }
   };
-
-  const resetAllData = () => {
-    if (window.confirm('Are you sure you want to reset all data? This cannot be undone!')) {
-      localStorage.removeItem('financial-workbook-bills');
-      localStorage.removeItem('financial-workbook-paychecks');
-      setBills([]);
-      setPaychecks([]);
-      alert('All data has been reset!');
-    }
-  };
-  const [activeView, setActiveView] = useState('overview');
-  const [newBill, setNewBill] = useState({ name: '', amount: '', dueDate: '' });
-  const [newPaycheck, setNewPaycheck] = useState({ date: '', amount: '', source: '' });
-
-  // Calculate totals
-  const totalBills = bills.reduce((sum, bill) => sum + bill.amount, 0);
-  const totalIncome = paychecks.reduce((sum, paycheck) => sum + paycheck.amount, 0);
-  const paidBills = bills.filter(bill => bill.isPaid);
-  const unpaidBills = bills.filter(bill => !bill.isPaid);
-  const totalPaid = paidBills.reduce((sum, bill) => sum + bill.amount, 0);
-  const totalUnpaid = unpaidBills.reduce((sum, bill) => sum + bill.amount, 0);
 
   // Add new bill
   const addBill = () => {
-    if (newBill.name && newBill.amount && newBill.dueDate) {
-      setBills([...bills, {
-        id: Date.now(),
-        name: newBill.name,
-        amount: parseFloat(newBill.amount),
-        dueDate: newBill.dueDate,
-        isPaid: false,
-        assignedPaycheckId: null
-      }]);
-      setNewBill({ name: '', amount: '', dueDate: '' });
-    }
+    if (!newBill.name || !newBill.amount) return;
+    
+    const bill = {
+      id: Date.now(),
+      name: newBill.name,
+      amount: parseFloat(newBill.amount),
+      dueDate: parseInt(newBill.dueDate) || 1,
+      category: newBill.category,
+      assignedPaycheck: null,
+      isPaid: false,
+      isSubscription: newBill.isSubscription
+    };
+    
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: [...currentMonth.bills, bill]
+        }
+      }
+    }));
+    
+    setNewBill({ name: '', amount: '', dueDate: '', category: 'Other', isSubscription: false });
   };
 
   // Add new paycheck
   const addPaycheck = () => {
-    if (newPaycheck.date && newPaycheck.amount && newPaycheck.source) {
-      setPaychecks([...paychecks, {
-        id: Date.now(),
-        date: newPaycheck.date,
-        amount: parseFloat(newPaycheck.amount),
-        source: newPaycheck.source
-      }]);
-      setNewPaycheck({ date: '', amount: '', source: '' });
-    }
+    if (!newPaycheck.date || !newPaycheck.amount) return;
+    
+    const paycheck = {
+      id: Date.now(),
+      date: newPaycheck.date,
+      amount: parseFloat(newPaycheck.amount),
+      source: newPaycheck.source,
+      label: newPaycheck.label || `Paycheck ${currentMonth.paychecks.length + 1}`
+    };
+    
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          paychecks: [...currentMonth.paychecks, paycheck]
+        }
+      }
+    }));
+    
+    setNewPaycheck({ date: '', amount: '', source: 'Equitas Health', label: '' });
   };
 
-  // Toggle bill payment status
-  const toggleBillPayment = (billId) => {
-    setBills(bills.map(bill => 
-      bill.id === billId 
-        ? { ...bill, isPaid: !bill.isPaid }
-        : bill
-    ));
+  // Update bill
+  const updateBill = (billId, updates) => {
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: currentMonth.bills.map(bill => 
+            bill.id === billId ? { ...bill, ...updates } : bill
+          )
+        }
+      }
+    }));
   };
 
-  // Assign bill to paycheck
-  const assignBillToPaycheck = (billId, paycheckId) => {
-    setBills(bills.map(bill => 
-      bill.id === billId 
-        ? { ...bill, assignedPaycheckId: paycheckId ? parseInt(paycheckId) : null }
-        : bill
-    ));
+  // Update paycheck
+  const updatePaycheck = (paycheckId, updates) => {
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          paychecks: currentMonth.paychecks.map(paycheck => 
+            paycheck.id === paycheckId ? { ...paycheck, ...updates } : paycheck
+          )
+        }
+      }
+    }));
   };
 
   // Delete bill
   const deleteBill = (billId) => {
-    setBills(bills.filter(bill => bill.id !== billId));
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: currentMonth.bills.filter(bill => bill.id !== billId)
+        }
+      }
+    }));
   };
 
   // Delete paycheck
   const deletePaycheck = (paycheckId) => {
-    setPaychecks(paychecks.filter(paycheck => paycheck.id !== paycheckId));
-    setBills(bills.map(bill => 
-      bill.assignedPaycheckId === paycheckId 
-        ? { ...bill, assignedPaycheckId: null }
-        : bill
-    ));
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          paychecks: currentMonth.paychecks.filter(paycheck => paycheck.id !== paycheckId),
+          bills: currentMonth.bills.map(bill => 
+            bill.assignedPaycheck === paycheckId 
+              ? { ...bill, assignedPaycheck: null }
+              : bill
+          )
+        }
+      }
+    }));
   };
 
-  // Calculate paycheck remaining amounts
-  const getPaycheckDetails = (paycheck) => {
-    const assignedBills = bills.filter(bill => bill.assignedPaycheckId === paycheck.id);
-    const totalAssigned = assignedBills.reduce((sum, bill) => sum + bill.amount, 0);
-    const remaining = paycheck.amount - totalAssigned;
-    return { assignedBills, totalAssigned, remaining };
+  // Start editing
+  const startEdit = (item, type) => {
+    setEditingItem({ ...item });
+    setEditType(type);
   };
 
-  const formatCurrency = (amount) => `$${amount.toFixed(2)}`;
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
+  // Save edit
+  const saveEdit = () => {
+    if (editType === 'bill') {
+      updateBill(editingItem.id, editingItem);
+    } else if (editType === 'paycheck') {
+      updatePaycheck(editingItem.id, editingItem);
+    }
+    setEditingItem(null);
+    setEditType(null);
+  };
 
-  // Beautiful inline styles
+  // Cancel edit
+  const cancelEdit = () => {
+    setEditingItem(null);
+    setEditType(null);
+  };
+
+  // Assign bill to paycheck
+  const assignBillToPaycheck = (billId, paycheckId) => {
+    updateBill(billId, { assignedPaycheck: paycheckId });
+  };
+
+  // Get bills by paycheck
+  const getBillsByPaycheck = (paycheckId) => {
+    return currentMonth.bills.filter(bill => bill.assignedPaycheck === paycheckId);
+  };
+
+  // Get unassigned bills
+  const getUnassignedBills = () => {
+    return currentMonth.bills.filter(bill => bill.assignedPaycheck === null);
+  };
+
+  // Calculate totals
+  const getPaycheckTotal = (paycheckId) => {
+    return getBillsByPaycheck(paycheckId).reduce((sum, bill) => sum + bill.amount, 0);
+  };
+
+  const getPaycheckRemaining = (paycheckId) => {
+    const paycheck = currentMonth.paychecks.find(p => p.id === paycheckId);
+    return paycheck ? paycheck.amount - getPaycheckTotal(paycheckId) : 0;
+  };
+
+  const getTotalIncome = () => {
+    return currentMonth.paychecks.reduce((sum, paycheck) => sum + paycheck.amount, 0);
+  };
+
+  const getTotalExpenses = () => {
+    return currentMonth.bills.reduce((sum, bill) => sum + bill.amount, 0);
+  };
+
+  // Get historical data
+  const getHistoricalData = () => {
+    return Object.values(data.months).map(month => ({
+      month: `${month.name} ${month.year}`,
+      income: month.paychecks.reduce((sum, p) => sum + p.amount, 0),
+      expenses: month.bills.reduce((sum, b) => sum + b.amount, 0),
+      remaining: month.paychecks.reduce((sum, p) => sum + p.amount, 0) - month.bills.reduce((sum, b) => sum + b.amount, 0)
+    }));
+  };
+
+  // Subscription Management Functions
+  const addNewSubscription = () => {
+    if (!newSubscription.name || !newSubscription.amount || !newSubscription.provider) return;
+    
+    const subscription = {
+      id: `sub-${Date.now()}`,
+      name: newSubscription.name,
+      amount: parseFloat(newSubscription.amount),
+      billingCycle: newSubscription.billingCycle,
+      nextBilling: newSubscription.nextBilling || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      category: newSubscription.category,
+      status: 'active',
+      provider: newSubscription.provider,
+      cancellationUrl: null,
+      description: newSubscription.description || 'Custom subscription',
+      connectedAccount: 'Manual Entry',
+      lastCharged: new Date().toISOString().split('T')[0],
+      autoRenew: true,
+      trialEnds: null,
+      yearlyDiscount: 0
+    };
+    
+    setData(prev => ({
+      ...prev,
+      subscriptions: [...prev.subscriptions, subscription]
+    }));
+    
+    setNewSubscription({ 
+      name: '', 
+      amount: '', 
+      provider: '', 
+      description: '', 
+      billingCycle: 'monthly',
+      category: 'Entertainment',
+      nextBilling: ''
+    });
+    setShowAddSubscriptionModal(false);
+  };
+
+  const updateSubscriptionStatus = (subscriptionId, status) => {
+    setData(prev => ({
+      ...prev,
+      subscriptions: prev.subscriptions.map(sub =>
+        sub.id === subscriptionId ? { ...sub, status } : sub
+      )
+    }));
+  };
+
+  const cancelSubscription = async (subscription) => {
+    console.log(`Cancelling subscription: ${subscription.name}`);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    updateSubscriptionStatus(subscription.id, 'cancelled');
+    setShowCancelModal(null);
+  };
+
+  const pauseSubscription = (subscriptionId) => {
+    updateSubscriptionStatus(subscriptionId, 'paused');
+  };
+
+  const resumeSubscription = (subscriptionId) => {
+    updateSubscriptionStatus(subscriptionId, 'active');
+  };
+
+  // Convert subscription to bill
+  const addSubscriptionToBudget = (subscription) => {
+    const bill = {
+      id: Date.now(),
+      name: subscription.name,
+      amount: subscription.amount,
+      dueDate: new Date(subscription.nextBilling).getDate(),
+      category: subscription.category,
+      assignedPaycheck: null,
+      isPaid: false,
+      isSubscription: true,
+      subscriptionId: subscription.id
+    };
+    
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: [...currentMonth.bills, bill]
+        }
+      }
+    }));
+  };
+
+  // Calculate subscription totals
+  const getActiveSubscriptionsTotal = () => {
+    return data.subscriptions
+      .filter(sub => sub.status === 'active')
+      .reduce((sum, sub) => sum + sub.amount, 0);
+  };
+
+  const getYearlySubscriptionSavings = () => {
+    return data.subscriptions
+      .filter(sub => sub.status === 'active' && sub.yearlyDiscount > 0)
+      .reduce((sum, sub) => sum + sub.yearlyDiscount, 0);
+  };
+
+  // Connected Accounts Management
+  const addConnectedAccount = () => {
+    if (!newAccount.name || !newAccount.provider || !newAccount.last4) return;
+    
+    const account = {
+      id: `acc-${Date.now()}`,
+      type: newAccount.type,
+      name: newAccount.name,
+      last4: newAccount.last4,
+      provider: newAccount.provider,
+      status: 'connected',
+      connectedAt: new Date().toISOString().split('T')[0]
+    };
+    
+    setData(prev => ({
+      ...prev,
+      connectedAccounts: [...prev.connectedAccounts, account]
+    }));
+    
+    setNewAccount({ name: '', type: 'checking', provider: '', last4: '' });
+    setShowAddAccountModal(false);
+  };
+
+  const startEditAccount = (account) => {
+    setEditingAccount({ ...account });
+  };
+
+  const saveAccountEdit = () => {
+    setData(prev => ({
+      ...prev,
+      connectedAccounts: prev.connectedAccounts.map(account =>
+        account.id === editingAccount.id ? editingAccount : account
+      )
+    }));
+    setEditingAccount(null);
+  };
+
+  const deleteConnectedAccount = (accountId) => {
+    setData(prev => ({
+      ...prev,
+      connectedAccounts: prev.connectedAccounts.filter(account => account.id !== accountId)
+    }));
+  };
+
+  // User Management Functions
+  const updateUser = (updates) => {
+    setData(prev => ({
+      ...prev,
+      user: { ...prev.user, ...updates }
+    }));
+  };
+
+  const startEditUser = () => {
+    setEditingUser({ ...data.user });
+  };
+
+  const saveUserEdit = () => {
+    updateUser(editingUser);
+    setEditingUser(null);
+  };
+
+  const cancelUserEdit = () => {
+    setEditingUser(null);
+  };
+
+  const addNewUser = () => {
+    if (!newUser.name || !newUser.email) return;
+    
+    const userId = `user-${Date.now()}`;
+    const userData = {
+      id: userId,
+      name: newUser.name,
+      email: newUser.email,
+      company: newUser.company || 'N/A',
+      createdAt: new Date().toISOString().split('T')[0],
+      settings: {
+        notifications: true,
+        darkMode: false,
+        currency: 'USD'
+      }
+    };
+    
+    // Create new user data structure
+    const newUserData = {
+      user: userData,
+      currentMonthId: 'current-month',
+      months: {
+        'current-month': {
+          id: 'current-month',
+          name: new Date().toLocaleDateString('en-US', { month: 'long' }),
+          year: new Date().getFullYear(),
+          bills: [],
+          paychecks: []
+        }
+      },
+      subscriptions: [],
+      connectedAccounts: []
+    };
+    
+    // In a real app, you'd save this to a database with the user ID
+    // For now, we'll just switch to this new user
+    setData(newUserData);
+    setNewUser({ name: '', email: '', company: '' });
+    setShowAddUserModal(false);
+    setShowUserManagement(false);
+  };
+
+  const deleteCurrentUser = () => {
+    // In a real app, you'd delete from database and redirect to login
+    // For demo purposes, we'll create a fresh user
+    const freshUserData = {
+      user: {
+        id: 'user-demo',
+        name: 'Demo User',
+        email: 'demo@example.com',
+        company: 'Demo Company',
+        createdAt: new Date().toISOString().split('T')[0],
+        settings: {
+          notifications: true,
+          darkMode: false,
+          currency: 'USD'
+        }
+      },
+      currentMonthId: 'demo-month',
+      months: {
+        'demo-month': {
+          id: 'demo-month',
+          name: new Date().toLocaleDateString('en-US', { month: 'long' }),
+          year: new Date().getFullYear(),
+          bills: [],
+          paychecks: []
+        }
+      },
+      subscriptions: [],
+      connectedAccounts: []
+    };
+    
+    setData(freshUserData);
+    setShowDeleteUserModal(false);
+    setShowUserManagement(false);
+    setShowUserProfile(false);
+  };
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const isDarkMode = data.user.settings.darkMode;
+
   const styles = {
     container: {
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      background: isDarkMode 
+        ? 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)'
+        : 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
       padding: '20px',
-      margin: 0
-    },
-    appContainer: {
-      maxWidth: '1200px',
-      margin: '0 auto',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '32px'
-    },
-    glassCard: {
-      background: 'rgba(255, 255, 255, 0.9)',
-      backdropFilter: 'blur(10px)',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      borderRadius: '20px',
-      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
       transition: 'all 0.3s ease'
     },
     header: {
-      padding: '40px',
-      textAlign: 'center'
+      textAlign: 'center',
+      marginBottom: '30px',
+      color: 'white',
+      position: 'relative'
     },
     title: {
-      fontSize: '3.5rem',
-      fontWeight: '800',
-      background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text',
-      marginBottom: '16px',
-      textShadow: '0 4px 8px rgba(0,0,0,0.1)'
+      fontSize: '32px',
+      fontWeight: '700',
+      marginBottom: '10px',
+      textShadow: '0 2px 4px rgba(0,0,0,0.3)'
     },
-    subtitle: {
-      fontSize: '1.2rem',
-      color: '#6b7280',
-      marginBottom: '40px',
-      fontWeight: '500'
+    userButton: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      color: 'white',
+      border: 'none',
+      padding: '10px 15px',
+      borderRadius: '25px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      backdropFilter: 'blur(10px)'
     },
-    viewToggle: {
+    monthSelector: {
       display: 'flex',
-      gap: '20px',
       justifyContent: 'center',
+      alignItems: 'center',
+      gap: '10px',
+      marginBottom: '20px',
       flexWrap: 'wrap'
     },
-    toggleBtn: {
-      padding: '16px 32px',
+    monthButton: {
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      color: 'white',
       border: 'none',
-      borderRadius: '15px',
+      padding: '8px 16px',
+      borderRadius: '20px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      transition: 'all 0.3s ease',
+      backdropFilter: 'blur(10px)'
+    },
+    monthButtonActive: {
+      backgroundColor: 'rgba(255,255,255,0.9)',
+      color: isDarkMode ? '#4f46e5' : '#4f46e5',
+      transform: 'translateY(-2px)'
+    },
+    newMonthButton: {
+      backgroundColor: '#10b981',
+      color: 'white',
+      border: 'none',
+      padding: '8px 16px',
+      borderRadius: '20px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500'
+    },
+    nav: {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '10px',
+      marginBottom: '30px',
+      flexWrap: 'wrap'
+    },
+    navButton: {
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      color: 'white',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '25px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      transition: 'all 0.3s ease',
+      backdropFilter: 'blur(10px)'
+    },
+    navButtonActive: {
+      backgroundColor: 'rgba(255,255,255,0.9)',
+      color: isDarkMode ? '#4f46e5' : '#4f46e5',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+    },
+    card: {
+      backgroundColor: isDarkMode 
+        ? 'rgba(45, 55, 72, 0.95)' 
+        : 'rgba(255,255,255,0.95)',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '20px',
+      padding: '25px',
+      marginBottom: '20px',
+      boxShadow: isDarkMode 
+        ? '0 8px 32px rgba(0,0,0,0.3)' 
+        : '0 8px 32px rgba(0,0,0,0.1)',
+      backdropFilter: 'blur(10px)',
+      border: isDarkMode 
+        ? '1px solid rgba(255,255,255,0.1)' 
+        : '1px solid rgba(255,255,255,0.2)',
+      transition: 'all 0.3s ease'
+    },
+    modal: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000
+    },
+    modalContent: {
+      backgroundColor: isDarkMode ? '#2d3748' : 'white',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '16px',
+      padding: '30px',
+      maxWidth: '500px',
+      width: '90%',
+      maxHeight: '80vh',
+      overflowY: 'auto',
+      transition: 'all 0.3s ease'
+    },
+    modalTitle: {
+      fontSize: '24px',
       fontWeight: '600',
-      fontSize: '1.1rem',
+      marginBottom: '20px',
+      color: isDarkMode ? '#f7fafc' : '#2c3e50'
+    },
+    formSection: {
+      marginBottom: '30px'
+    },
+    formTitle: {
+      fontSize: '20px',
+      fontWeight: '600',
+      marginBottom: '15px',
+      color: '#2c3e50'
+    },
+    formGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '15px',
+      marginBottom: '15px'
+    },
+    input: {
+      padding: '12px 15px',
+      border: isDarkMode ? '2px solid #4a5568' : '2px solid #e0e0e0',
+      backgroundColor: isDarkMode ? '#1a202c' : 'white',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '8px',
+      fontSize: '14px',
+      transition: 'border-color 0.3s ease',
+      outline: 'none'
+    },
+    inputFocus: {
+      borderColor: '#4f46e5'
+    },
+    select: {
+      padding: '12px 15px',
+      border: isDarkMode ? '2px solid #4a5568' : '2px solid #e0e0e0',
+      backgroundColor: isDarkMode ? '#1a202c' : 'white',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '8px',
+      fontSize: '14px',
+      cursor: 'pointer'
+    },
+    button: {
+      backgroundColor: '#4f46e5',
+      color: 'white',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '8px',
+      fontSize: '14px',
+      fontWeight: '500',
       cursor: 'pointer',
       transition: 'all 0.3s ease',
-      background: 'rgba(255, 255, 255, 0.8)',
-      color: '#374151',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
-      transform: 'translateY(0px)'
+      margin: '5px'
     },
-    toggleBtnHover: {
-      transform: 'translateY(-3px)',
-      boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)'
+    buttonSecondary: {
+      backgroundColor: isDarkMode ? '#4a5568' : '#95a5a6',
+      color: 'white'
     },
-    toggleBtnActive: {
-      background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+    buttonDanger: {
+      backgroundColor: '#ef4444',
+      color: 'white'
+    },
+    buttonSuccess: {
+      backgroundColor: '#10b981',
+      color: 'white'
+    },
+    buttonWarning: {
+      backgroundColor: '#f59e0b',
+      color: 'white'
+    },
+    editButton: {
+      backgroundColor: '#0ea5e9',
       color: 'white',
-      transform: 'translateY(-3px)',
-      boxShadow: '0 12px 30px rgba(59, 130, 246, 0.4)'
+      border: 'none',
+      padding: '6px 12px',
+      borderRadius: '6px',
+      fontSize: '12px',
+      cursor: 'pointer',
+      marginLeft: '5px'
     },
-    toggleBtnActivePaychecks: {
-      background: 'linear-gradient(135deg, #10b981, #059669)',
+    deleteButton: {
+      backgroundColor: '#ef4444',
       color: 'white',
-      transform: 'translateY(-3px)',
-      boxShadow: '0 12px 30px rgba(16, 185, 129, 0.4)'
+      border: 'none',
+      padding: '6px 12px',
+      borderRadius: '6px',
+      fontSize: '12px',
+      cursor: 'pointer',
+      marginLeft: '5px'
     },
     statsGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-      gap: '25px'
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '20px',
+      marginBottom: '30px'
     },
     statCard: {
-      padding: '30px',
-      position: 'relative',
-      overflow: 'hidden',
-      cursor: 'pointer',
-      transform: 'translateY(0px)',
-      transition: 'all 0.3s ease'
+      background: isDarkMode 
+        ? 'linear-gradient(135deg, #4c51bf 0%, #065f46 100%)'
+        : 'linear-gradient(135deg, #4f46e5 0%, #10b981 100%)',
+      color: 'white',
+      borderRadius: '16px',
+      padding: '20px',
+      textAlign: 'center',
+      boxShadow: isDarkMode 
+        ? '0 4px 20px rgba(79, 70, 229, 0.2)'
+        : '0 4px 20px rgba(79, 70, 229, 0.3)',
+      transition: 'transform 0.3s ease',
+      cursor: 'pointer'
     },
     statCardHover: {
-      transform: 'translateY(-8px)',
-      boxShadow: '0 25px 50px rgba(0, 0, 0, 0.2)'
-    },
-    statContent: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '20px'
-    },
-    statIcon: {
-      width: '70px',
-      height: '70px',
-      borderRadius: '16px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
-      flexShrink: 0,
-      boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
-    },
-    statIconIncome: {
-      background: 'linear-gradient(135deg, #10b981, #34d399)'
-    },
-    statIconBills: {
-      background: 'linear-gradient(135deg, #ef4444, #f87171)'
-    },
-    statIconUnpaid: {
-      background: 'linear-gradient(135deg, #f59e0b, #fbbf24)'
-    },
-    statIconRemaining: {
-      background: 'linear-gradient(135deg, #3b82f6, #60a5fa)'
-    },
-    statInfo: {
-      flex: 1
-    },
-    statLabel: {
-      fontSize: '0.9rem',
-      color: '#6b7280',
-      fontWeight: '500',
-      marginBottom: '8px'
+      transform: 'translateY(-5px)'
     },
     statValue: {
-      fontSize: '2.2rem',
+      fontSize: '24px',
       fontWeight: '700',
-      color: '#1f2937'
+      marginBottom: '5px'
     },
-    sectionCard: {
-      padding: '40px'
+    statLabel: {
+      fontSize: '14px',
+      opacity: '0.9'
     },
-    sectionTitle: {
-      fontSize: '1.8rem',
-      fontWeight: '700',
-      color: '#1f2937',
-      marginBottom: '30px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px'
-    },
-    addForm: {
+    paycheckGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-      gap: '20px',
-      padding: '30px',
-      background: 'rgba(248, 250, 252, 0.8)',
-      borderRadius: '16px',
-      marginBottom: '30px',
-      border: '1px solid rgba(226, 232, 240, 0.5)'
-    },
-    formInput: {
-      padding: '14px 18px',
-      border: '2px solid #e5e7eb',
-      borderRadius: '12px',
-      fontSize: '1rem',
-      fontWeight: '500',
-      background: 'white',
-      transition: 'all 0.3s ease',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-    },
-    formInputFocus: {
-      borderColor: '#3b82f6',
-      boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 8px rgba(0,0,0,0.1)'
-    },
-    btn: {
-      padding: '14px 24px',
-      border: 'none',
-      borderRadius: '12px',
-      fontWeight: '600',
-      fontSize: '1rem',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '8px',
-      boxShadow: '0 6px 12px rgba(0, 0, 0, 0.1)',
-      transform: 'translateY(0px)'
-    },
-    btnHover: {
-      transform: 'translateY(-2px)',
-      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.15)'
-    },
-    btnPrimary: {
-      background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-      color: 'white'
-    },
-    btnSuccess: {
-      background: 'linear-gradient(135deg, #10b981, #059669)',
-      color: 'white'
-    },
-    btnDanger: {
-      background: 'rgba(239, 68, 68, 0.1)',
-      color: '#ef4444',
-      padding: '10px'
-    },
-    billsList: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '20px'
-    },
-    billItem: {
-      padding: '25px',
-      borderRadius: '16px',
-      transition: 'all 0.3s ease',
-      borderLeft: '5px solid transparent',
-      background: 'rgba(255, 255, 255, 0.9)',
-      backdropFilter: 'blur(10px)',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.08)',
-      cursor: 'pointer',
-      transform: 'translateX(0px)'
-    },
-    billItemHover: {
-      transform: 'translateX(8px)',
-      boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)'
-    },
-    billItemPaid: {
-      background: 'rgba(236, 253, 245, 0.9)',
-      borderLeftColor: '#10b981'
-    },
-    billItemUnpaid: {
-      background: 'rgba(255, 251, 235, 0.9)',
-      borderLeftColor: '#f59e0b'
-    },
-    billContent: {
-      display: 'flex',
-      alignItems: 'center',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
       gap: '25px',
-      flexWrap: 'wrap'
-    },
-    billInfo: {
-      flex: 1,
-      minWidth: '200px'
-    },
-    billName: {
-      fontSize: '1.2rem',
-      fontWeight: '600',
-      color: '#1f2937',
-      marginBottom: '6px'
-    },
-    billDue: {
-      fontSize: '0.9rem',
-      color: '#6b7280',
-      fontWeight: '500'
-    },
-    billAmount: {
-      fontSize: '1.4rem',
-      fontWeight: '700',
-      color: '#1f2937',
-      margin: '0 20px'
-    },
-    billActions: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '15px',
-      flexWrap: 'wrap'
-    },
-    statusBtn: {
-      padding: '10px 20px',
-      border: 'none',
-      borderRadius: '25px',
-      fontWeight: '600',
-      fontSize: '0.9rem',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-    },
-    statusBtnPaid: {
-      background: 'linear-gradient(135deg, #10b981, #34d399)',
-      color: 'white'
-    },
-    statusBtnUnpaid: {
-      background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
-      color: 'white'
-    },
-    paychecksGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
-      gap: '30px'
+      marginBottom: '30px'
     },
     paycheckCard: {
-      padding: '30px',
+      backgroundColor: isDarkMode 
+        ? 'rgba(45, 55, 72, 0.95)'
+        : 'rgba(255,255,255,0.95)',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '16px',
+      padding: '20px',
+      boxShadow: isDarkMode
+        ? '0 6px 25px rgba(0,0,0,0.3)'
+        : '0 6px 25px rgba(0,0,0,0.1)',
+      border: isDarkMode
+        ? '1px solid rgba(255,255,255,0.1)'
+        : '1px solid rgba(255,255,255,0.3)',
       position: 'relative',
       overflow: 'hidden',
-      cursor: 'pointer',
-      transform: 'translateY(0px)',
       transition: 'all 0.3s ease'
     },
-    paycheckCardHover: {
-      transform: 'translateY(-8px)',
-      boxShadow: '0 25px 50px rgba(0, 0, 0, 0.2)'
-    },
     paycheckHeader: {
+      borderBottom: isDarkMode ? '2px solid #4f46e5' : '2px solid #4f46e5',
+      paddingBottom: '15px',
+      marginBottom: '15px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    },
+    paycheckTitle: {
+      fontSize: '18px',
+      fontWeight: '600',
+      color: isDarkMode ? '#f7fafc' : '#2c3e50',
+      marginBottom: '5px'
+    },
+    paycheckAmount: {
+      fontSize: '24px',
+      fontWeight: '700',
+      color: '#10b981'
+    },
+    billsList: {
+      maxHeight: '300px',
+      overflowY: 'auto'
+    },
+    billItem: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '10px 0',
+      borderBottom: isDarkMode ? '1px solid #4a5568' : '1px solid #eee',
+      transition: 'all 0.3s ease'
+    },
+    billName: {
+      fontWeight: '500',
+      color: isDarkMode ? '#e2e8f0' : '#2c3e50',
+      flex: 1
+    },
+    billAmount: {
+      fontWeight: '600',
+      color: '#ef4444'
+    },
+    remainingAmount: {
+      textAlign: 'center',
+      marginTop: '15px',
+      padding: '10px',
+      borderRadius: '8px',
+      fontWeight: '600'
+    },
+    positiveRemaining: {
+      backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.2)' : '#d5f4e6',
+      color: '#10b981'
+    },
+    negativeRemaining: {
+      backgroundColor: isDarkMode ? 'rgba(239, 68, 68, 0.2)' : '#fadbd8',
+      color: '#ef4444'
+    },
+    unassignedSection: {
+      backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.1)' : '#fff3cd',
+      border: isDarkMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #ffeaa7',
+      borderRadius: '12px',
+      padding: '20px',
+      marginTop: '20px'
+    },
+    unassignedTitle: {
+      color: isDarkMode ? '#f59e0b' : '#856404',
+      fontSize: '16px',
+      fontWeight: '600',
+      marginBottom: '15px'
+    },
+    subscriptionGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+      gap: '20px',
+      marginBottom: '30px'
+    },
+    subscriptionCard: {
+      backgroundColor: isDarkMode ? '#2d3748' : 'white',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '16px',
+      padding: '20px',
+      boxShadow: isDarkMode
+        ? '0 4px 15px rgba(0,0,0,0.3)'
+        : '0 4px 15px rgba(0,0,0,0.1)',
+      border: isDarkMode ? '1px solid #4a5568' : '1px solid #e0e0e0',
+      position: 'relative',
+      overflow: 'hidden',
+      transition: 'all 0.3s ease'
+    },
+    subscriptionHeader: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
-      marginBottom: '25px',
-      gap: '20px'
+      marginBottom: '15px'
     },
-    paycheckAmount: {
-      fontSize: '2.5rem',
-      fontWeight: '700',
-      background: 'linear-gradient(135deg, #10b981, #34d399)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text'
+    subscriptionName: {
+      fontSize: '18px',
+      fontWeight: '600',
+      color: isDarkMode ? '#f7fafc' : '#2c3e50',
+      marginBottom: '5px'
+    },
+    statusBadge: {
+      padding: '4px 12px',
+      borderRadius: '20px',
+      fontSize: '12px',
+      fontWeight: '500',
+      textTransform: 'uppercase'
+    },
+    statusActive: {
+      backgroundColor: '#d5f4e6',
+      color: '#27ae60'
+    },
+    statusTrial: {
+      backgroundColor: '#fff3cd',
+      color: '#856404'
+    },
+    statusPaused: {
+      backgroundColor: '#f8d7da',
+      color: '#721c24'
+    },
+    statusCancelled: {
+      backgroundColor: '#e2e3e5',
+      color: '#383d41'
+    },
+    subscriptionDetails: {
+      fontSize: '14px',
+      color: '#666',
+      marginBottom: '15px'
+    },
+    buttonGroup: {
+      display: 'flex',
+      gap: '8px',
+      flexWrap: 'wrap'
+    },
+    historicalChart: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '15px',
+      marginTop: '20px'
+    },
+    historicalCard: {
+      backgroundColor: isDarkMode ? '#2d3748' : 'white',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '12px',
+      padding: '15px',
+      textAlign: 'center',
+      boxShadow: isDarkMode
+        ? '0 2px 8px rgba(0,0,0,0.3)'
+        : '0 2px 8px rgba(0,0,0,0.1)',
+      transition: 'all 0.3s ease'
+    },
+    savingsAlert: {
+      backgroundColor: isDarkMode ? 'rgba(6, 182, 212, 0.1)' : '#d1ecf1',
+      border: isDarkMode ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid #bee5eb',
+      borderRadius: '8px',
+      padding: '15px',
+      marginBottom: '20px',
+      color: isDarkMode ? '#67e8f9' : '#0c5460'
+    },
+    accountCard: {
+      backgroundColor: isDarkMode ? '#1a202c' : '#f8f9fa',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      padding: '15px',
+      borderRadius: '8px',
+      marginBottom: '10px',
+      border: isDarkMode ? '1px solid #4a5568' : '1px solid #e0e0e0',
+      transition: 'all 0.3s ease'
     }
   };
 
-  return (
-    <div style={styles.container}>
-      <div style={styles.appContainer}>
-        {/* Header */}
-        <div style={{...styles.glassCard, ...styles.header}}>
-          <h1 style={styles.title}>💰 Financial Workbook</h1>
-          <p style={styles.subtitle}>Smart budget planning for your financial success</p>
+  const renderOverview = () => (
+    <div>
+      {/* Stats Cards */}
+      <div style={styles.statsGrid}>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getTotalIncome())}</div>
+          <div style={styles.statLabel}>Total Income</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getTotalExpenses())}</div>
+          <div style={styles.statLabel}>Total Expenses</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getTotalIncome() - getTotalExpenses())}</div>
+          <div style={styles.statLabel}>Remaining</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{getUnassignedBills().length}</div>
+          <div style={styles.statLabel}>Unassigned Bills</div>
+        </div>
+      </div>
+
+      {/* Quick subscription summary */}
+      <div style={styles.card}>
+        <h3>📱 Subscription Summary</h3>
+        <p>You have <strong>{data.subscriptions.filter(s => s.status === 'active').length} active subscriptions</strong> costing <strong>{formatCurrency(getActiveSubscriptionsTotal())}/month</strong></p>
+        <button 
+          style={styles.button}
+          onClick={() => setActiveView('subscriptions')}
+        >
+          Manage Subscriptions
+        </button>
+      </div>
+
+      {/* Paycheck Cards */}
+      <div style={styles.paycheckGrid}>
+        {currentMonth.paychecks.map(paycheck => {
+          const assignedBills = getBillsByPaycheck(paycheck.id);
+          const remaining = getPaycheckRemaining(paycheck.id);
           
-          {/* Data Management */}
-          <div style={{display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px', flexWrap: 'wrap'}}>
-            <button
-              onClick={exportData}
-              style={{
-                ...styles.btn,
-                background: 'linear-gradient(135deg, #10b981, #059669)',
-                color: 'white',
-                padding: '8px 16px',
-                fontSize: '0.9rem'
-              }}
-            >
-              📥 Export Data
-            </button>
-            <label style={{
-              ...styles.btn,
-              background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-              color: 'white',
-              padding: '8px 16px',
-              fontSize: '0.9rem',
-              cursor: 'pointer'
-            }}>
-              📤 Import Data
-              <input
-                type="file"
-                accept=".json"
-                onChange={importData}
-                style={{display: 'none'}}
-              />
-            </label>
-            <button
-              onClick={resetAllData}
-              style={{
-                ...styles.btn,
-                background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                color: 'white',
-                padding: '8px 16px',
-                fontSize: '0.9rem'
-              }}
-            >
-              🗑️ Reset All
-            </button>
+          return (
+            <div key={paycheck.id} style={styles.paycheckCard}>
+              <div style={styles.paycheckHeader}>
+                <div>
+                  <div style={styles.paycheckTitle}>
+                    {paycheck.label} • {formatDate(paycheck.date)}
+                  </div>
+                  <div style={styles.paycheckAmount}>
+                    {formatCurrency(paycheck.amount)}
+                  </div>
+                </div>
+                <div>
+                  <button 
+                    style={styles.editButton}
+                    onClick={() => startEdit(paycheck, 'paycheck')}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    style={styles.deleteButton}
+                    onClick={() => deletePaycheck(paycheck.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+              
+              <div style={styles.billsList}>
+                {assignedBills.map(bill => (
+                  <div key={bill.id} style={styles.billItem}>
+                    <span style={{...styles.billName, display: 'flex', alignItems: 'center'}}>
+                      {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
+                      {bill.name}
+                    </span>
+                    <span style={styles.billAmount}>{formatCurrency(bill.amount)}</span>
+                    <button 
+                      style={styles.editButton}
+                      onClick={() => startEdit(bill, 'bill')}
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      style={styles.deleteButton}
+                      onClick={() => assignBillToPaycheck(bill.id, null)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                {assignedBills.length === 0 && (
+                  <div style={{textAlign: 'center', color: '#999', padding: '20px'}}>
+                    No bills assigned yet
+                  </div>
+                )}
+              </div>
+              
+              <div style={{
+                ...styles.remainingAmount,
+                ...(remaining >= 0 ? styles.positiveRemaining : styles.negativeRemaining)
+              }}>
+                Remaining: {formatCurrency(remaining)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Unassigned Bills */}
+      {getUnassignedBills().length > 0 && (
+        <div style={styles.unassignedSection}>
+          <div style={styles.unassignedTitle}>
+            📋 Unassigned Bills ({getUnassignedBills().length})
           </div>
-          
-          {/* View Toggle */}
-          <div style={styles.viewToggle}>
-            <button
-              onClick={() => setActiveView('overview')}
-              style={{
-                ...styles.toggleBtn,
-                ...(activeView === 'overview' ? styles.toggleBtnActive : {})
-              }}
-              onMouseEnter={(e) => {
-                if (activeView !== 'overview') {
-                  Object.assign(e.target.style, styles.toggleBtnHover);
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (activeView !== 'overview') {
-                  Object.assign(e.target.style, styles.toggleBtn);
-                }
-              }}
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px'}}>
+            {getUnassignedBills().map(bill => (
+              <div key={bill.id} style={{
+                backgroundColor: 'white',
+                padding: '15px',
+                borderRadius: '8px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}>
+                <div>
+                  <div style={{fontWeight: '500', display: 'flex', alignItems: 'center'}}>
+                    {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
+                    {bill.name}
+                  </div>
+                  <div style={{fontSize: '14px', color: '#666'}}>
+                    Due: {bill.dueDate}{bill.dueDate === 1 ? 'st' : bill.dueDate === 2 ? 'nd' : bill.dueDate === 3 ? 'rd' : 'th'} • {formatCurrency(bill.amount)}
+                  </div>
+                </div>
+                <div>
+                  <select
+                    value=""
+                    onChange={(e) => assignBillToPaycheck(bill.id, parseInt(e.target.value))}
+                    style={styles.select}
+                  >
+                    <option value="">Assign to...</option>
+                    {currentMonth.paychecks.map(paycheck => (
+                      <option key={paycheck.id} value={paycheck.id}>
+                        {paycheck.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button 
+                    style={styles.editButton}
+                    onClick={() => startEdit(bill, 'bill')}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    style={styles.deleteButton}
+                    onClick={() => deleteBill(bill.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSubscriptions = () => (
+    <div>
+      {/* Subscription Stats */}
+      <div style={styles.statsGrid}>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getActiveSubscriptionsTotal())}</div>
+          <div style={styles.statLabel}>Monthly Subscriptions</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getActiveSubscriptionsTotal() * 12)}</div>
+          <div style={styles.statLabel}>Yearly Cost</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{data.subscriptions.filter(s => s.status === 'active').length}</div>
+          <div style={styles.statLabel}>Active Subscriptions</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getYearlySubscriptionSavings())}</div>
+          <div style={styles.statLabel}>Potential Yearly Savings</div>
+        </div>
+      </div>
+
+      {/* Savings Alert */}
+      {getYearlySubscriptionSavings() > 0 && (
+        <div style={styles.savingsAlert}>
+          <strong>💡 Savings Opportunity!</strong> You could save {formatCurrency(getYearlySubscriptionSavings())} per year by switching to annual billing on some subscriptions.
+        </div>
+      )}
+
+      {/* Add Subscription Button */}
+      <div style={{textAlign: 'center', marginBottom: '20px'}}>
+        <button 
+          style={{...styles.button, ...styles.buttonSuccess}}
+          onClick={() => setShowAddSubscriptionModal(true)}
+        >
+          + Add New Subscription
+        </button>
+      </div>
+
+      {/* Subscriptions Grid */}
+      <div style={styles.subscriptionGrid}>
+        {data.subscriptions.map(subscription => (
+          <div key={subscription.id} style={styles.subscriptionCard}>
+            <div style={styles.subscriptionHeader}>
+              <div>
+                <div style={styles.subscriptionName}>
+                  {subscription.name}
+                </div>
+                <div style={styles.paycheckAmount}>
+                  {formatCurrency(subscription.amount)}/mo
+                </div>
+              </div>
+              <div style={{
+                ...styles.statusBadge,
+                ...(subscription.status === 'active' ? styles.statusActive :
+                   subscription.status === 'trial' ? styles.statusTrial :
+                   subscription.status === 'paused' ? styles.statusPaused :
+                   styles.statusCancelled)
+              }}>
+                {subscription.status}
+              </div>
+            </div>
+
+            <div style={styles.subscriptionDetails}>
+              <div><strong>Provider:</strong> {subscription.provider}</div>
+              <div><strong>Description:</strong> {subscription.description}</div>
+              <div><strong>Next Billing:</strong> {formatDate(subscription.nextBilling)}</div>
+              <div><strong>Connected Account:</strong> {subscription.connectedAccount}</div>
+              {subscription.trialEnds && (
+                <div><strong>⏰ Trial Ends:</strong> {formatDate(subscription.trialEnds)}</div>
+              )}
+              {subscription.yearlyDiscount > 0 && (
+                <div style={{color: '#27ae60', fontWeight: '500'}}>
+                  💰 Save {formatCurrency(subscription.yearlyDiscount)}/year with annual billing
+                </div>
+              )}
+            </div>
+
+            <div style={styles.buttonGroup}>
+              {subscription.status === 'active' && (
+                <>
+                  <button 
+                    style={{...styles.button, ...styles.buttonDanger}}
+                    onClick={() => setShowCancelModal(subscription)}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    style={{...styles.button, ...styles.buttonWarning}}
+                    onClick={() => pauseSubscription(subscription.id)}
+                  >
+                    Pause
+                  </button>
+                </>
+              )}
+              
+              {subscription.status === 'paused' && (
+                <button 
+                  style={{...styles.button, ...styles.buttonSuccess}}
+                  onClick={() => resumeSubscription(subscription.id)}
+                >
+                  Resume
+                </button>
+              )}
+
+              {subscription.status === 'trial' && (
+                <button 
+                  style={{...styles.button, ...styles.buttonDanger}}
+                  onClick={() => setShowCancelModal(subscription)}
+                >
+                  Cancel Before Trial Ends
+                </button>
+              )}
+
+              {(subscription.status === 'active' || subscription.status === 'trial') && (
+                <button 
+                  style={styles.button}
+                  onClick={() => addSubscriptionToBudget(subscription)}
+                >
+                  Add to Budget
+                </button>
+              )}
+
+              {subscription.cancellationUrl && (
+                <button 
+                  style={{...styles.button, ...styles.buttonSecondary}}
+                  onClick={() => window.open(subscription.cancellationUrl, '_blank')}
+                >
+                  Manage Online
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderManage = () => (
+    <div>
+      {/* Copy from Previous Month */}
+      {Object.keys(data.months).length > 1 && (
+        <div style={styles.card}>
+          <div style={styles.formTitle}>🔄 Quick Setup</div>
+          <p>Copy recurring bills from your previous month to get started quickly.</p>
+          <button style={styles.button} onClick={copyFromPreviousMonth}>
+            Copy Bills from Previous Month
+          </button>
+        </div>
+      )}
+
+      {/* Add Bill Form */}
+      <div style={styles.card}>
+        <div style={styles.formSection}>
+          <div style={styles.formTitle}>💰 Add New Bill</div>
+          <div style={styles.formGrid}>
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Bill name"
+              value={newBill.name}
+              onChange={(e) => setNewBill({...newBill, name: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="number"
+              step="0.01"
+              placeholder="Amount"
+              value={newBill.amount}
+              onChange={(e) => setNewBill({...newBill, amount: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="number"
+              min="1"
+              max="31"
+              placeholder="Due date (1-31)"
+              value={newBill.dueDate}
+              onChange={(e) => setNewBill({...newBill, dueDate: e.target.value})}
+            />
+            <select
+              style={styles.select}
+              value={newBill.category}
+              onChange={(e) => setNewBill({...newBill, category: e.target.value})}
             >
-              📊 Overview
+              <option value="Housing">Housing</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Transportation">Transportation</option>
+              <option value="Food">Food</option>
+              <option value="Health">Health</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Debt">Debt</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <label style={{display: 'flex', alignItems: 'center', marginBottom: '15px'}}>
+            <input 
+              type="checkbox" 
+              checked={newBill.isSubscription}
+              onChange={(e) => setNewBill({...newBill, isSubscription: e.target.checked})}
+              style={{marginRight: '10px'}}
+            />
+            This is a subscription
+          </label>
+          <button style={styles.button} onClick={addBill}>
+            Add Bill
+          </button>
+        </div>
+      </div>
+
+      {/* Add Paycheck Form */}
+      <div style={styles.card}>
+        <div style={styles.formSection}>
+          <div style={styles.formTitle}>💵 Add New Paycheck</div>
+          <div style={styles.formGrid}>
+            <input
+              style={styles.input}
+              type="date"
+              value={newPaycheck.date}
+              onChange={(e) => setNewPaycheck({...newPaycheck, date: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="number"
+              step="0.01"
+              placeholder="Amount"
+              value={newPaycheck.amount}
+              onChange={(e) => setNewPaycheck({...newPaycheck, amount: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Source (e.g., Equitas Health)"
+              value={newPaycheck.source}
+              onChange={(e) => setNewPaycheck({...newPaycheck, source: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Label (e.g., First Paycheck)"
+              value={newPaycheck.label}
+              onChange={(e) => setNewPaycheck({...newPaycheck, label: e.target.value})}
+            />
+          </div>
+          <button style={styles.button} onClick={addPaycheck}>
+            Add Paycheck
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderHistory = () => {
+    const historicalData = getHistoricalData();
+    
+    return (
+      <div style={styles.card}>
+        <h3>📊 Historical Overview</h3>
+        <div style={styles.historicalChart}>
+          {historicalData.map((month, index) => (
+            <div key={index} style={styles.historicalCard}>
+              <h4 style={{marginBottom: '10px', color: '#2c3e50'}}>{month.month}</h4>
+              <div style={{fontSize: '14px', marginBottom: '5px'}}>
+                <strong>Income:</strong> {formatCurrency(month.income)}
+              </div>
+              <div style={{fontSize: '14px', marginBottom: '5px'}}>
+                <strong>Expenses:</strong> {formatCurrency(month.expenses)}
+              </div>
+              <div style={{
+                fontSize: '16px', 
+                fontWeight: '600',
+                color: month.remaining >= 0 ? '#27ae60' : '#e74c3c'
+              }}>
+                <strong>Remaining:</strong> {formatCurrency(month.remaining)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderUserProfile = () => (
+    <div style={styles.card}>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+        <h3>👤 User Profile</h3>
+        <div>
+          <button 
+            style={styles.button}
+            onClick={() => setShowUserManagement(true)}
+          >
+            ⚙️ Manage Users
+          </button>
+        </div>
+      </div>
+
+      {editingUser ? (
+        <div>
+          <h4>✏️ Edit Profile</h4>
+          <div style={styles.formGrid}>
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Full Name"
+              value={editingUser.name}
+              onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="email"
+              placeholder="Email Address"
+              value={editingUser.email}
+              onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Company (optional)"
+              value={editingUser.company || ''}
+              onChange={(e) => setEditingUser({...editingUser, company: e.target.value})}
+            />
+          </div>
+          <div>
+            <button style={styles.button} onClick={saveUserEdit}>
+              Save Changes
             </button>
-            <button
-              onClick={() => setActiveView('paychecks')}
-              style={{
-                ...styles.toggleBtn,
-                ...(activeView === 'paychecks' ? styles.toggleBtnActivePaychecks : {})
-              }}
-              onMouseEnter={(e) => {
-                if (activeView !== 'paychecks') {
-                  Object.assign(e.target.style, styles.toggleBtnHover);
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (activeView !== 'paychecks') {
-                  Object.assign(e.target.style, styles.toggleBtn);
-                }
-              }}
+            <button 
+              style={{...styles.button, ...styles.buttonSecondary}} 
+              onClick={cancelUserEdit}
             >
-              💰 Paycheck Planning
+              Cancel
             </button>
           </div>
         </div>
-
-        {activeView === 'overview' && (
-          <>
-            {/* Summary Cards */}
-            <div style={styles.statsGrid}>
-              <div style={styles.glassCard}>
-                <div style={styles.statCard}>
-                  <div style={styles.statContent}>
-                    <div style={{...styles.statIcon, ...styles.statIconIncome}}>
-                      <TrendingUp size={28} />
-                    </div>
-                    <div style={styles.statInfo}>
-                      <div style={styles.statLabel}>Total Income</div>
-                      <div style={styles.statValue}>{formatCurrency(totalIncome)}</div>
-                    </div>
-                  </div>
-                </div>
+      ) : (
+        <div>
+          <div style={{marginBottom: '20px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+              <div>
+                <div><strong>Name:</strong> {data.user.name}</div>
+                <div><strong>Email:</strong> {data.user.email}</div>
+                <div><strong>Company:</strong> {data.user.company || 'N/A'}</div>
+                <div><strong>Member Since:</strong> {formatDate(data.user.createdAt)}</div>
               </div>
-              
-              <div style={styles.glassCard}>
-                <div style={styles.statCard}>
-                  <div style={styles.statContent}>
-                    <div style={{...styles.statIcon, ...styles.statIconBills}}>
-                      <AlertCircle size={28} />
-                    </div>
-                    <div style={styles.statInfo}>
-                      <div style={styles.statLabel}>Total Bills</div>
-                      <div style={styles.statValue}>{formatCurrency(totalBills)}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div style={styles.glassCard}>
-                <div style={styles.statCard}>
-                  <div style={styles.statContent}>
-                    <div style={{...styles.statIcon, ...styles.statIconUnpaid}}>
-                      <AlertCircle size={28} />
-                    </div>
-                    <div style={styles.statInfo}>
-                      <div style={styles.statLabel}>Unpaid Bills</div>
-                      <div style={styles.statValue}>{formatCurrency(totalUnpaid)}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div style={styles.glassCard}>
-                <div style={styles.statCard}>
-                  <div style={styles.statContent}>
-                    <div style={{...styles.statIcon, ...styles.statIconRemaining}}>
-                      <DollarSign size={28} />
-                    </div>
-                    <div style={styles.statInfo}>
-                      <div style={styles.statLabel}>Remaining</div>
-                      <div style={styles.statValue}>{formatCurrency(totalIncome - totalBills)}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bills Section */}
-            <div style={{...styles.glassCard, ...styles.sectionCard}}>
-              <h2 style={styles.sectionTitle}>💳 Bills & Expenses</h2>
-              
-              {/* Add New Bill Form */}
-              <div style={styles.addForm}>
-                <input
-                  type="text"
-                  placeholder="Bill name"
-                  value={newBill.name}
-                  onChange={(e) => setNewBill({...newBill, name: e.target.value})}
-                  style={styles.formInput}
-                />
-                <input
-                  type="number"
-                  placeholder="Amount"
-                  value={newBill.amount}
-                  onChange={(e) => setNewBill({...newBill, amount: e.target.value})}
-                  style={styles.formInput}
-                />
-                <input
-                  type="date"
-                  value={newBill.dueDate}
-                  onChange={(e) => setNewBill({...newBill, dueDate: e.target.value})}
-                  style={styles.formInput}
-                />
-                <button
-                  onClick={addBill}
-                  style={{...styles.btn, ...styles.btnPrimary}}
+              <div>
+                <button 
+                  style={styles.editButton}
+                  onClick={startEditUser}
                 >
-                  <Plus size={18} />
-                  <span>Add Bill</span>
+                  Edit Profile
                 </button>
-              </div>
-
-              {/* Bills List */}
-              <div style={styles.billsList}>
-                {bills.map(bill => (
-                  <div key={bill.id} style={{
-                    ...styles.billItem,
-                    ...(bill.isPaid ? styles.billItemPaid : styles.billItemUnpaid)
-                  }}>
-                    <div style={styles.billContent}>
-                      <div style={styles.billInfo}>
-                        <div style={styles.billName}>{bill.name}</div>
-                        <div style={styles.billDue}>Due: {formatDate(bill.dueDate)}</div>
-                      </div>
-                      <div style={styles.billAmount}>{formatCurrency(bill.amount)}</div>
-                      <div style={styles.billActions}>
-                        <select
-                          value={bill.assignedPaycheckId || ''}
-                          onChange={(e) => assignBillToPaycheck(bill.id, e.target.value)}
-                          style={styles.formInput}
-                        >
-                          <option value="">Unassigned</option>
-                          {paychecks.map(paycheck => (
-                            <option key={paycheck.id} value={paycheck.id}>
-                              {formatDate(paycheck.date)} - {paycheck.source}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          onClick={() => toggleBillPayment(bill.id)}
-                          style={{
-                            ...styles.statusBtn,
-                            ...(bill.isPaid ? styles.statusBtnPaid : styles.statusBtnUnpaid)
-                          }}
-                        >
-                          {bill.isPaid ? '✅ Paid' : '⏳ Unpaid'}
-                        </button>
-                        <button
-                          onClick={() => deleteBill(bill.id)}
-                          style={{...styles.btn, ...styles.btnDanger}}
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {activeView === 'paychecks' && (
-          <>
-            {/* Add New Paycheck */}
-            <div style={{...styles.glassCard, ...styles.sectionCard}}>
-              <h2 style={styles.sectionTitle}>➕ Add New Paycheck</h2>
-              <div style={styles.addForm}>
-                <input
-                  type="date"
-                  value={newPaycheck.date}
-                  onChange={(e) => setNewPaycheck({...newPaycheck, date: e.target.value})}
-                  style={styles.formInput}
-                />
-                <input
-                  type="number"
-                  placeholder="Amount"
-                  value={newPaycheck.amount}
-                  onChange={(e) => setNewPaycheck({...newPaycheck, amount: e.target.value})}
-                  style={styles.formInput}
-                />
-                <input
-                  type="text"
-                  placeholder="Source (e.g., Equitas Health)"
-                  value={newPaycheck.source}
-                  onChange={(e) => setNewPaycheck({...newPaycheck, source: e.target.value})}
-                  style={styles.formInput}
-                />
-                <button
-                  onClick={addPaycheck}
-                  style={{...styles.btn, ...styles.btnSuccess}}
+                <button 
+                  style={styles.deleteButton}
+                  onClick={() => setShowDeleteUserModal(true)}
                 >
-                  <Plus size={18} />
-                  <span>Add Paycheck</span>
+                  Delete User
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      
+      <h4>🔗 Connected Accounts</h4>
+      <div style={{marginBottom: '15px'}}>
+        <div style={{
+          backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.1)' : '#fff3cd',
+          border: isDarkMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #ffeaa7',
+          borderRadius: '8px',
+          padding: '15px',
+          marginBottom: '15px',
+          color: isDarkMode ? '#f59e0b' : '#856404'
+        }}>
+          <strong>⚠️ For Demo/Personal Use Only</strong><br />
+          This is for tracking your accounts manually. Never enter real banking credentials in any app unless it's from your actual bank or uses certified services like Plaid.
+        </div>
+        
+        <button 
+          style={{...styles.button, ...styles.buttonSuccess}}
+          onClick={() => setShowAddAccountModal(true)}
+        >
+          + Add Account (Manual)
+        </button>
+      </div>
 
-            {/* Paycheck Cards */}
-            <div style={styles.paychecksGrid}>
-              {paychecks.map(paycheck => {
-                const details = getPaycheckDetails(paycheck);
-                return (
-                  <div key={paycheck.id} style={{...styles.glassCard, ...styles.paycheckCard}}>
-                    <div style={styles.paycheckHeader}>
-                      <div>
-                        <h3 style={{fontSize: '1.4rem', fontWeight: '700', color: '#1f2937', marginBottom: '6px'}}>
-                          {paycheck.source}
-                        </h3>
-                        <p style={{color: '#6b7280', fontWeight: '500', fontSize: '1rem'}}>
-                          {formatDate(paycheck.date)}
-                        </p>
-                      </div>
-                      <div>
-                        <div style={styles.paycheckAmount}>{formatCurrency(paycheck.amount)}</div>
-                        <button
-                          onClick={() => deletePaycheck(paycheck.id)}
-                          style={{...styles.btn, ...styles.btnDanger, marginTop: '10px'}}
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Assigned Bills */}
-                    <div style={{marginBottom: '25px'}}>
-                      <h4 style={{fontSize: '1.1rem', fontWeight: '600', color: '#374151', marginBottom: '15px'}}>
-                        Assigned Bills:
-                      </h4>
-                      {details.assignedBills.length > 0 ? (
-                        details.assignedBills.map(bill => (
-                          <div key={bill.id} style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            padding: '15px 20px',
-                            background: 'rgba(248, 250, 252, 0.8)',
-                            borderRadius: '12px',
-                            marginBottom: '10px',
-                            borderLeft: '4px solid #3b82f6',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                            ...(bill.isPaid ? {opacity: 0.6, textDecoration: 'line-through'} : {})
-                          }}>
-                            <span style={{fontWeight: '500', color: '#374151', fontSize: '1rem'}}>{bill.name}</span>
-                            <span style={{fontWeight: '600', color: '#1f2937', fontSize: '1.1rem'}}>{formatCurrency(bill.amount)}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <p style={{
-                          color: '#9ca3af',
-                          fontStyle: 'italic',
-                          textAlign: 'center',
-                          padding: '25px',
-                          background: 'rgba(249, 250, 251, 0.5)',
-                          borderRadius: '12px',
-                          fontSize: '1rem'
-                        }}>
-                          No bills assigned
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Summary */}
-                    <div style={{borderTop: '2px solid #e5e7eb', paddingTop: '20px'}}>
-                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', fontWeight: '500', fontSize: '1rem'}}>
-                        <span>Paycheck Amount:</span>
-                        <span>{formatCurrency(paycheck.amount)}</span>
-                      </div>
-                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', fontWeight: '500', fontSize: '1rem'}}>
-                        <span>Assigned Bills:</span>
-                        <span style={{color: '#ef4444'}}>-{formatCurrency(details.totalAssigned)}</span>
-                      </div>
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        borderTop: '1px solid #e5e7eb',
-                        paddingTop: '12px',
-                        marginTop: '15px',
-                        fontWeight: '700',
-                        fontSize: '1.2rem'
-                      }}>
-                        <span>Remaining:</span>
-                        <span style={{color: details.remaining >= 0 ? '#10b981' : '#ef4444'}}>
-                          {formatCurrency(details.remaining)}
-                        </span>
-                      </div>
+      <div style={{marginBottom: '20px'}}>
+        {data.connectedAccounts.length > 0 ? (
+          data.connectedAccounts.map(account => (
+            <div key={account.id} style={{
+              ...styles.accountCard,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              {editingAccount && editingAccount.id === account.id ? (
+                <div style={{flex: 1}}>
+                  <div style={styles.formGrid}>
+                    <input
+                      style={styles.input}
+                      type="text"
+                      placeholder="Account name"
+                      value={editingAccount.name}
+                      onChange={(e) => setEditingAccount({...editingAccount, name: e.target.value})}
+                    />
+                    <select
+                      style={styles.select}
+                      value={editingAccount.type}
+                      onChange={(e) => setEditingAccount({...editingAccount, type: e.target.value})}
+                    >
+                      <option value="checking">Checking</option>
+                      <option value="savings">Savings</option>
+                      <option value="credit_card">Credit Card</option>
+                      <option value="investment">Investment</option>
+                    </select>
+                    <input
+                      style={styles.input}
+                      type="text"
+                      placeholder="Bank/Provider"
+                      value={editingAccount.provider}
+                      onChange={(e) => setEditingAccount({...editingAccount, provider: e.target.value})}
+                    />
+                    <input
+                      style={styles.input}
+                      type="text"
+                      placeholder="Last 4 digits"
+                      maxLength="4"
+                      value={editingAccount.last4}
+                      onChange={(e) => setEditingAccount({...editingAccount, last4: e.target.value.replace(/\D/g, '')})}
+                    />
+                  </div>
+                  <div style={{marginTop: '10px'}}>
+                    <button style={styles.button} onClick={saveAccountEdit}>
+                      Save
+                    </button>
+                    <button 
+                      style={{...styles.button, ...styles.buttonSecondary}}
+                      onClick={() => setEditingAccount(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <div><strong>{account.name}</strong> ****{account.last4}</div>
+                    <div style={{fontSize: '14px', opacity: '0.7'}}>
+                      {account.provider} • {account.type.replace('_', ' ')}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-
-            {/* Unassigned Bills */}
-            {bills.filter(bill => !bill.assignedPaycheckId).length > 0 && (
-              <div style={{
-                ...styles.glassCard,
-                ...styles.sectionCard,
-                background: 'rgba(254, 243, 199, 0.9)',
-                borderLeft: '6px solid #f59e0b'
-              }}>
-                <h3 style={{...styles.sectionTitle, color: '#92400e'}}>⚠️ Unassigned Bills</h3>
-                <div style={{display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px'}}>
-                  {bills.filter(bill => !bill.assignedPaycheckId).map(bill => (
-                    <div key={bill.id} style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '20px 25px',
-                      background: 'rgba(254, 252, 232, 0.8)',
-                      borderRadius: '12px',
-                      borderLeft: '5px solid #f59e0b',
-                      boxShadow: '0 4px 8px rgba(0,0,0,0.05)'
+                  <div>
+                    <div style={{
+                      ...styles.statusBadge,
+                      ...styles.statusActive,
+                      marginBottom: '5px'
                     }}>
-                      <div>
-                        <span style={{fontWeight: '600', color: '#92400e', fontSize: '1.1rem'}}>{bill.name}</span>
-                        <br />
-                        <span style={{fontSize: '0.9rem', color: '#a16207'}}>Due: {formatDate(bill.dueDate)}</span>
-                      </div>
-                      <span style={{fontWeight: '700', color: '#92400e', fontSize: '1.2rem'}}>{formatCurrency(bill.amount)}</span>
+                      Manual Entry
                     </div>
-                  ))}
-                </div>
-                <p style={{
-                  color: '#92400e',
-                  background: 'rgba(254, 243, 199, 0.6)',
-                  padding: '15px 20px',
-                  borderRadius: '12px',
-                  borderLeft: '4px solid #f59e0b',
-                  fontSize: '1rem',
-                  fontWeight: '500'
-                }}>
-                  💡 Assign these bills to specific paychecks in the Overview tab for better planning!
-                </p>
-              </div>
-            )}
-          </>
+                    <div>
+                      <button 
+                        style={styles.editButton}
+                        onClick={() => startEditAccount(account)}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        style={styles.deleteButton}
+                        onClick={() => deleteConnectedAccount(account.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          ))
+        ) : (
+          <div style={{textAlign: 'center', color: isDarkMode ? '#a0aec0' : '#666', padding: '20px'}}>
+            No connected accounts yet. Add your accounts manually for tracking.
+          </div>
         )}
       </div>
+
+      <h4>⚙️ Settings</h4>
+      <div>
+        <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
+          <input 
+            type="checkbox" 
+            checked={data.user.settings.notifications} 
+            onChange={(e) => updateUser({
+              settings: { ...data.user.settings, notifications: e.target.checked }
+            })}
+            style={{marginRight: '10px'}} 
+          />
+          Email Notifications
+        </label>
+        <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
+          <input 
+            type="checkbox" 
+            checked={data.user.settings.darkMode} 
+            onChange={(e) => updateUser({
+              settings: { ...data.user.settings, darkMode: e.target.checked }
+            })}
+            style={{marginRight: '10px'}} 
+          />
+          Dark Mode
+        </label>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <button 
+          style={styles.userButton}
+          onClick={() => setShowUserProfile(!showUserProfile)}
+        >
+          👤 {data.user.name}
+        </button>
+        <h1 style={styles.title}>💼 FinanceHub Pro</h1>
+        <p style={{fontSize: '16px', opacity: '0.9'}}>
+          Complete Financial Management • Subscriptions • Budgeting
+        </p>
+      </div>
+
+      {/* Month Selector */}
+      <div style={styles.monthSelector}>
+        {Object.values(data.months)
+          .sort((a, b) => new Date(`${a.year}-${a.name}`) - new Date(`${b.year}-${b.name}`))
+          .map(month => (
+            <button
+              key={month.id}
+              style={{
+                ...styles.monthButton,
+                ...(data.currentMonthId === month.id ? styles.monthButtonActive : {})
+              }}
+              onClick={() => switchMonth(month.id)}
+            >
+              {month.name} {month.year}
+            </button>
+          ))}
+        <button
+          style={styles.newMonthButton}
+          onClick={() => setShowNewMonthForm(true)}
+        >
+          + New Month
+        </button>
+      </div>
+
+      {/* Navigation */}
+      <div style={styles.nav}>
+        <button
+          style={{
+            ...styles.navButton,
+            ...(activeView === 'overview' ? styles.navButtonActive : {})
+          }}
+          onClick={() => setActiveView('overview')}
+        >
+          📊 Overview
+        </button>
+        <button
+          style={{
+            ...styles.navButton,
+            ...(activeView === 'subscriptions' ? styles.navButtonActive : {})
+          }}
+          onClick={() => setActiveView('subscriptions')}
+        >
+          📱 Subscriptions
+        </button>
+        <button
+          style={{
+            ...styles.navButton,
+            ...(activeView === 'manage' ? styles.navButtonActive : {})
+          }}
+          onClick={() => setActiveView('manage')}
+        >
+          ⚙️ Manage
+        </button>
+        <button
+          style={{
+            ...styles.navButton,
+            ...(activeView === 'history' ? styles.navButtonActive : {})
+          }}
+          onClick={() => setActiveView('history')}
+        >
+          📈 History
+        </button>
+      </div>
+
+      {/* Main Content */}
+      {showUserProfile && renderUserProfile()}
+      {activeView === 'overview' && renderOverview()}
+      {activeView === 'subscriptions' && renderSubscriptions()}
+      {activeView === 'manage' && renderManage()}
+      {activeView === 'history' && renderHistory()}
+
+      {/* New Month Modal */}
+      {showNewMonthForm && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>🗓️ Create New Month</div>
+            <div style={styles.formGrid}>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Month name (e.g., September)"
+                value={newMonth.name}
+                onChange={(e) => setNewMonth({...newMonth, name: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="number"
+                placeholder="Year"
+                value={newMonth.year}
+                onChange={(e) => setNewMonth({...newMonth, year: e.target.value})}
+              />
+            </div>
+            <div>
+              <button style={styles.button} onClick={createNewMonth}>
+                Create Month
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}} 
+                onClick={() => setShowNewMonthForm(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingItem && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>
+              ✏️ Edit {editType === 'bill' ? 'Bill' : 'Paycheck'}
+            </div>
+            
+            {editType === 'bill' ? (
+              <div style={styles.formGrid}>
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Bill name"
+                  value={editingItem.name}
+                  onChange={(e) => setEditingItem({...editingItem, name: e.target.value})}
+                />
+                <input
+                  style={styles.input}
+                  type="number"
+                  step="0.01"
+                  placeholder="Amount"
+                  value={editingItem.amount}
+                  onChange={(e) => setEditingItem({...editingItem, amount: parseFloat(e.target.value) || 0})}
+                />
+                <input
+                  style={styles.input}
+                  type="number"
+                  min="1"
+                  max="31"
+                  placeholder="Due date"
+                  value={editingItem.dueDate}
+                  onChange={(e) => setEditingItem({...editingItem, dueDate: parseInt(e.target.value) || 1})}
+                />
+                <select
+                  style={styles.select}
+                  value={editingItem.category}
+                  onChange={(e) => setEditingItem({...editingItem, category: e.target.value})}
+                >
+                  <option value="Housing">Housing</option>
+                  <option value="Utilities">Utilities</option>
+                  <option value="Transportation">Transportation</option>
+                  <option value="Food">Food</option>
+                  <option value="Health">Health</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Debt">Debt</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            ) : (
+              <div style={styles.formGrid}>
+                <input
+                  style={styles.input}
+                  type="date"
+                  value={editingItem.date}
+                  onChange={(e) => setEditingItem({...editingItem, date: e.target.value})}
+                />
+                <input
+                  style={styles.input}
+                  type="number"
+                  step="0.01"
+                  placeholder="Amount"
+                  value={editingItem.amount}
+                  onChange={(e) => setEditingItem({...editingItem, amount: parseFloat(e.target.value) || 0})}
+                />
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Source"
+                  value={editingItem.source}
+                  onChange={(e) => setEditingItem({...editingItem, source: e.target.value})}
+                />
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Label"
+                  value={editingItem.label}
+                  onChange={(e) => setEditingItem({...editingItem, label: e.target.value})}
+                />
+              </div>
+            )}
+            
+            <div>
+              <button style={styles.button} onClick={saveEdit}>
+                Save Changes
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}} 
+                onClick={cancelEdit}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Subscription Modal */}
+      {showCancelModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <h3>🚫 Cancel Subscription</h3>
+            <p>Are you sure you want to cancel <strong>{showCancelModal.name}</strong>?</p>
+            <div style={{backgroundColor: '#f8f9fa', padding: '15px', borderRadius: '8px', marginBottom: '20px'}}>
+              <div><strong>Current Plan:</strong> {showCancelModal.description}</div>
+              <div><strong>Monthly Cost:</strong> {formatCurrency(showCancelModal.amount)}</div>
+              <div><strong>Next Billing:</strong> {formatDate(showCancelModal.nextBilling)}</div>
+              {showCancelModal.trialEnds && (
+                <div><strong>Trial Ends:</strong> {formatDate(showCancelModal.trialEnds)}</div>
+              )}
+            </div>
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, ...styles.buttonDanger}}
+                onClick={() => cancelSubscription(showCancelModal)}
+              >
+                Yes, Cancel Subscription
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}}
+                onClick={() => setShowCancelModal(null)}
+              >
+                Keep Subscription
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Management Modal */}
+      {showUserManagement && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>👥 User Management</div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <h4>Current User</h4>
+              <div style={{
+                backgroundColor: '#f8f9fa',
+                padding: '15px',
+                borderRadius: '8px',
+                marginBottom: '15px'
+              }}>
+                <div><strong>{data.user.name}</strong></div>
+                <div style={{fontSize: '14px', color: '#666'}}>{data.user.email}</div>
+                <div style={{fontSize: '14px', color: '#666'}}>Member since {formatDate(data.user.createdAt)}</div>
+              </div>
+            </div>
+
+            <div style={{marginBottom: '20px'}}>
+              <h4>🔄 Switch User</h4>
+              <p style={{fontSize: '14px', color: '#666', marginBottom: '10px'}}>
+                In a full version, you'd see all your users here and could switch between them.
+              </p>
+              <div style={{
+                backgroundColor: '#e9ecef',
+                padding: '15px',
+                borderRadius: '8px',
+                textAlign: 'center',
+                color: '#6c757d'
+              }}>
+                <em>Multi-user switching coming soon!</em>
+              </div>
+            </div>
+
+            <div style={{marginBottom: '20px'}}>
+              <h4>👤 User Actions</h4>
+              <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                <button 
+                  style={{...styles.button, ...styles.buttonSuccess}}
+                  onClick={() => {
+                    setShowUserManagement(false);
+                    setShowAddUserModal(true);
+                  }}
+                >
+                  + Add New User
+                </button>
+                <button 
+                  style={styles.editButton}
+                  onClick={() => {
+                    setShowUserManagement(false);
+                    startEditUser();
+                  }}
+                >
+                  Edit Current User
+                </button>
+                <button 
+                  style={{...styles.button, ...styles.buttonDanger}}
+                  onClick={() => {
+                    setShowUserManagement(false);
+                    setShowDeleteUserModal(true);
+                  }}
+                >
+                  Delete Current User
+                </button>
+              </div>
+            </div>
+
+            <button 
+              style={{...styles.button, ...styles.buttonSecondary}}
+              onClick={() => setShowUserManagement(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add New User Modal */}
+      {showAddUserModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>👤 Add New User</div>
+            <p style={{marginBottom: '20px', color: '#666'}}>
+              Create a new user profile with separate financial data.
+            </p>
+            
+            <div style={styles.formGrid}>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Full Name *"
+                value={newUser.name}
+                onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="email"
+                placeholder="Email Address *"
+                value={newUser.email}
+                onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Company (optional)"
+                value={newUser.company}
+                onChange={(e) => setNewUser({...newUser, company: e.target.value})}
+              />
+            </div>
+            
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, ...styles.buttonSuccess}}
+                onClick={addNewUser}
+                disabled={!newUser.name || !newUser.email}
+              >
+                Create User
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}}
+                onClick={() => {
+                  setShowAddUserModal(false);
+                  setNewUser({ name: '', email: '', company: '' });
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add New Subscription Modal */}
+      {showAddSubscriptionModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>📱 Add New Subscription</div>
+            <p style={{marginBottom: '20px', color: isDarkMode ? '#a0aec0' : '#666'}}>
+              Add a subscription you want to track and manage.
+            </p>
+            
+            <div style={styles.formGrid}>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Subscription Name (e.g., Netflix) *"
+                value={newSubscription.name}
+                onChange={(e) => setNewSubscription({...newSubscription, name: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="number"
+                step="0.01"
+                placeholder="Monthly Amount *"
+                value={newSubscription.amount}
+                onChange={(e) => setNewSubscription({...newSubscription, amount: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Provider (e.g., Netflix Inc.) *"
+                value={newSubscription.provider}
+                onChange={(e) => setNewSubscription({...newSubscription, provider: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Description (e.g., Premium Plan)"
+                value={newSubscription.description}
+                onChange={(e) => setNewSubscription({...newSubscription, description: e.target.value})}
+              />
+              <select
+                style={styles.select}
+                value={newSubscription.category}
+                onChange={(e) => setNewSubscription({...newSubscription, category: e.target.value})}
+              >
+                <option value="Entertainment">Entertainment</option>
+                <option value="Productivity">Productivity</option>
+                <option value="Health">Health & Fitness</option>
+                <option value="Music">Music</option>
+                <option value="Gaming">Gaming</option>
+                <option value="News">News & Media</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Other">Other</option>
+              </select>
+              <select
+                style={styles.select}
+                value={newSubscription.billingCycle}
+                onChange={(e) => setNewSubscription({...newSubscription, billingCycle: e.target.value})}
+              >
+                <option value="monthly">Monthly</option>
+                <option value="annually">Annually</option>
+                <option value="weekly">Weekly</option>
+              </select>
+              <input
+                style={styles.input}
+                type="date"
+                placeholder="Next Billing Date"
+                value={newSubscription.nextBilling}
+                onChange={(e) => setNewSubscription({...newSubscription, nextBilling: e.target.value})}
+              />
+            </div>
+            
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, ...styles.buttonSuccess}}
+                onClick={addNewSubscription}
+                disabled={!newSubscription.name || !newSubscription.amount || !newSubscription.provider}
+              >
+                Add Subscription
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}}
+                onClick={() => {
+                  setShowAddSubscriptionModal(false);
+                  setNewSubscription({ 
+                    name: '', 
+                    amount: '', 
+                    provider: '', 
+                    description: '', 
+                    billingCycle: 'monthly',
+                    category: 'Entertainment',
+                    nextBilling: ''
+                  });
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Connected Account Modal */}
+      {showAddAccountModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>🔗 Add Connected Account</div>
+            <div style={{
+              backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.1)' : '#fff3cd',
+              border: isDarkMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #ffeaa7',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '20px',
+              color: isDarkMode ? '#f59e0b' : '#856404'
+            }}>
+              <strong>📝 Manual Entry Only</strong><br />
+              Add your account details for personal tracking. This information stays in your browser only.
+            </div>
+            
+            <div style={styles.formGrid}>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Account Name (e.g., Main Checking) *"
+                value={newAccount.name}
+                onChange={(e) => setNewAccount({...newAccount, name: e.target.value})}
+              />
+              <select
+                style={styles.select}
+                value={newAccount.type}
+                onChange={(e) => setNewAccount({...newAccount, type: e.target.value})}
+              >
+                <option value="checking">Checking Account</option>
+                <option value="savings">Savings Account</option>
+                <option value="credit_card">Credit Card</option>
+                <option value="investment">Investment Account</option>
+              </select>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Bank/Provider (e.g., Wells Fargo) *"
+                value={newAccount.provider}
+                onChange={(e) => setNewAccount({...newAccount, provider: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Last 4 digits (for reference) *"
+                maxLength="4"
+                value={newAccount.last4}
+                onChange={(e) => setNewAccount({...newAccount, last4: e.target.value.replace(/\D/g, '')})}
+              />
+            </div>
+            
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, ...styles.buttonSuccess}}
+                onClick={addConnectedAccount}
+                disabled={!newAccount.name || !newAccount.provider || !newAccount.last4}
+              >
+                Add Account
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}}
+                onClick={() => {
+                  setShowAddAccountModal(false);
+                  setNewAccount({ name: '', type: 'checking', provider: '', last4: '' });
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete User Confirmation Modal */}
+      {showDeleteUserModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>⚠️ Delete User Account</div>
+            <p><strong>Warning:</strong> This action cannot be undone!</p>
+            
+            <div style={{
+              backgroundColor: '#f8d7da',
+              border: '1px solid #f5c6cb',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '20px',
+              color: '#721c24'
+            }}>
+              <h4>This will permanently delete:</h4>
+              <ul style={{marginLeft: '20px', marginTop: '10px'}}>
+                <li>User profile: <strong>{data.user.name}</strong></li>
+                <li>All financial data ({Object.keys(data.months).length} months)</li>
+                <li>All bills and paychecks</li>
+                <li>All subscription data</li>
+                <li>All connected accounts</li>
+              </ul>
+            </div>
+
+            <div style={{
+              backgroundColor: '#d1ecf1',
+              border: '1px solid #bee5eb',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '20px',
+              color: '#0c5460'
+            }}>
+              <strong>💡 Alternative:</strong> Consider creating a new user instead if you just want to start fresh while keeping this data.
+            </div>
+
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, ...styles.buttonDanger}}
+                onClick={deleteCurrentUser}
+              >
+                Yes, Delete Everything
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}}
+                onClick={() => setShowDeleteUserModal(false)}
+              >
+                Cancel - Keep User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default FinancialWorkbook;
+export default FinanceHubPro;
