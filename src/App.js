@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
 
 const FinanceHubPro = () => {
   // Load data from localStorage
@@ -369,41 +368,6 @@ const FinanceHubPro = () => {
       }
     }));
   };
-
-  // Add these RIGHT AFTER your existing handler functions
-const toggleBillPaid = (billId, isPaid) => {
-  setData(prev => ({
-    ...prev,
-    months: {
-      ...prev.months,
-      [data.currentMonthId]: {
-        ...currentMonth,
-        bills: currentMonth.bills.map(bill => 
-          bill.id === billId 
-            ? { ...bill, isPaid: isPaid, actualAmount: isPaid ? bill.actualAmount : null }
-            : bill
-        )
-      }
-    }
-  }));
-};
-
-const updateActualAmount = (billId, actualAmount) => {
-  setData(prev => ({
-    ...prev,
-    months: {
-      ...prev.months,
-      [data.currentMonthId]: {
-        ...currentMonth,
-        bills: currentMonth.bills.map(bill => 
-          bill.id === billId 
-            ? { ...bill, actualAmount: actualAmount }
-            : bill
-        )
-      }
-    }
-  }));
-};
 
   // Start editing
   const startEdit = (item, type) => {
@@ -1216,6 +1180,7 @@ const updateActualAmount = (billId, actualAmount) => {
       <div style={styles.paycheckGrid}>
         {currentMonth.paychecks.map(paycheck => {
           const assignedBills = getBillsByPaycheck(paycheck.id);
+          const remaining = getPaycheckRemaining(paycheck.id);
           
           return (
             <div key={paycheck.id} style={styles.paycheckCard}>
@@ -1245,78 +1210,39 @@ const updateActualAmount = (billId, actualAmount) => {
               </div>
               
               <div style={styles.billsList}>
-  {assignedBills.map(bill => (
-  <div key={bill.id} style={{
-    ...styles.billItem,
-    backgroundColor: bill.isPaid ? (isDarkMode ? 'rgba(16, 185, 129, 0.1)' : '#d5f4e6') : 'transparent',
-    border: bill.isPaid ? (isDarkMode ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #10b981') : 'none',
-    borderRadius: bill.isPaid ? '8px' : '0',
-    padding: bill.isPaid ? '10px' : '10px 0',
-    flexDirection: 'column',
-    alignItems: 'stretch'
-  }}>
-    <div style={{display: 'flex', alignItems: 'center', marginBottom: bill.isPaid ? '10px' : '0'}}>
-      <input
-        type="checkbox"
-        checked={bill.isPaid || false}
-        onChange={(e) => toggleBillPaid(bill.id, e.target.checked)}
-        style={{marginRight: '10px', transform: 'scale(1.2)'}}
-      />
-      <span style={{
-        ...styles.billName, 
-        display: 'flex', 
-        alignItems: 'center',
-        textDecoration: bill.isPaid ? 'line-through' : 'none',
-        opacity: bill.isPaid ? 0.7 : 1,
-        flex: 1
-      }}>
-        {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
-        {bill.name}
-      </span>
-      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: '10px'}}>
-        <span style={styles.billAmount}>{formatCurrency(bill.amount)}</span>
-        {bill.isPaid && bill.actualAmount && (
-          <span style={{fontSize: '12px', color: '#10b981', fontWeight: '500'}}>
-            Paid: {formatCurrency(bill.actualAmount)}
-          </span>
-        )}
-      </div>
-      <button 
-        style={styles.editButton}
-        onClick={() => startEdit(bill, 'bill')}
-      >
-        Edit
-      </button>
-      <button 
-        style={styles.deleteButton}
-        onClick={() => assignBillToPaycheck(bill.id, null)}
-      >
-        Remove
-      </button>
-    </div>
-    {bill.isPaid && (
-      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-        <span style={{fontSize: '14px', color: isDarkMode ? '#a0aec0' : '#666'}}>
-          Actual amount paid:
-        </span>
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Enter amount"
-          value={bill.actualAmount || ''}
-          onChange={(e) => updateActualAmount(bill.id, e.target.value)}
-          style={{
-            ...styles.input,
-            fontSize: '14px',
-            padding: '6px 10px',
-            width: '120px',
-            marginLeft: '10px'
-          }}
-        />
-      </div>
-    )}
-  </div>
-))}
+                {assignedBills.map(bill => (
+                  <div key={bill.id} style={styles.billItem}>
+                    <span style={{...styles.billName, display: 'flex', alignItems: 'center'}}>
+                      {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
+                      {bill.name}
+                    </span>
+                    <span style={styles.billAmount}>{formatCurrency(bill.amount)}</span>
+                    <button 
+                      style={styles.editButton}
+                      onClick={() => startEdit(bill, 'bill')}
+                    >
+                      Edit
+                    </button>
+                    <button 
+                      style={styles.deleteButton}
+                      onClick={() => assignBillToPaycheck(bill.id, null)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                {assignedBills.length === 0 && (
+                  <div style={{textAlign: 'center', color: '#999', padding: '20px'}}>
+                    No bills assigned yet
+                  </div>
+                )}
+              </div>
+              
+              <div style={{
+                ...styles.remainingAmount,
+                ...(remaining >= 0 ? styles.positiveRemaining : styles.negativeRemaining)
+              }}>
+                Remaining: {formatCurrency(remaining)}
               </div>
             </div>
           );
@@ -1895,7 +1821,6 @@ const updateActualAmount = (billId, actualAmount) => {
     </div>
   );
 
-  // Main component render
   return (
     <div style={styles.container}>
       <div style={styles.header}>
