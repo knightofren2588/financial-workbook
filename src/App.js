@@ -1,175 +1,67 @@
 import React, { useState, useEffect } from 'react';
+import './App.css';
 
 const FinanceHubPro = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [selectedMonth, setSelectedMonth] = useState('July 2025');
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
-  });
-  
-  // Initialize with default data structure
-  const [data, setData] = useState(() => {
-    const saved = localStorage.getItem('financeData');
-    if (saved) {
-      return JSON.parse(saved);
+  // Load data from localStorage
+  const loadData = () => {
+    try {
+      const savedData = localStorage.getItem('financeHubProData');
+      if (savedData) {
+        return JSON.parse(savedData);
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
     }
+    
     return {
       user: {
         id: 'user-1',
         name: 'John Doe',
-        email: 'john.doe@equitashealth.com',
+        email: 'john@equitashealth.com',
         company: 'Equitas Health',
-        createdAt: new Date().toISOString(),
+        createdAt: '2025-07-01',
         settings: {
           notifications: true,
-          darkMode: false
-        },
-        connectedAccounts: []
+          darkMode: false,
+          currency: 'USD'
+        }
       },
+      currentMonthId: 'july-2025',
       months: {
-        'July 2025': {
-          paychecks: [
-            {
-              id: 'paycheck-1',
-              name: '1st Paycheck',
-              amount: '1600.00',
-              date: 'Aug 7'
-            },
-            {
-              id: 'paycheck-2', 
-              name: '2nd Paycheck',
-              amount: '1600.00',
-              date: 'Aug 21'
-            }
-          ],
+        'july-2025': {
+          id: 'july-2025',
+          name: 'July',
+          year: 2025,
           bills: [
-            {
-              id: 'bill-1',
-              name: 'Planet Fitness',
-              amount: '26.86',
-              dueDate: 'Aug 5',
-              category: 'Health & Fitness',
-              paycheckId: 'paycheck-1',
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-2',
-              name: 'FitBod - Workout App',
-              amount: '15.99',
-              dueDate: 'Aug 10',
-              category: 'Health & Fitness',
-              paycheckId: 'paycheck-1',
-              isSubscription: true,
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-3',
-              name: 'Peacock - Stream App',
-              amount: '7.99',
-              dueDate: 'Aug 12',
-              category: 'Entertainment',
-              paycheckId: 'paycheck-1',
-              isSubscription: true,
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-4',
-              name: 'ChatGPT',
-              amount: '20.00',
-              dueDate: 'Aug 15',
-              category: 'Productivity',
-              paycheckId: 'paycheck-1',
-              isSubscription: true,
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-5',
-              name: 'Disney Plus',
-              amount: '18.22',
-              dueDate: 'Aug 18',
-              category: 'Entertainment',
-              paycheckId: 'paycheck-1',
-              isSubscription: true,
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-6',
-              name: 'Amazon Prime',
-              amount: '16.00',
-              dueDate: 'Aug 20',
-              category: 'Shopping',
-              paycheckId: 'paycheck-1',
-              isSubscription: true,
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-7',
-              name: 'Electric',
-              amount: '46.00',
-              dueDate: 'Aug 22',
-              category: 'Utilities',
-              paycheckId: 'paycheck-2',
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-8',
-              name: 'Gas',
-              amount: '46.00',
-              dueDate: 'Aug 24',
-              category: 'Utilities',
-              paycheckId: 'paycheck-2',
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-9',
-              name: 'Water, Sewer, Trash',
-              amount: '50.00',
-              dueDate: 'Aug 26',
-              category: 'Utilities',
-              paycheckId: 'paycheck-2',
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-10',
-              name: 'GloFiber - Internet',
-              amount: '80.00',
-              dueDate: 'Aug 28',
-              category: 'Utilities',
-              paycheckId: 'paycheck-2',
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-11',
-              name: 'Claude AI',
-              amount: '100.00',
-              dueDate: 'Aug 30',
-              category: 'Productivity',
-              paycheckId: 'paycheck-2',
-              isSubscription: true,
-              isPaid: false,
-              actualAmount: null
-            },
-            {
-              id: 'bill-12',
-              name: 'Choice Home Warranty',
-              amount: '50.32',
-              dueDate: 'Aug 31',
-              category: 'Insurance',
-              paycheckId: 'paycheck-2',
-              isPaid: false,
-              actualAmount: null
-            }
+            { id: 1, name: 'Rent', amount: 826.00, dueDate: 11, category: 'Housing', assignedPaycheck: 1, isPaid: false, actualAmount: null, isSubscription: false },
+            { id: 2, name: 'Electric', amount: 46.00, dueDate: 18, category: 'Utilities', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
+            { id: 3, name: 'Gas', amount: 46.00, dueDate: 3, category: 'Utilities', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
+            { id: 4, name: 'Internet', amount: 50.00, dueDate: 20, category: 'Utilities', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
+            { id: 5, name: 'Car Payment', amount: 570.00, dueDate: 28, category: 'Transportation', assignedPaycheck: null, isPaid: false, actualAmount: null, isSubscription: false },
+            { id: 6, name: 'Health Insurance', amount: 160.00, dueDate: 28, category: 'Health', assignedPaycheck: 1, isPaid: false, actualAmount: null, isSubscription: false },
+            { id: 7, name: 'Dental Insurance', amount: 80.00, dueDate: 21, category: 'Health', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
+            { id: 8, name: 'Netflix', amount: 15.99, dueDate: 4, category: 'Entertainment', assignedPaycheck: null, isPaid: false, actualAmount: null, isSubscription: true },
+            { id: 9, name: 'Spotify Premium', amount: 10.99, dueDate: 13, category: 'Entertainment', assignedPaycheck: null, isPaid: false, actualAmount: null, isSubscription: true },
+            { id: 10, name: 'Student Loan', amount: 50.32, dueDate: 29, category: 'Debt', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
+            { id: 11, name: 'Groceries', amount: 400.00, dueDate: 15, category: 'Food', assignedPaycheck: 1, isPaid: false, actualAmount: null, isSubscription: false }
+          ],
+          paychecks: [
+            { id: 1, date: '2025-07-11', amount: 1600.00, source: 'Equitas Health', label: 'First Paycheck' },
+            { id: 2, date: '2025-07-25', amount: 2100.00, source: 'Equitas Health', label: 'Second Paycheck' }
+          ]
+        },
+        'august-2025': {
+          id: 'august-2025',
+          name: 'August',
+          year: 2025,
+          bills: [
+            { id: 1, name: 'Rent', amount: 826.00, dueDate: 1, category: 'Housing', assignedPaycheck: 1, isPaid: false, actualAmount: null, isSubscription: false },
+            { id: 2, name: 'Electric', amount: 46.00, dueDate: 10, category: 'Utilities', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
+            { id: 3, name: 'Car Payment', amount: 570.00, dueDate: 28, category: 'Transportation', assignedPaycheck: null, isPaid: false, actualAmount: null, isSubscription: false }
+          ],
+          paychecks: [
+            { id: 1, date: '2025-08-08', amount: 1600.00, source: 'Equitas Health', label: 'First Paycheck' },
+            { id: 2, date: '2025-08-22', amount: 1600.00, source: 'Equitas Health', label: 'Second Paycheck' }
           ]
         }
       },
@@ -177,1569 +69,2570 @@ const FinanceHubPro = () => {
         {
           id: 'sub-1',
           name: 'Netflix',
-          provider: 'Netflix',
-          amount: 15.49,
-          billingCycle: 'Monthly',
-          nextBilling: '2025-08-15',
+          amount: 15.99,
+          billingCycle: 'monthly',
+          nextBilling: '2025-08-04',
+          category: 'Entertainment',
           status: 'active',
+          provider: 'Netflix',
+          cancellationUrl: 'https://netflix.com/cancelplan',
           description: 'Standard Plan',
-          category: 'Entertainment'
+          connectedAccount: 'Chase Credit Card ****1234',
+          lastCharged: '2025-07-04',
+          autoRenew: true,
+          trialEnds: null,
+          yearlyDiscount: 0
         },
         {
           id: 'sub-2',
           name: 'Spotify Premium',
-          provider: 'Spotify',
-          amount: 9.99,
-          billingCycle: 'Monthly',
-          nextBilling: '2025-08-20',
+          amount: 10.99,
+          billingCycle: 'monthly',
+          nextBilling: '2025-08-13',
+          category: 'Entertainment',
           status: 'active',
+          provider: 'Spotify',
+          cancellationUrl: 'https://spotify.com/account/subscription',
           description: 'Individual Plan',
-          category: 'Entertainment'
+          connectedAccount: 'Chase Credit Card ****1234',
+          lastCharged: '2025-07-13',
+          autoRenew: true,
+          trialEnds: null,
+          yearlyDiscount: 10.99 * 2
         },
         {
           id: 'sub-3',
+          name: 'Apple iCloud+',
+          amount: 2.99,
+          billingCycle: 'monthly',
+          nextBilling: '2025-08-18',
+          category: 'Productivity',
+          status: 'active',
+          provider: 'Apple',
+          cancellationUrl: 'https://apple.com/icloud/settings',
+          description: '200GB Storage',
+          connectedAccount: 'Apple ID Payment',
+          lastCharged: '2025-07-18',
+          autoRenew: true,
+          trialEnds: null,
+          yearlyDiscount: 0
+        },
+        {
+          id: 'sub-4',
           name: 'Adobe Creative Cloud',
-          provider: 'Adobe',
-          amount: 52.99,
-          billingCycle: 'Monthly',
-          nextBilling: '2025-08-10',
+          amount: 54.99,
+          billingCycle: 'monthly',
+          nextBilling: '2025-08-22',
+          category: 'Productivity',
           status: 'trial',
-          description: 'All Apps',
-          category: 'Productivity'
+          provider: 'Adobe',
+          cancellationUrl: 'https://adobe.com/account/cancel',
+          description: 'All Apps Plan',
+          connectedAccount: 'Chase Credit Card ****1234',
+          lastCharged: null,
+          autoRenew: true,
+          trialEnds: '2025-08-22',
+          yearlyDiscount: 120.00
+        }
+      ],
+      connectedAccounts: [
+        {
+          id: 'acc-1',
+          type: 'credit_card',
+          name: 'Chase Freedom',
+          last4: '1234',
+          provider: 'Chase',
+          status: 'connected'
+        },
+        {
+          id: 'acc-2',
+          type: 'bank_account',
+          name: 'Checking Account',
+          last4: '5678',
+          provider: 'Wells Fargo',
+          status: 'connected'
         }
       ]
     };
-  });
+  };
 
-  // Modal states
-  const [showBillModal, setShowBillModal] = useState(false);
-  const [showPaycheckModal, setShowPaycheckModal] = useState(false);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  const [showUserModal, setShowUserModal] = useState(false);
+  const [data, setData] = useState(loadData);
+  const [activeView, setActiveView] = useState('overview');
+  const [editingItem, setEditingItem] = useState(null);
+  const [editType, setEditType] = useState(null);
+  const [showNewMonthForm, setShowNewMonthForm] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(null);
   const [showUserManagement, setShowUserManagement] = useState(false);
-  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
-  const [showAccountModal, setShowAccountModal] = useState(false);
-  const [editingBill, setEditingBill] = useState(null);
-  const [editingPaycheck, setEditingPaycheck] = useState(null);
-  const [editingSubscription, setEditingSubscription] = useState(null);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+  const [showAddSubscriptionModal, setShowAddSubscriptionModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
-
-  // Form states
-  const [newBill, setNewBill] = useState({
-    name: '',
-    amount: '',
-    dueDate: '',
-    category: 'Utilities'
+  const [newAccount, setNewAccount] = useState({ name: '', type: 'checking', provider: '', last4: '' });
+  const [newSubscription, setNewSubscription] = useState({ 
+    name: '', 
+    amount: '', 
+    provider: '', 
+    description: '', 
+    billingCycle: 'monthly',
+    category: 'Entertainment',
+    nextBilling: ''
   });
+  const [newUser, setNewUser] = useState({ name: '', email: '', company: '' });
+  const [newMonth, setNewMonth] = useState({ name: '', year: new Date().getFullYear() });
+  const [newBill, setNewBill] = useState({ name: '', amount: '', dueDate: '', category: 'Other', isSubscription: false });
+  const [newPaycheck, setNewPaycheck] = useState({ date: '', amount: '', source: 'Equitas Health', label: '' });
 
-  const [newPaycheck, setNewPaycheck] = useState({
-    name: '',
-    amount: '',
-    date: ''
-  });
+  const currentMonth = data.months[data.currentMonthId];
 
-  const [newSubscription, setNewSubscription] = useState({
-    name: '',
-    provider: '',
-    amount: '',
-    billingCycle: 'Monthly',
-    nextBilling: '',
-    description: '',
-    category: 'Entertainment'
-  });
-
-  const [newUser, setNewUser] = useState({
-    name: '',
-    email: '',
-    company: ''
-  });
-
-  const [newAccount, setNewAccount] = useState({
-    name: '',
-    type: 'checking',
-    lastFour: '',
-    balance: ''
-  });
-
-  // Apply dark mode to document
+  // Save data to localStorage
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    try {
+      localStorage.setItem('financeHubProData', JSON.stringify(data));
+    } catch (error) {
+      console.error('Error saving data:', error);
     }
-    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
-  }, [isDarkMode]);
-
-  // Save data whenever it changes
-  useEffect(() => {
-    localStorage.setItem('financeData', JSON.stringify(data));
   }, [data]);
 
-  const currentMonthData = data.months[selectedMonth] || { paychecks: [], bills: [] };
+  // Switch to different month
+  const switchMonth = (monthId) => {
+    setData(prev => ({ ...prev, currentMonthId: monthId }));
+  };
 
-  // Handle add new bill
-  const handleAddBill = () => {
-    if (!newBill.name || !newBill.amount) return;
-
-    const updatedData = { ...data };
-    if (!updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth] = { paychecks: [], bills: [] };
-    }
-
-    const bill = {
-      id: 'bill-' + Date.now(),
-      name: newBill.name,
-      amount: newBill.amount,
-      dueDate: newBill.dueDate,
-      category: newBill.category,
-      paycheckId: null,
-      isPaid: false,
-      actualAmount: null
+  // Create new month
+  const createNewMonth = () => {
+    if (!newMonth.name) return;
+    
+    const monthId = `${newMonth.name.toLowerCase()}-${newMonth.year}`;
+    const month = {
+      id: monthId,
+      name: newMonth.name,
+      year: parseInt(newMonth.year),
+      bills: [],
+      paychecks: []
     };
-
-    updatedData.months[selectedMonth].bills.push(bill);
-    setData(updatedData);
-    setNewBill({ name: '', amount: '', dueDate: '', category: 'Utilities' });
-    setShowBillModal(false);
-  };
-
-  // Handle add new paycheck
-  const handleAddPaycheck = () => {
-    if (!newPaycheck.name || !newPaycheck.amount) return;
-
-    const updatedData = { ...data };
-    if (!updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth] = { paychecks: [], bills: [] };
-    }
-
-    const paycheck = {
-      id: 'paycheck-' + Date.now(),
-      name: newPaycheck.name,
-      amount: newPaycheck.amount,
-      date: newPaycheck.date
-    };
-
-    updatedData.months[selectedMonth].paychecks.push(paycheck);
-    setData(updatedData);
-    setNewPaycheck({ name: '', amount: '', date: '' });
-    setShowPaycheckModal(false);
-  };
-
-  // Handle add new subscription
-  const handleAddSubscription = () => {
-    if (!newSubscription.name || !newSubscription.amount || !newSubscription.provider) return;
-
-    const updatedData = { ...data };
-    const subscription = {
-      id: 'sub-' + Date.now(),
-      name: newSubscription.name,
-      provider: newSubscription.provider,
-      amount: parseFloat(newSubscription.amount),
-      billingCycle: newSubscription.billingCycle,
-      nextBilling: newSubscription.nextBilling,
-      status: 'active',
-      description: newSubscription.description,
-      category: newSubscription.category
-    };
-
-    updatedData.subscriptions.push(subscription);
-    setData(updatedData);
-    setNewSubscription({
-      name: '',
-      provider: '',
-      amount: '',
-      billingCycle: 'Monthly',
-      nextBilling: '',
-      description: '',
-      category: 'Entertainment'
-    });
-    setShowSubscriptionModal(false);
-  };
-
-  // Handle assign bill to paycheck
-  const handleAssignBill = (billId, paycheckId) => {
-    const updatedData = { ...data };
-    if (updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth].bills = updatedData.months[selectedMonth].bills.map(bill => {
-        if (bill.id === billId) {
-          return { ...bill, paycheckId: paycheckId };
-        }
-        return bill;
-      });
-      setData(updatedData);
-    }
-  };
-
-  // Handle edit bill
-  const handleEditBill = (bill) => {
-    setEditingBill(bill);
-    setNewBill({
-      name: bill.name,
-      amount: bill.amount,
-      dueDate: bill.dueDate,
-      category: bill.category
-    });
-    setShowBillModal(true);
-  };
-
-  // Handle save edited bill
-  const handleSaveEditedBill = () => {
-    if (!newBill.name || !newBill.amount) return;
-
-    const updatedData = { ...data };
-    if (updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth].bills = updatedData.months[selectedMonth].bills.map(bill => {
-        if (bill.id === editingBill.id) {
-          return {
-            ...bill,
-            name: newBill.name,
-            amount: newBill.amount,
-            dueDate: newBill.dueDate,
-            category: newBill.category
-          };
-        }
-        return bill;
-      });
-      setData(updatedData);
-    }
     
-    setEditingBill(null);
-    setNewBill({ name: '', amount: '', dueDate: '', category: 'Utilities' });
-    setShowBillModal(false);
-  };
-
-  // Handle edit paycheck
-  const handleEditPaycheck = (paycheck) => {
-    setEditingPaycheck(paycheck);
-    setNewPaycheck({
-      name: paycheck.name,
-      amount: paycheck.amount,
-      date: paycheck.date
-    });
-    setShowPaycheckModal(true);
-  };
-
-  // Handle save edited paycheck
-  const handleSaveEditedPaycheck = () => {
-    if (!newPaycheck.name || !newPaycheck.amount) return;
-
-    const updatedData = { ...data };
-    if (updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth].paychecks = updatedData.months[selectedMonth].paychecks.map(paycheck => {
-        if (paycheck.id === editingPaycheck.id) {
-          return {
-            ...paycheck,
-            name: newPaycheck.name,
-            amount: newPaycheck.amount,
-            date: newPaycheck.date
-          };
-        }
-        return paycheck;
-      });
-      setData(updatedData);
-    }
+    setData(prev => ({
+      ...prev,
+      months: { ...prev.months, [monthId]: month },
+      currentMonthId: monthId
+    }));
     
-    setEditingPaycheck(null);
-    setNewPaycheck({ name: '', amount: '', date: '' });
-    setShowPaycheckModal(false);
+    setNewMonth({ name: '', year: new Date().getFullYear() });
+    setShowNewMonthForm(false);
   };
 
-  // Handle delete bill
-  const handleDeleteBill = (billId) => {
-    const updatedData = { ...data };
-    if (updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth].bills = updatedData.months[selectedMonth].bills.filter(bill => bill.id !== billId);
-      setData(updatedData);
-    }
-  };
-
-  // Handle delete paycheck
-  const handleDeletePaycheck = (paycheckId) => {
-    const updatedData = { ...data };
-    if (updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth].paychecks = updatedData.months[selectedMonth].paychecks.filter(paycheck => paycheck.id !== paycheckId);
-      // Also remove paycheck assignment from bills
-      updatedData.months[selectedMonth].bills = updatedData.months[selectedMonth].bills.map(bill => {
-        if (bill.paycheckId === paycheckId) {
-          return { ...bill, paycheckId: null };
-        }
-        return bill;
-      });
-      setData(updatedData);
-    }
-  };
-
-  // Handle remove bill from paycheck
-  const handleRemoveBillFromPaycheck = (billId) => {
-    const updatedData = { ...data };
-    if (updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth].bills = updatedData.months[selectedMonth].bills.map(bill => {
-        if (bill.id === billId) {
-          return { ...bill, paycheckId: null };
-        }
-        return bill;
-      });
-      setData(updatedData);
-    }
-  };
-
-  // Handle toggle paid status
-  const handleTogglePaid = (billId, isPaid) => {
-    const updatedData = { ...data };
-    
-    // Find and update the bill in the current month's data
-    if (updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth].bills = updatedData.months[selectedMonth].bills.map(bill => {
-        if (bill.id === billId) {
-          return { ...bill, isPaid: isPaid, actualAmount: isPaid ? bill.actualAmount : null };
-        }
-        return bill;
-      });
-      setData(updatedData);
-    }
-  };
-
-  // Handle update actual amount paid
-  const handleUpdateActualAmount = (billId, actualAmount) => {
-    const updatedData = { ...data };
-    
-    // Find and update the bill in the current month's data
-    if (updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth].bills = updatedData.months[selectedMonth].bills.map(bill => {
-        if (bill.id === billId) {
-          return { ...bill, actualAmount: actualAmount };
-        }
-        return bill;
-      });
-      setData(updatedData);
-    }
-  };
-
-  // Handle create new month
-  const handleCreateNewMonth = () => {
-    const monthOptions = [
-      'January 2025', 'February 2025', 'March 2025', 'April 2025', 
-      'May 2025', 'June 2025', 'July 2025', 'August 2025', 
-      'September 2025', 'October 2025', 'November 2025', 'December 2025',
-      'January 2026', 'February 2026', 'March 2026', 'April 2026', 
-      'May 2026', 'June 2026', 'July 2026', 'August 2026', 
-      'September 2026', 'October 2026', 'November 2026', 'December 2026'
-    ];
-    
-    const nextMonth = monthOptions.find(month => !data.months[month]);
-    if (nextMonth) {
-      const updatedData = { ...data };
-      updatedData.months[nextMonth] = { paychecks: [], bills: [] };
-      setData(updatedData);
-      setSelectedMonth(nextMonth);
-    }
-  };
-
-  // Handle copy from previous month
-  const handleCopyFromPreviousMonth = () => {
-    const monthOrder = Object.keys(data.months).sort();
-    const currentIndex = monthOrder.indexOf(selectedMonth);
+  // Copy previous month's recurring bills
+  const copyFromPreviousMonth = () => {
+    const monthIds = Object.keys(data.months);
+    const currentIndex = monthIds.indexOf(data.currentMonthId);
     if (currentIndex > 0) {
-      const previousMonth = monthOrder[currentIndex - 1];
-      const previousData = data.months[previousMonth];
-      
-      const updatedData = { ...data };
-      if (!updatedData.months[selectedMonth]) {
-        updatedData.months[selectedMonth] = { paychecks: [], bills: [] };
-      }
-      
-      // Copy bills (but reset paid status and actual amounts)
-      const copiedBills = previousData.bills.map(bill => ({
+      const previousMonth = data.months[monthIds[currentIndex - 1]];
+      const recurringBills = previousMonth.bills.map(bill => ({
         ...bill,
-        id: 'bill-' + Date.now() + Math.random(),
-        paycheckId: null,
+        id: Date.now() + Math.random(),
         isPaid: false,
-        actualAmount: null
+        actualAmount: null,
+        assignedPaycheck: null
       }));
       
-      updatedData.months[selectedMonth].bills = [...updatedData.months[selectedMonth].bills, ...copiedBills];
-      setData(updatedData);
+      setData(prev => ({
+        ...prev,
+        months: {
+          ...prev.months,
+          [data.currentMonthId]: {
+            ...currentMonth,
+            bills: [...currentMonth.bills, ...recurringBills]
+          }
+        }
+      }));
     }
   };
 
-  // Handle subscription actions
-  const handleSubscriptionAction = (subscriptionId, action) => {
-    const updatedData = { ...data };
-    updatedData.subscriptions = updatedData.subscriptions.map(sub => {
-      if (sub.id === subscriptionId) {
-        return { ...sub, status: action };
-      }
-      return sub;
-    });
-    setData(updatedData);
-  };
-
-  // Handle add subscription to budget
-  const handleAddSubscriptionToBudget = (subscription) => {
-    const updatedData = { ...data };
-    if (!updatedData.months[selectedMonth]) {
-      updatedData.months[selectedMonth] = { paychecks: [], bills: [] };
-    }
-
+  // Add new bill
+  const addBill = () => {
+    if (!newBill.name || !newBill.amount) return;
+    
     const bill = {
-      id: 'bill-' + Date.now(),
-      name: subscription.name,
-      amount: subscription.amount.toString(),
-      dueDate: new Date(subscription.nextBilling).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      category: subscription.category,
-      paycheckId: null,
-      isSubscription: true,
+      id: Date.now(),
+      name: newBill.name,
+      amount: parseFloat(newBill.amount),
+      dueDate: parseInt(newBill.dueDate) || 1,
+      category: newBill.category,
+      assignedPaycheck: null,
       isPaid: false,
-      actualAmount: null
+      actualAmount: null,
+      isSubscription: newBill.isSubscription
     };
-
-    updatedData.months[selectedMonth].bills.push(bill);
-    setData(updatedData);
-  };
-
-  // Handle update user profile
-  const handleUpdateUserProfile = (updatedUser) => {
-    const updatedData = { ...data };
-    updatedData.user = { ...updatedData.user, ...updatedUser };
-    setData(updatedData);
-  };
-
-  // Handle toggle settings
-  const handleToggleSetting = (setting) => {
-    const updatedData = { ...data };
-    updatedData.user.settings[setting] = !updatedData.user.settings[setting];
     
-    if (setting === 'darkMode') {
-      setIsDarkMode(updatedData.user.settings[setting]);
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: [...currentMonth.bills, bill]
+        }
+      }
+    }));
+    
+    setNewBill({ name: '', amount: '', dueDate: '', category: 'Other', isSubscription: false });
+  };
+
+  // Add new paycheck
+  const addPaycheck = () => {
+    if (!newPaycheck.date || !newPaycheck.amount) return;
+    
+    const paycheck = {
+      id: Date.now(),
+      date: newPaycheck.date,
+      amount: parseFloat(newPaycheck.amount),
+      source: newPaycheck.source,
+      label: newPaycheck.label || `Paycheck ${currentMonth.paychecks.length + 1}`
+    };
+    
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          paychecks: [...currentMonth.paychecks, paycheck]
+        }
+      }
+    }));
+    
+    setNewPaycheck({ date: '', amount: '', source: 'Equitas Health', label: '' });
+  };
+
+  // Update bill
+  const updateBill = (billId, updates) => {
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: currentMonth.bills.map(bill => 
+            bill.id === billId ? { ...bill, ...updates } : bill
+          )
+        }
+      }
+    }));
+  };
+
+  // Update paycheck
+  const updatePaycheck = (paycheckId, updates) => {
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          paychecks: currentMonth.paychecks.map(paycheck => 
+            paycheck.id === paycheckId ? { ...paycheck, ...updates } : paycheck
+          )
+        }
+      }
+    }));
+  };
+
+  // Delete bill
+  const deleteBill = (billId) => {
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: currentMonth.bills.filter(bill => bill.id !== billId)
+        }
+      }
+    }));
+  };
+
+  // Delete paycheck
+  const deletePaycheck = (paycheckId) => {
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          paychecks: currentMonth.paychecks.filter(paycheck => paycheck.id !== paycheckId),
+          bills: currentMonth.bills.map(bill => 
+            bill.assignedPaycheck === paycheckId 
+              ? { ...bill, assignedPaycheck: null }
+              : bill
+          )
+        }
+      }
+    }));
+  };
+
+  // Payment tracking functions
+  const toggleBillPaid = (billId, isPaid) => {
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: currentMonth.bills.map(bill => 
+            bill.id === billId 
+              ? { ...bill, isPaid: isPaid, actualAmount: isPaid ? bill.actualAmount : null }
+              : bill
+          )
+        }
+      }
+    }));
+  };
+
+  const updateActualAmount = (billId, actualAmount) => {
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: currentMonth.bills.map(bill => 
+            bill.id === billId 
+              ? { ...bill, actualAmount: actualAmount }
+              : bill
+          )
+        }
+      }
+    }));
+  };
+
+  // Start editing
+  const startEdit = (item, type) => {
+    setEditingItem({ ...item });
+    setEditType(type);
+  };
+
+  // Save edit
+  const saveEdit = () => {
+    if (editType === 'bill') {
+      updateBill(editingItem.id, editingItem);
+    } else if (editType === 'paycheck') {
+      updatePaycheck(editingItem.id, editingItem);
     }
+    setEditingItem(null);
+    setEditType(null);
+  };
+
+  // Cancel edit
+  const cancelEdit = () => {
+    setEditingItem(null);
+    setEditType(null);
+  };
+
+  // Assign bill to paycheck
+  const assignBillToPaycheck = (billId, paycheckId) => {
+    updateBill(billId, { assignedPaycheck: paycheckId });
+  };
+
+  // Get bills by paycheck
+  const getBillsByPaycheck = (paycheckId) => {
+    return currentMonth.bills.filter(bill => bill.assignedPaycheck === paycheckId);
+  };
+
+  // Get unassigned bills
+  const getUnassignedBills = () => {
+    return currentMonth.bills.filter(bill => bill.assignedPaycheck === null);
+  };
+
+  // Calculate totals
+  const getPaycheckTotal = (paycheckId) => {
+    return getBillsByPaycheck(paycheckId).reduce((sum, bill) => sum + bill.amount, 0);
+  };
+
+  // Updated paycheck remaining calculation with actual amounts
+  const getPaycheckRemaining = (paycheckId) => {
+    const paycheck = currentMonth.paychecks.find(p => p.id === paycheckId);
+    if (!paycheck) return 0;
     
-    setData(updatedData);
+    const assignedBills = getBillsByPaycheck(paycheckId);
+    const actualTotal = assignedBills.reduce((sum, bill) => {
+      if (bill.isPaid && bill.actualAmount) {
+        return sum + parseFloat(bill.actualAmount || 0);
+      }
+      return sum + (bill.isPaid ? bill.amount : 0);
+    }, 0);
+    
+    return paycheck.amount - actualTotal;
   };
 
-  // Handle add connected account
-  const handleAddConnectedAccount = () => {
-    if (!newAccount.name || !newAccount.lastFour) return;
+  const getTotalIncome = () => {
+    return currentMonth.paychecks.reduce((sum, paycheck) => sum + paycheck.amount, 0);
+  };
 
-    const updatedData = { ...data };
+  const getTotalExpenses = () => {
+    return currentMonth.bills.reduce((sum, bill) => sum + bill.amount, 0);
+  };
+
+  // Get historical data
+  const getHistoricalData = () => {
+    return Object.values(data.months).map(month => ({
+      month: `${month.name} ${month.year}`,
+      income: month.paychecks.reduce((sum, p) => sum + p.amount, 0),
+      expenses: month.bills.reduce((sum, b) => sum + b.amount, 0),
+      remaining: month.paychecks.reduce((sum, p) => sum + p.amount, 0) - month.bills.reduce((sum, b) => sum + b.amount, 0)
+    }));
+  };
+
+  // Subscription Management Functions
+  const addNewSubscription = () => {
+    if (!newSubscription.name || !newSubscription.amount || !newSubscription.provider) return;
+    
+    const subscription = {
+      id: `sub-${Date.now()}`,
+      name: newSubscription.name,
+      amount: parseFloat(newSubscription.amount),
+      billingCycle: newSubscription.billingCycle,
+      nextBilling: newSubscription.nextBilling || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      category: newSubscription.category,
+      status: 'active',
+      provider: newSubscription.provider,
+      cancellationUrl: null,
+      description: newSubscription.description || 'Custom subscription',
+      connectedAccount: 'Manual Entry',
+      lastCharged: new Date().toISOString().split('T')[0],
+      autoRenew: true,
+      trialEnds: null,
+      yearlyDiscount: 0
+    };
+    
+    setData(prev => ({
+      ...prev,
+      subscriptions: [...prev.subscriptions, subscription]
+    }));
+    
+    setNewSubscription({ 
+      name: '', 
+      amount: '', 
+      provider: '', 
+      description: '', 
+      billingCycle: 'monthly',
+      category: 'Entertainment',
+      nextBilling: ''
+    });
+    setShowAddSubscriptionModal(false);
+  };
+
+  const updateSubscriptionStatus = (subscriptionId, status) => {
+    setData(prev => ({
+      ...prev,
+      subscriptions: prev.subscriptions.map(sub =>
+        sub.id === subscriptionId ? { ...sub, status } : sub
+      )
+    }));
+  };
+
+  const cancelSubscription = async (subscription) => {
+    console.log(`Cancelling subscription: ${subscription.name}`);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    updateSubscriptionStatus(subscription.id, 'cancelled');
+    setShowCancelModal(null);
+  };
+
+  const pauseSubscription = (subscriptionId) => {
+    updateSubscriptionStatus(subscriptionId, 'paused');
+  };
+
+  const resumeSubscription = (subscriptionId) => {
+    updateSubscriptionStatus(subscriptionId, 'active');
+  };
+
+  // Convert subscription to bill
+  const addSubscriptionToBudget = (subscription) => {
+    const bill = {
+      id: Date.now(),
+      name: subscription.name,
+      amount: subscription.amount,
+      dueDate: new Date(subscription.nextBilling).getDate(),
+      category: subscription.category,
+      assignedPaycheck: null,
+      isPaid: false,
+      actualAmount: null,
+      isSubscription: true,
+      subscriptionId: subscription.id
+    };
+    
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: [...currentMonth.bills, bill]
+        }
+      }
+    }));
+  };
+
+  // Calculate subscription totals
+  const getActiveSubscriptionsTotal = () => {
+    return data.subscriptions
+      .filter(sub => sub.status === 'active')
+      .reduce((sum, sub) => sum + sub.amount, 0);
+  };
+
+  const getYearlySubscriptionSavings = () => {
+    return data.subscriptions
+      .filter(sub => sub.status === 'active' && sub.yearlyDiscount > 0)
+      .reduce((sum, sub) => sum + sub.yearlyDiscount, 0);
+  };
+
+  // Connected Accounts Management
+  const addConnectedAccount = () => {
+    if (!newAccount.name || !newAccount.provider || !newAccount.last4) return;
+    
     const account = {
-      id: 'account-' + Date.now(),
-      name: newAccount.name,
+      id: `acc-${Date.now()}`,
       type: newAccount.type,
-      lastFour: newAccount.lastFour,
-      balance: newAccount.balance || '0',
-      addedAt: new Date().toISOString()
+      name: newAccount.name,
+      last4: newAccount.last4,
+      provider: newAccount.provider,
+      status: 'connected',
+      connectedAt: new Date().toISOString().split('T')[0]
     };
-
-    updatedData.user.connectedAccounts.push(account);
-    setData(updatedData);
-    setNewAccount({ name: '', type: 'checking', lastFour: '', balance: '' });
-    setShowAccountModal(false);
+    
+    setData(prev => ({
+      ...prev,
+      connectedAccounts: [...prev.connectedAccounts, account]
+    }));
+    
+    setNewAccount({ name: '', type: 'checking', provider: '', last4: '' });
+    setShowAddAccountModal(false);
   };
 
-  // Handle delete connected account
-  const handleDeleteConnectedAccount = (accountId) => {
-    const updatedData = { ...data };
-    updatedData.user.connectedAccounts = updatedData.user.connectedAccounts.filter(account => account.id !== accountId);
-    setData(updatedData);
+  const startEditAccount = (account) => {
+    setEditingAccount({ ...account });
   };
 
-  // Handle add new user
-  const handleAddNewUser = () => {
+  const saveAccountEdit = () => {
+    setData(prev => ({
+      ...prev,
+      connectedAccounts: prev.connectedAccounts.map(account =>
+        account.id === editingAccount.id ? editingAccount : account
+      )
+    }));
+    setEditingAccount(null);
+  };
+
+  const deleteConnectedAccount = (accountId) => {
+    setData(prev => ({
+      ...prev,
+      connectedAccounts: prev.connectedAccounts.filter(account => account.id !== accountId)
+    }));
+  };
+
+  // User Management Functions
+  const updateUser = (updates) => {
+    setData(prev => ({
+      ...prev,
+      user: { ...prev.user, ...updates }
+    }));
+  };
+
+  const startEditUser = () => {
+    setEditingUser({ ...data.user });
+  };
+
+  const saveUserEdit = () => {
+    updateUser(editingUser);
+    setEditingUser(null);
+  };
+
+  const cancelUserEdit = () => {
+    setEditingUser(null);
+  };
+
+  const addNewUser = () => {
     if (!newUser.name || !newUser.email) return;
-
-    // For now, just replace current user (in a real app, this would create a new user session)
-    const updatedData = {
-      user: {
-        id: 'user-' + Date.now(),
-        name: newUser.name,
-        email: newUser.email,
-        company: newUser.company,
-        createdAt: new Date().toISOString(),
-        settings: {
-          notifications: true,
-          darkMode: false
-        },
-        connectedAccounts: []
-      },
-      months: {},
-      subscriptions: []
+    
+    const userId = `user-${Date.now()}`;
+    const userData = {
+      id: userId,
+      name: newUser.name,
+      email: newUser.email,
+      company: newUser.company || 'N/A',
+      createdAt: new Date().toISOString().split('T')[0],
+      settings: {
+        notifications: true,
+        darkMode: false,
+        currency: 'USD'
+      }
     };
-
-    setData(updatedData);
+    
+    // Create new user data structure
+    const newUserData = {
+      user: userData,
+      currentMonthId: 'current-month',
+      months: {
+        'current-month': {
+          id: 'current-month',
+          name: new Date().toLocaleDateString('en-US', { month: 'long' }),
+          year: new Date().getFullYear(),
+          bills: [],
+          paychecks: []
+        }
+      },
+      subscriptions: [],
+      connectedAccounts: []
+    };
+    
+    // In a real app, you'd save this to a database with the user ID
+    // For now, we'll just switch to this new user
+    setData(newUserData);
     setNewUser({ name: '', email: '', company: '' });
     setShowAddUserModal(false);
     setShowUserManagement(false);
-    setSelectedMonth('July 2025');
   };
 
-  // Handle delete current user
-  const handleDeleteCurrentUser = () => {
-    // Reset to default data
-    const defaultData = {
+  const deleteCurrentUser = () => {
+    // In a real app, you'd delete from database and redirect to login
+    // For demo purposes, we'll create a fresh user
+    const freshUserData = {
       user: {
-        id: 'user-1',
-        name: 'New User',
-        email: 'user@example.com',
-        company: 'Company Name',
-        createdAt: new Date().toISOString(),
+        id: 'user-demo',
+        name: 'Demo User',
+        email: 'demo@example.com',
+        company: 'Demo Company',
+        createdAt: new Date().toISOString().split('T')[0],
         settings: {
           notifications: true,
-          darkMode: false
-        },
-        connectedAccounts: []
+          darkMode: false,
+          currency: 'USD'
+        }
       },
-      months: {},
-      subscriptions: []
+      currentMonthId: 'demo-month',
+      months: {
+        'demo-month': {
+          id: 'demo-month',
+          name: new Date().toLocaleDateString('en-US', { month: 'long' }),
+          year: new Date().getFullYear(),
+          bills: [],
+          paychecks: []
+        }
+      },
+      subscriptions: [],
+      connectedAccounts: []
     };
-
-    setData(defaultData);
+    
+    setData(freshUserData);
     setShowDeleteUserModal(false);
     setShowUserManagement(false);
-    setSelectedMonth('July 2025');
+    setShowUserProfile(false);
   };
 
-  const unassignedBills = currentMonthData.bills.filter(bill => !bill.paycheckId);
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  };
 
-  const categories = ['Utilities', 'Food', 'Transportation', 'Entertainment', 'Health & Fitness', 'Shopping', 'Insurance', 'Debt', 'Savings', 'Other', 'Productivity'];
-  const accountTypes = ['checking', 'savings', 'credit', 'investment'];
+  // Format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
 
-  return (
-    <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-indigo-50 via-white to-cyan-50'}`}>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">FinanceHub Pro</h1>
-            <p className="text-gray-600 dark:text-gray-400">Complete Financial Management System</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            {/* Month Navigation */}
-            <div className="flex items-center space-x-2">
-              {Object.keys(data.months).map(month => (
-                <button
-                  key={month}
-                  onClick={() => setSelectedMonth(month)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    selectedMonth === month
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  {month}
-                </button>
-              ))}
-              <button
-                onClick={handleCreateNewMonth}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                + New Month
-              </button>
-            </div>
-            
-            {/* User Profile */}
-            <div className="relative">
-              <button
-                onClick={() => setShowUserModal(true)}
-                className="flex items-center space-x-2 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
-                  {data.user.name.charAt(0)}
-                </div>
-                <span className="text-gray-900 dark:text-white font-medium">{data.user.name}</span>
-              </button>
-            </div>
-          </div>
-        </div>
+  const isDarkMode = data.user.settings.darkMode;
 
-        {/* Navigation Tabs */}
-        <div className="flex space-x-1 mb-8 bg-white dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700">
-          {[
-            { id: 'overview', label: 'Overview', icon: '📊' },
-            { id: 'subscriptions', label: 'Subscriptions', icon: '📱' },
-            { id: 'manage', label: 'Manage', icon: '⚙️' },
-            { id: 'history', label: 'History', icon: '📈' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg font-medium transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+  const styles = {
+    container: {
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      background: isDarkMode 
+        ? 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)'
+        : 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
+      minHeight: '100vh',
+      padding: '20px',
+      transition: 'all 0.3s ease'
+    },
+    header: {
+      textAlign: 'center',
+      marginBottom: '30px',
+      color: 'white',
+      position: 'relative'
+    },
+    title: {
+      fontSize: '32px',
+      fontWeight: '700',
+      marginBottom: '10px',
+      textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+    },
+    userButton: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      color: 'white',
+      border: 'none',
+      padding: '10px 15px',
+      borderRadius: '25px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      backdropFilter: 'blur(10px)'
+    },
+    monthSelector: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '10px',
+      marginBottom: '20px',
+      flexWrap: 'wrap'
+    },
+    monthButton: {
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      color: 'white',
+      border: 'none',
+      padding: '8px 16px',
+      borderRadius: '20px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      transition: 'all 0.3s ease',
+      backdropFilter: 'blur(10px)'
+    },
+    monthButtonActive: {
+      backgroundColor: 'rgba(255,255,255,0.9)',
+      color: isDarkMode ? '#4f46e5' : '#4f46e5',
+      transform: 'translateY(-2px)'
+    },
+    newMonthButton: {
+      backgroundColor: '#10b981',
+      color: 'white',
+      border: 'none',
+      padding: '8px 16px',
+      borderRadius: '20px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500'
+    },
+    nav: {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '10px',
+      marginBottom: '30px',
+      flexWrap: 'wrap'
+    },
+    navButton: {
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      color: 'white',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '25px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      transition: 'all 0.3s ease',
+      backdropFilter: 'blur(10px)'
+    },
+    navButtonActive: {
+      backgroundColor: 'rgba(255,255,255,0.9)',
+      color: isDarkMode ? '#4f46e5' : '#4f46e5',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+    },
+    card: {
+      backgroundColor: isDarkMode 
+        ? 'rgba(45, 55, 72, 0.95)' 
+        : 'rgba(255,255,255,0.95)',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '20px',
+      padding: '25px',
+      marginBottom: '20px',
+      boxShadow: isDarkMode 
+        ? '0 8px 32px rgba(0,0,0,0.3)' 
+        : '0 8px 32px rgba(0,0,0,0.1)',
+      backdropFilter: 'blur(10px)',
+      border: isDarkMode 
+        ? '1px solid rgba(255,255,255,0.1)' 
+        : '1px solid rgba(255,255,255,0.2)',
+      transition: 'all 0.3s ease'
+    },
+    modal: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000
+    },
+    modalContent: {
+      backgroundColor: isDarkMode ? '#2d3748' : 'white',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '16px',
+      padding: '30px',
+      maxWidth: '500px',
+      width: '90%',
+      maxHeight: '80vh',
+      overflowY: 'auto',
+      transition: 'all 0.3s ease'
+    },
+    modalTitle: {
+      fontSize: '24px',
+      fontWeight: '600',
+      marginBottom: '20px',
+      color: isDarkMode ? '#f7fafc' : '#2c3e50'
+    },
+    formSection: {
+      marginBottom: '30px'
+    },
+    formTitle: {
+      fontSize: '20px',
+      fontWeight: '600',
+      marginBottom: '15px',
+      color: '#2c3e50'
+    },
+    formGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '15px',
+      marginBottom: '15px'
+    },
+    input: {
+      padding: '12px 15px',
+      border: isDarkMode ? '2px solid #4a5568' : '2px solid #e0e0e0',
+      backgroundColor: isDarkMode ? '#1a202c' : 'white',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '8px',
+      fontSize: '14px',
+      transition: 'border-color 0.3s ease',
+      outline: 'none'
+    },
+    inputFocus: {
+      borderColor: '#4f46e5'
+    },
+    select: {
+      padding: '12px 15px',
+      border: isDarkMode ? '2px solid #4a5568' : '2px solid #e0e0e0',
+      backgroundColor: isDarkMode ? '#1a202c' : 'white',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '8px',
+      fontSize: '14px',
+      cursor: 'pointer'
+    },
+    button: {
+      backgroundColor: '#4f46e5',
+      color: 'white',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '8px',
+      fontSize: '14px',
+      fontWeight: '500',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      margin: '5px'
+    },
+    buttonSecondary: {
+      backgroundColor: isDarkMode ? '#4a5568' : '#95a5a6',
+      color: 'white'
+    },
+    buttonDanger: {
+      backgroundColor: '#ef4444',
+      color: 'white'
+    },
+    buttonSuccess: {
+      backgroundColor: '#10b981',
+      color: 'white'
+    },
+    buttonWarning: {
+      backgroundColor: '#f59e0b',
+      color: 'white'
+    },
+    editButton: {
+      backgroundColor: '#0ea5e9',
+      color: 'white',
+      border: 'none',
+      padding: '6px 12px',
+      borderRadius: '6px',
+      fontSize: '12px',
+      cursor: 'pointer',
+      marginLeft: '5px'
+    },
+    deleteButton: {
+      backgroundColor: '#ef4444',
+      color: 'white',
+      border: 'none',
+      padding: '6px 12px',
+      borderRadius: '6px',
+      fontSize: '12px',
+      cursor: 'pointer',
+      marginLeft: '5px'
+    },
+    statsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '20px',
+      marginBottom: '30px'
+    },
+    statCard: {
+      background: isDarkMode 
+        ? 'linear-gradient(135deg, #4c51bf 0%, #065f46 100%)'
+        : 'linear-gradient(135deg, #4f46e5 0%, #10b981 100%)',
+      color: 'white',
+      borderRadius: '16px',
+      padding: '20px',
+      textAlign: 'center',
+      boxShadow: isDarkMode 
+        ? '0 4px 20px rgba(79, 70, 229, 0.2)'
+        : '0 4px 20px rgba(79, 70, 229, 0.3)',
+      transition: 'transform 0.3s ease',
+      cursor: 'pointer'
+    },
+    statCardHover: {
+      transform: 'translateY(-5px)'
+    },
+    statValue: {
+      fontSize: '24px',
+      fontWeight: '700',
+      marginBottom: '5px'
+    },
+    statLabel: {
+      fontSize: '14px',
+      opacity: '0.9'
+    },
+    paycheckGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+      gap: '25px',
+      marginBottom: '30px'
+    },
+    paycheckCard: {
+      backgroundColor: isDarkMode 
+        ? 'rgba(45, 55, 72, 0.95)'
+        : 'rgba(255,255,255,0.95)',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '16px',
+      padding: '20px',
+      boxShadow: isDarkMode
+        ? '0 6px 25px rgba(0,0,0,0.3)'
+        : '0 6px 25px rgba(0,0,0,0.1)',
+      border: isDarkMode
+        ? '1px solid rgba(255,255,255,0.1)'
+        : '1px solid rgba(255,255,255,0.3)',
+      position: 'relative',
+      overflow: 'hidden',
+      transition: 'all 0.3s ease'
+    },
+    paycheckHeader: {
+      borderBottom: isDarkMode ? '2px solid #4f46e5' : '2px solid #4f46e5',
+      paddingBottom: '15px',
+      marginBottom: '15px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
+    },
+    paycheckTitle: {
+      fontSize: '18px',
+      fontWeight: '600',
+      color: isDarkMode ? '#f7fafc' : '#2c3e50',
+      marginBottom: '5px'
+    },
+    paycheckAmount: {
+      fontSize: '24px',
+      fontWeight: '700',
+      color: '#10b981'
+    },
+    billsList: {
+      maxHeight: '300px',
+      overflowY: 'auto'
+    },
+    billItem: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '10px 0',
+      borderBottom: isDarkMode ? '1px solid #4a5568' : '1px solid #eee',
+      transition: 'all 0.3s ease'
+    },
+    billName: {
+      fontWeight: '500',
+      color: isDarkMode ? '#e2e8f0' : '#2c3e50',
+      flex: 1
+    },
+    billAmount: {
+      fontWeight: '600',
+      color: '#ef4444'
+    },
+    remainingAmount: {
+      textAlign: 'center',
+      marginTop: '15px',
+      padding: '10px',
+      borderRadius: '8px',
+      fontWeight: '600'
+    },
+    positiveRemaining: {
+      backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.2)' : '#d5f4e6',
+      color: '#10b981'
+    },
+    negativeRemaining: {
+      backgroundColor: isDarkMode ? 'rgba(239, 68, 68, 0.2)' : '#fadbd8',
+      color: '#ef4444'
+    },
+    unassignedSection: {
+      backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.1)' : '#fff3cd',
+      border: isDarkMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #ffeaa7',
+      borderRadius: '12px',
+      padding: '20px',
+      marginTop: '20px'
+    },
+    unassignedTitle: {
+      color: isDarkMode ? '#f59e0b' : '#856404',
+      fontSize: '16px',
+      fontWeight: '600',
+      marginBottom: '15px'
+    },
+    subscriptionGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+      gap: '20px',
+      marginBottom: '30px'
+    },
+    subscriptionCard: {
+      backgroundColor: isDarkMode ? '#2d3748' : 'white',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '16px',
+      padding: '20px',
+      boxShadow: isDarkMode
+        ? '0 4px 15px rgba(0,0,0,0.3)'
+        : '0 4px 15px rgba(0,0,0,0.1)',
+      border: isDarkMode ? '1px solid #4a5568' : '1px solid #e0e0e0',
+      position: 'relative',
+      overflow: 'hidden',
+      transition: 'all 0.3s ease'
+    },
+    subscriptionHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: '15px'
+    },
+    subscriptionName: {
+      fontSize: '18px',
+      fontWeight: '600',
+      color: isDarkMode ? '#f7fafc' : '#2c3e50',
+      marginBottom: '5px'
+    },
+    statusBadge: {
+      padding: '4px 12px',
+      borderRadius: '20px',
+      fontSize: '12px',
+      fontWeight: '500',
+      textTransform: 'uppercase'
+    },
+    statusActive: {
+      backgroundColor: '#d5f4e6',
+      color: '#27ae60'
+    },
+    statusTrial: {
+      backgroundColor: '#fff3cd',
+      color: '#856404'
+    },
+    statusPaused: {
+      backgroundColor: '#f8d7da',
+      color: '#721c24'
+    },
+    statusCancelled: {
+      backgroundColor: '#e2e3e5',
+      color: '#383d41'
+    },
+    subscriptionDetails: {
+      fontSize: '14px',
+      color: '#666',
+      marginBottom: '15px'
+    },
+    buttonGroup: {
+      display: 'flex',
+      gap: '8px',
+      flexWrap: 'wrap'
+    },
+    historicalChart: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gap: '15px',
+      marginTop: '20px'
+    },
+    historicalCard: {
+      backgroundColor: isDarkMode ? '#2d3748' : 'white',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      borderRadius: '12px',
+      padding: '15px',
+      textAlign: 'center',
+      boxShadow: isDarkMode
+        ? '0 2px 8px rgba(0,0,0,0.3)'
+        : '0 2px 8px rgba(0,0,0,0.1)',
+      transition: 'all 0.3s ease'
+    },
+    savingsAlert: {
+      backgroundColor: isDarkMode ? 'rgba(6, 182, 212, 0.1)' : '#d1ecf1',
+      border: isDarkMode ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid #bee5eb',
+      borderRadius: '8px',
+      padding: '15px',
+      marginBottom: '20px',
+      color: isDarkMode ? '#67e8f9' : '#0c5460'
+    },
+    accountCard: {
+      backgroundColor: isDarkMode ? '#1a202c' : '#f8f9fa',
+      color: isDarkMode ? '#e2e8f0' : '#2d3748',
+      padding: '15px',
+      borderRadius: '8px',
+      marginBottom: '10px',
+      border: isDarkMode ? '1px solid #4a5568' : '1px solid #e0e0e0',
+      transition: 'all 0.3s ease'
+    }
+  };
 
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div>
-            {/* Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {(() => {
-                const totalIncome = currentMonthData.paychecks.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-                const budgetedExpenses = currentMonthData.bills.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0);
-                const actualExpenses = currentMonthData.bills.reduce((sum, bill) => {
-                  if (bill.isPaid && bill.actualAmount) {
-                    return sum + parseFloat(bill.actualAmount || 0);
-                  }
-                  return sum + (bill.isPaid ? parseFloat(bill.amount || 0) : 0);
-                }, 0);
-                const paidBills = currentMonthData.bills.filter(b => b.isPaid).length;
-                const totalBills = currentMonthData.bills.length;
-                
-                return (
-                  <>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">${totalIncome.toFixed(2)}</div>
-                      <div className="text-gray-600 dark:text-gray-400">Total Income</div>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                      <div className="text-2xl font-bold text-red-600 dark:text-red-400">${budgetedExpenses.toFixed(2)}</div>
-                      <div className="text-gray-600 dark:text-gray-400">Budgeted Expenses</div>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                      <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">${actualExpenses.toFixed(2)}</div>
-                      <div className="text-gray-600 dark:text-gray-400">Actual Expenses</div>
-                      {actualExpenses > 0 && budgetedExpenses !== actualExpenses && (
-                        <div className={`text-sm ${budgetedExpenses > actualExpenses ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {budgetedExpenses > actualExpenses ? 'Under' : 'Over'} by ${Math.abs(budgetedExpenses - actualExpenses).toFixed(2)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                      <div className={`text-2xl font-bold ${(totalIncome - (actualExpenses > 0 ? actualExpenses : budgetedExpenses)) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                        ${(totalIncome - (actualExpenses > 0 ? actualExpenses : budgetedExpenses)).toFixed(2)}
-                      </div>
-                      <div className="text-gray-600 dark:text-gray-400">
-                        {actualExpenses > 0 ? 'Actual' : 'Projected'} Remaining
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        Bills paid: {paidBills}/{totalBills}
-                      </div>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Paychecks Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {currentMonthData.paychecks.map(paycheck => (
-                <div key={paycheck.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  <div className="bg-gradient-to-r from-indigo-600 to-cyan-600 p-4 text-white">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="text-xl font-bold">{paycheck.name} • {paycheck.date}</h3>
-                        <div className="text-2xl font-bold">${paycheck.amount}</div>
-                      </div>
-                      <div className="space-x-2">
-                        <button
-                          onClick={() => handleEditPaycheck(paycheck)}
-                          className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg text-sm transition-colors"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeletePaycheck(paycheck.id)}
-                          className="bg-red-500/20 hover:bg-red-500/30 px-3 py-1 rounded-lg text-sm transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-4 space-y-3">
-                    {currentMonthData.bills.filter(bill => bill.paycheckId === paycheck.id).map(bill => (
-                      <div key={bill.id} className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${bill.isPaid ? 'border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-700'}`}>
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              checked={bill.isPaid || false}
-                              onChange={(e) => handleTogglePaid(bill.id, e.target.checked)}
-                              className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                            />
-                            {bill.isSubscription && <span className="text-sm">📱</span>}
-                            <span className={`font-medium ${bill.isPaid ? 'text-green-700 dark:text-green-300 line-through' : 'text-gray-900 dark:text-white'}`}>{bill.name}</span>
-                          </div>
-                          <div className="text-right">
-                            <span className="font-bold text-red-600 dark:text-red-400">${bill.amount}</span>
-                            {bill.isPaid && bill.actualAmount && (
-                              <div className="text-sm text-green-600 dark:text-green-400">
-                                Paid: ${bill.actualAmount}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        {bill.isPaid && (
-                          <div className="mb-2">
-                            <input
-                              type="number"
-                              placeholder="Actual amount paid"
-                              value={bill.actualAmount || ''}
-                              onChange={(e) => handleUpdateActualAmount(bill.id, e.target.value)}
-                              className="w-full px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                          </div>
-                        )}
-                        <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
-                          <span>Due: {bill.dueDate} | {bill.category}</span>
-                          <div className="space-x-2">
-                            <button
-                              onClick={() => handleEditBill(bill)}
-                              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleRemoveBillFromPaycheck(bill.id)}
-                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="p-4 bg-gray-50 dark:bg-gray-900/50">
-                    {(() => {
-                      const paycheckBills = currentMonthData.bills.filter(b => b.paycheckId === paycheck.id);
-                      const budgetedTotal = paycheckBills.reduce((sum, bill) => sum + parseFloat(bill.amount || 0), 0);
-                      const actualTotal = paycheckBills.reduce((sum, bill) => {
-                        if (bill.isPaid && bill.actualAmount) {
-                          return sum + parseFloat(bill.actualAmount || 0);
-                        }
-                        return sum + (bill.isPaid ? parseFloat(bill.amount || 0) : 0);
-                      }, 0);
-                      const budgetedRemaining = parseFloat(paycheck.amount) - budgetedTotal;
-                      const actualRemaining = parseFloat(paycheck.amount) - actualTotal;
-                      const paidBills = paycheckBills.filter(b => b.isPaid).length;
-                      const totalBills = paycheckBills.length;
-                      
-                      return (
-                        <div className={`p-3 rounded-lg ${budgetedRemaining >= 0 ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Budgeted:</span>
-                            <span className={`font-bold ${budgetedRemaining >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                              ${budgetedRemaining.toFixed(2)}
-                            </span>
-                          </div>
-                          {actualTotal > 0 && (
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Actual:</span>
-                              <span className={`font-bold ${actualRemaining >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                ${actualRemaining.toFixed(2)}
-                              </span>
-                            </div>
-                          )}
-                          <div className="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400">
-                            <span>Bills paid: {paidBills}/{totalBills}</span>
-                            {budgetedTotal !== actualTotal && actualTotal > 0 && (
-                              <span className={budgetedTotal > actualTotal ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
-                                {budgetedTotal > actualTotal ? 'Under' : 'Over'} by ${Math.abs(budgetedTotal - actualTotal).toFixed(2)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Unassigned Bills */}
-            {unassignedBills.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Unassigned Bills</h3>
-                <div className="space-y-4">
-                  {unassignedBills.map(bill => (
-                    <div key={bill.id} className={`bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 ${bill.isPaid ? 'border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20' : ''}`}>
-                      <div className="flex justify-between items-center mb-2">
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={bill.isPaid || false}
-                            onChange={(e) => handleTogglePaid(bill.id, e.target.checked)}
-                            className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                          />
-                          {bill.isSubscription && <span className="text-sm">📱</span>}
-                          <span className={`font-medium ${bill.isPaid ? 'text-green-700 dark:text-green-300 line-through' : 'text-gray-900 dark:text-white'}`}>{bill.name}</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="font-bold text-red-600 dark:text-red-400">${bill.amount}</span>
-                          {bill.isPaid && bill.actualAmount && (
-                            <div className="text-sm text-green-600 dark:text-green-400">
-                              Paid: ${bill.actualAmount}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {bill.isPaid && (
-                        <div className="mb-2">
-                          <input
-                            type="number"
-                            placeholder="Actual amount paid"
-                            value={bill.actualAmount || ''}
-                            onChange={(e) => handleUpdateActualAmount(bill.id, e.target.value)}
-                            className="w-full px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                          />
-                        </div>
-                      )}
-                      <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        <span>Due: {bill.dueDate} | {bill.category}</span>
-                        <div className="space-x-2">
-                          <button
-                            onClick={() => handleEditBill(bill)}
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteBill(bill.id)}
-                            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                      <select
-                        value={bill.paycheckId || ''}
-                        onChange={(e) => handleAssignBill(bill.id, e.target.value)}
-                        className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      >
-                        <option value="">Assign to paycheck...</option>
-                        {currentMonthData.paychecks.map(paycheck => (
-                          <option key={paycheck.id} value={paycheck.id}>
-                            {paycheck.name} (${paycheck.amount})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-                </div>
+  const renderOverview = () => (
+    <div>
+      {/* Stats Cards - Updated with payment tracking */}
+      <div style={styles.statsGrid}>
+        {(() => {
+          const totalIncome = getTotalIncome();
+          const budgetedExpenses = getTotalExpenses();
+          const actualExpenses = currentMonth.bills.reduce((sum, bill) => {
+            if (bill.isPaid && bill.actualAmount) {
+              return sum + parseFloat(bill.actualAmount || 0);
+            }
+            return sum + (bill.isPaid ? bill.amount : 0);
+          }, 0);
+          const paidBills = currentMonth.bills.filter(b => b.isPaid).length;
+          
+          return (
+            <>
+              <div style={styles.statCard}>
+                <div style={styles.statValue}>{formatCurrency(totalIncome)}</div>
+                <div style={styles.statLabel}>Total Income</div>
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Subscriptions Tab */}
-        {activeTab === 'subscriptions' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Subscription Management</h2>
-              <button
-                onClick={() => setShowSubscriptionModal(true)}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                + Add New Subscription
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {data.subscriptions.map(subscription => (
-                <div key={subscription.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-bold text-gray-900 dark:text-white">{subscription.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{subscription.provider}</p>
-                    </div>
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      subscription.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                      subscription.status === 'trial' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                      subscription.status === 'paused' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400' :
-                      'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                    }`}>
-                      {subscription.status}
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2 mb-4">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Amount:</span>
-                      <span className="font-medium text-gray-900 dark:text-white">${subscription.amount}/{subscription.billingCycle}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Next billing:</span>
-                      <span className="text-sm text-gray-900 dark:text-white">{new Date(subscription.nextBilling).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Category:</span>
-                      <span className="text-sm text-gray-900 dark:text-white">{subscription.category}</span>
-                    </div>
-                    {subscription.description && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Plan:</span>
-                        <span className="text-sm text-gray-900 dark:text-white">{subscription.description}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {subscription.status === 'active' && (
-                      <>
-                        <button
-                          onClick={() => handleSubscriptionAction(subscription.id, 'paused')}
-                          className="flex-1 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400 px-3 py-1 rounded text-sm hover:bg-yellow-200 dark:hover:bg-yellow-900/30 transition-colors"
-                        >
-                          Pause
-                        </button>
-                        <button
-                          onClick={() => handleSubscriptionAction(subscription.id, 'cancelled')}
-                          className="flex-1 bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400 px-3 py-1 rounded text-sm hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    )}
-                    
-                    {subscription.status === 'paused' && (
-                      <button
-                        onClick={() => handleSubscriptionAction(subscription.id, 'active')}
-                        className="flex-1 bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 px-3 py-1 rounded text-sm hover:bg-green-200 dark:hover:bg-green-900/30 transition-colors"
-                      >
-                        Resume
-                      </button>
-                    )}
-                    
-                    {subscription.status === 'cancelled' && (
-                      <span className="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-1">
-                        Cancelled
-                      </span>
-                    )}
-                    
-                    <button
-                      onClick={() => handleAddSubscriptionToBudget(subscription)}
-                      className="flex-1 bg-indigo-100 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-400 px-3 py-1 rounded text-sm hover:bg-indigo-200 dark:hover:bg-indigo-900/30 transition-colors"
-                    >
-                      Add to Budget
-                    </button>
-                  </div>
-
-                  {subscription.billingCycle === 'Monthly' && (
-                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <div className="text-sm text-blue-800 dark:text-blue-400">
-                        💰 Save ${((subscription.amount * 12) - (subscription.amount * 10)).toFixed(2)}/year with annual billing
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Manage Tab */}
-        {activeTab === 'manage' && (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Add Bill */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Add New Bill</h3>
-                <button
-                  onClick={() => setShowBillModal(true)}
-                  className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  + Add Bill
-                </button>
+              <div style={styles.statCard}>
+                <div style={styles.statValue}>{formatCurrency(budgetedExpenses)}</div>
+                <div style={styles.statLabel}>Budgeted Expenses</div>
               </div>
-
-              {/* Add Paycheck */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Add New Paycheck</h3>
-                <button
-                  onClick={() => setShowPaycheckModal(true)}
-                  className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  + Add Paycheck
-                </button>
-              </div>
-            </div>
-
-            {/* Copy from Previous Month */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Copy Recurring Bills</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Copy bills from your previous month to save time on recurring expenses.
-              </p>
-              <button
-                onClick={handleCopyFromPreviousMonth}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-                disabled={Object.keys(data.months).length <= 1}
-              >
-                Copy from Previous Month
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* History Tab */}
-        {activeTab === 'history' && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Financial History</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Object.entries(data.months).map(([month, monthData]) => {
-                const totalIncome = monthData.paychecks.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
-                const totalExpenses = monthData.bills.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0);
-                const remaining = totalIncome - totalExpenses;
-                
-                return (
-                  <div key={month} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-4">{month}</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Income:</span>
-                        <span className="font-medium text-green-600 dark:text-green-400">${totalIncome.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Expenses:</span>
-                        <span className="font-medium text-red-600 dark:text-red-400">${totalExpenses.toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between border-t border-gray-200 dark:border-gray-600 pt-2">
-                        <span className="font-medium text-gray-900 dark:text-white">Remaining:</span>
-                        <span className={`font-bold ${remaining >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          ${remaining.toFixed(2)}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {monthData.bills.length} bills • {monthData.paychecks.length} paychecks
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Bill Modal */}
-        {showBillModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                {editingBill ? 'Edit Bill' : 'Add New Bill'}
-              </h3>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Bill name"
-                  value={newBill.name}
-                  onChange={(e) => setNewBill({ ...newBill, name: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <input
-                  type="number"
-                  placeholder="Amount"
-                  value={newBill.amount}
-                  onChange={(e) => setNewBill({ ...newBill, amount: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <input
-                  type="text"
-                  placeholder="Due date (e.g., Aug 15)"
-                  value={newBill.dueDate}
-                  onChange={(e) => setNewBill({ ...newBill, dueDate: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <select
-                  value={newBill.category}
-                  onChange={(e) => setNewBill({ ...newBill, category: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex space-x-3 mt-6">
-                <button
-                  onClick={editingBill ? handleSaveEditedBill : handleAddBill}
-                  className="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  {editingBill ? 'Save Changes' : 'Add Bill'}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowBillModal(false);
-                    setEditingBill(null);
-                    setNewBill({ name: '', amount: '', dueDate: '', category: 'Utilities' });
-                  }}
-                  className="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Paycheck Modal */}
-        {showPaycheckModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                {editingPaycheck ? 'Edit Paycheck' : 'Add New Paycheck'}
-              </h3>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Paycheck name (e.g., 1st Paycheck)"
-                  value={newPaycheck.name}
-                  onChange={(e) => setNewPaycheck({ ...newPaycheck, name: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <input
-                  type="number"
-                  placeholder="Amount"
-                  value={newPaycheck.amount}
-                  onChange={(e) => setNewPaycheck({ ...newPaycheck, amount: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <input
-                  type="text"
-                  placeholder="Date (e.g., Aug 15)"
-                  value={newPaycheck.date}
-                  onChange={(e) => setNewPaycheck({ ...newPaycheck, date: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div className="flex space-x-3 mt-6">
-                <button
-                  onClick={editingPaycheck ? handleSaveEditedPaycheck : handleAddPaycheck}
-                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  {editingPaycheck ? 'Save Changes' : 'Add Paycheck'}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowPaycheckModal(false);
-                    setEditingPaycheck(null);
-                    setNewPaycheck({ name: '', amount: '', date: '' });
-                  }}
-                  className="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Subscription Modal */}
-        {showSubscriptionModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Add New Subscription</h3>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Subscription name (e.g., Netflix)"
-                  value={newSubscription.name}
-                  onChange={(e) => setNewSubscription({ ...newSubscription, name: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <input
-                  type="text"
-                  placeholder="Provider (e.g., Netflix Inc.)"
-                  value={newSubscription.provider}
-                  onChange={(e) => setNewSubscription({ ...newSubscription, provider: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <input
-                  type="number"
-                  placeholder="Monthly amount"
-                  value={newSubscription.amount}
-                  onChange={(e) => setNewSubscription({ ...newSubscription, amount: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <input
-                  type="text"
-                  placeholder="Description (e.g., Basic Plan)"
-                  value={newSubscription.description}
-                  onChange={(e) => setNewSubscription({ ...newSubscription, description: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <select
-                  value={newSubscription.category}
-                  onChange={(e) => setNewSubscription({ ...newSubscription, category: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="Entertainment">Entertainment</option>
-                  <option value="Productivity">Productivity</option>
-                  <option value="Health & Fitness">Health & Fitness</option>
-                  <option value="Shopping">Shopping</option>
-                  <option value="Other">Other</option>
-                </select>
-                <select
-                  value={newSubscription.billingCycle}
-                  onChange={(e) => setNewSubscription({ ...newSubscription, billingCycle: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="Monthly">Monthly</option>
-                  <option value="Annual">Annual</option>
-                  <option value="Weekly">Weekly</option>
-                </select>
-                <input
-                  type="date"
-                  placeholder="Next billing date"
-                  value={newSubscription.nextBilling}
-                  onChange={(e) => setNewSubscription({ ...newSubscription, nextBilling: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div className="flex space-x-3 mt-6">
-                <button
-                  onClick={handleAddSubscription}
-                  className="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  Add Subscription
-                </button>
-                <button
-                  onClick={() => {
-                    setShowSubscriptionModal(false);
-                    setNewSubscription({
-                      name: '',
-                      provider: '',
-                      amount: '',
-                      billingCycle: 'Monthly',
-                      nextBilling: '',
-                      description: '',
-                      category: 'Entertainment'
-                    });
-                  }}
-                  className="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* User Profile Modal */}
-        {showUserModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {data.user.name.charAt(0)}
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{data.user.name}</h3>
-                  <p className="text-gray-600 dark:text-gray-400">{data.user.email}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">{data.user.company}</p>
-                </div>
-              </div>
-
-              {/* Settings */}
-              <div className="space-y-4 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-900 dark:text-white">Dark Mode</span>
-                  <button
-                    onClick={() => {
-                      setIsDarkMode(!isDarkMode);
-                      handleToggleSetting('darkMode');
-                    }}
-                    className={`w-12 h-6 rounded-full transition-colors ${isDarkMode ? 'bg-indigo-600' : 'bg-gray-300'}`}
-                  >
-                    <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${isDarkMode ? 'translate-x-6' : 'translate-x-0.5'}`} />
-                  </button>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-900 dark:text-white">Notifications</span>
-                  <button
-                    onClick={() => handleToggleSetting('notifications')}
-                    className={`w-12 h-6 rounded-full transition-colors ${data.user.settings.notifications ? 'bg-indigo-600' : 'bg-gray-300'}`}
-                  >
-                    <div className={`w-5 h-5 bg-white rounded-full shadow transition-transform ${data.user.settings.notifications ? 'translate-x-6' : 'translate-x-0.5'}`} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Connected Accounts */}
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-medium text-gray-900 dark:text-white">Connected Accounts</h4>
-                  <button
-                    onClick={() => setShowAccountModal(true)}
-                    className="text-indigo-600 dark:text-indigo-400 text-sm hover:text-indigo-800 dark:hover:text-indigo-300"
-                  >
-                    + Add Account (Manual)
-                  </button>
-                </div>
-                {data.user.connectedAccounts.length === 0 ? (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
-                    No accounts connected. Add accounts manually for tracking purposes only.
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {data.user.connectedAccounts.map(account => (
-                      <div key={account.id} className="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
-                        <div>
-                          <span className="font-medium text-gray-900 dark:text-white">{account.name}</span>
-                          <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">****{account.lastFour}</span>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteConnectedAccount(account.id)}
-                          className="text-red-600 dark:text-red-400 text-sm"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
+              <div style={styles.statCard}>
+                <div style={styles.statValue}>{formatCurrency(actualExpenses)}</div>
+                <div style={styles.statLabel}>Actual Expenses</div>
+                {actualExpenses > 0 && budgetedExpenses !== actualExpenses && (
+                  <div style={{
+                    fontSize: '12px',
+                    marginTop: '5px',
+                    color: budgetedExpenses > actualExpenses ? '#10b981' : '#ef4444'
+                  }}>
+                    {budgetedExpenses > actualExpenses ? 'Under' : 'Over'} by {formatCurrency(Math.abs(budgetedExpenses - actualExpenses))}
                   </div>
                 )}
-                <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                  <p className="text-xs text-yellow-800 dark:text-yellow-400">
-                    ⚠️ For Demo/Personal Use Only - No real bank connections
-                  </p>
+              </div>
+              <div style={styles.statCard}>
+                <div style={styles.statValue}>{formatCurrency(totalIncome - (actualExpenses > 0 ? actualExpenses : budgetedExpenses))}</div>
+                <div style={styles.statLabel}>
+                  {actualExpenses > 0 ? 'Actual' : 'Projected'} Remaining
+                </div>
+                <div style={{fontSize: '12px', marginTop: '5px', opacity: 0.9}}>
+                  Bills paid: {paidBills}/{currentMonth.bills.length}
                 </div>
               </div>
+            </>
+          );
+        })()}
+      </div>
 
-              {/* Action Buttons */}
-              <div className="space-y-3">
-                <button
-                  onClick={() => {
-                    setShowUserModal(false);
-                    setShowUserManagement(true);
-                  }}
-                  className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  ⚙️ Manage Users
-                </button>
-                <button
-                  onClick={() => setShowUserModal(false)}
-                  className="w-full bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-                >
-                  Close
-                </button>
+      {/* Quick subscription summary */}
+      <div style={styles.card}>
+        <h3>📱 Subscription Summary</h3>
+        <p>You have <strong>{data.subscriptions.filter(s => s.status === 'active').length} active subscriptions</strong> costing <strong>{formatCurrency(getActiveSubscriptionsTotal())}/month</strong></p>
+        <button 
+          style={styles.button}
+          onClick={() => setActiveView('subscriptions')}
+        >
+          Manage Subscriptions
+        </button>
+      </div>
+
+      {/* Paycheck Cards */}
+      <div style={styles.paycheckGrid}>
+        {currentMonth.paychecks.map(paycheck => {
+          const assignedBills = getBillsByPaycheck(paycheck.id);
+          const remaining = getPaycheckRemaining(paycheck.id);
+          
+          return (
+            <div key={paycheck.id} style={styles.paycheckCard}>
+              <div style={styles.paycheckHeader}>
+                <div>
+                  <div style={styles.paycheckTitle}>
+                    {paycheck.label} • {formatDate(paycheck.date)}
+                  </div>
+                  <div style={styles.paycheckAmount}>
+                    {formatCurrency(paycheck.amount)}
+                  </div>
+                </div>
+                <div>
+                  <button 
+                    style={styles.editButton}
+                    onClick={() => startEdit(paycheck, 'paycheck')}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    style={styles.deleteButton}
+                    onClick={() => deletePaycheck(paycheck.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* User Management Modal */}
-        {showUserManagement && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">User Management</h3>
               
-              {/* Current User */}
-              <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg mb-6">
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Current User</h4>
-                <div className="space-y-1 text-sm">
-                  <p><span className="text-gray-600 dark:text-gray-400">Name:</span> {data.user.name}</p>
-                  <p><span className="text-gray-600 dark:text-gray-400">Email:</span> {data.user.email}</p>
-                  <p><span className="text-gray-600 dark:text-gray-400">Company:</span> {data.user.company}</p>
-                  <p><span className="text-gray-600 dark:text-gray-400">Created:</span> {new Date(data.user.createdAt).toLocaleDateString()}</p>
+              <div style={styles.billsList}>
+                {assignedBills.map(bill => (
+                  <div key={bill.id} style={{
+                    ...styles.billItem,
+                    backgroundColor: bill.isPaid ? (isDarkMode ? 'rgba(16, 185, 129, 0.1)' : '#d5f4e6') : 'transparent',
+                    border: bill.isPaid ? (isDarkMode ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #10b981') : 'none',
+                    borderRadius: bill.isPaid ? '8px' : '0',
+                    padding: bill.isPaid ? '10px' : '10px 0',
+                    flexDirection: 'column',
+                    alignItems: 'stretch'
+                  }}>
+                    <div style={{display: 'flex', alignItems: 'center', marginBottom: bill.isPaid ? '10px' : '0'}}>
+                      <input
+                        type="checkbox"
+                        checked={bill.isPaid || false}
+                        onChange={(e) => toggleBillPaid(bill.id, e.target.checked)}
+                        style={{marginRight: '10px', transform: 'scale(1.2)'}}
+                      />
+                      <span style={{
+                        ...styles.billName, 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        textDecoration: bill.isPaid ? 'line-through' : 'none',
+                        opacity: bill.isPaid ? 0.7 : 1,
+                        flex: 1
+                      }}>
+                        {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
+                        {bill.name}
+                      </span>
+                      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: '10px'}}>
+                        <span style={styles.billAmount}>{formatCurrency(bill.amount)}</span>
+                        {bill.isPaid && bill.actualAmount && (
+                          <span style={{fontSize: '12px', color: '#10b981', fontWeight: '500'}}>
+                            Paid: {formatCurrency(bill.actualAmount)}
+                          </span>
+                        )}
+                      </div>
+                      <button 
+                        style={styles.editButton}
+                        onClick={() => startEdit(bill, 'bill')}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        style={styles.deleteButton}
+                        onClick={() => assignBillToPaycheck(bill.id, null)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    {bill.isPaid && (
+                      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                        <span style={{fontSize: '14px', color: isDarkMode ? '#a0aec0' : '#666'}}>
+                          Actual amount paid:
+                        </span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="Enter amount"
+                          value={bill.actualAmount || ''}
+                          onChange={(e) => updateActualAmount(bill.id, e.target.value)}
+                          style={{
+                            ...styles.input,
+                            fontSize: '14px',
+                            padding: '6px 10px',
+                            width: '120px',
+                            marginLeft: '10px'
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {assignedBills.length === 0 && (
+                  <div style={{textAlign: 'center', color: '#999', padding: '20px'}}>
+                    No bills assigned yet
+                  </div>
+                )}
+              </div>
+              
+              <div style={{
+                ...styles.remainingAmount,
+                ...(remaining >= 0 ? styles.positiveRemaining : styles.negativeRemaining)
+              }}>
+                {(() => {
+                  const budgetedTotal = assignedBills.reduce((sum, bill) => sum + bill.amount, 0);
+                  const actualTotal = assignedBills.reduce((sum, bill) => {
+                    if (bill.isPaid && bill.actualAmount) {
+                      return sum + parseFloat(bill.actualAmount || 0);
+                    }
+                    return sum + (bill.isPaid ? bill.amount : 0);
+                  }, 0);
+                  const budgetedRemaining = paycheck.amount - budgetedTotal;
+                  const actualRemaining = paycheck.amount - actualTotal;
+                  const paidCount = assignedBills.filter(b => b.isPaid).length;
+                  
+                  return (
+                    <div>
+                      <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '5px'}}>
+                        <span>Budgeted:</span>
+                        <span>{formatCurrency(budgetedRemaining)}</span>
+                      </div>
+                      {actualTotal > 0 && (
+                        <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '5px'}}>
+                          <span>Actual:</span>
+                          <span>{formatCurrency(actualRemaining)}</span>
+                        </div>
+                      )}
+                      <div style={{fontSize: '12px', textAlign: 'center', opacity: 0.8}}>
+                        Paid: {paidCount}/{assignedBills.length} bills
+                        {budgetedTotal !== actualTotal && actualTotal > 0 && (
+                          <span style={{
+                            marginLeft: '10px',
+                            color: budgetedTotal > actualTotal ? '#10b981' : '#ef4444'
+                          }}>
+                            ({budgetedTotal > actualTotal ? 'Under' : 'Over'} by {formatCurrency(Math.abs(budgetedTotal - actualTotal))})
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Unassigned Bills */}
+      {getUnassignedBills().length > 0 && (
+        <div style={styles.unassignedSection}>
+          <div style={styles.unassignedTitle}>
+            📋 Unassigned Bills ({getUnassignedBills().length})
+          </div>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px'}}>
+            {getUnassignedBills().map(bill => (
+              <div key={bill.id} style={{
+                backgroundColor: bill.isPaid ? (isDarkMode ? 'rgba(16, 185, 129, 0.1)' : '#d5f4e6') : 'white',
+                padding: '15px',
+                borderRadius: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                border: bill.isPaid ? (isDarkMode ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #10b981') : 'none'
+              }}>
+                <div style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
+                  <input
+                    type="checkbox"
+                    checked={bill.isPaid || false}
+                    onChange={(e) => toggleBillPaid(bill.id, e.target.checked)}
+                    style={{marginRight: '10px', transform: 'scale(1.2)'}}
+                  />
+                  <div style={{flex: 1}}>
+                    <div style={{fontWeight: '500', display: 'flex', alignItems: 'center'}}>
+                      {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
+                      <span style={{
+                        textDecoration: bill.isPaid ? 'line-through' : 'none',
+                        opacity: bill.isPaid ? 0.7 : 1
+                      }}>
+                        {bill.name}
+                      </span>
+                    </div>
+                    <div style={{fontSize: '14px', color: '#666'}}>
+                      Due: {bill.dueDate}{bill.dueDate === 1 ? 'st' : bill.dueDate === 2 ? 'nd' : bill.dueDate === 3 ? 'rd' : 'th'} • {formatCurrency(bill.amount)}
+                      {bill.isPaid && bill.actualAmount && (
+                        <span style={{color: '#10b981', marginLeft: '10px'}}>
+                          (Paid: {formatCurrency(bill.actualAmount)})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                {bill.isPaid && (
+                  <div style={{marginBottom: '10px'}}>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="Actual amount paid"
+                      value={bill.actualAmount || ''}
+                      onChange={(e) => updateActualAmount(bill.id, e.target.value)}
+                      style={{
+                        ...styles.input,
+                        fontSize: '14px',
+                        padding: '6px 10px',
+                        width: '100%'
+                      }}
+                    />
+                  </div>
+                )}
+                
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                  <select
+                    value=""
+                    onChange={(e) => assignBillToPaycheck(bill.id, parseInt(e.target.value))}
+                    style={{...styles.select, flex: 1, marginRight: '10px'}}
+                  >
+                    <option value="">Assign to...</option>
+                    {currentMonth.paychecks.map(paycheck => (
+                      <option key={paycheck.id} value={paycheck.id}>
+                        {paycheck.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button 
+                    style={styles.editButton}
+                    onClick={() => startEdit(bill, 'bill')}
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    style={styles.deleteButton}
+                    onClick={() => deleteBill(bill.id)}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
-              {/* Actions */}
-              <div className="space-y-3">
-                <button
-                  onClick={() => {
-                    // Edit current user - for now just show an alert
-                    const newName = prompt('Enter new name:', data.user.name);
-                    const newEmail = prompt('Enter new email:', data.user.email);
-                    const newCompany = prompt('Enter new company:', data.user.company);
-                    
-                    if (newName && newEmail) {
-                      handleUpdateUserProfile({
-                        name: newName,
-                        email: newEmail,
-                        company: newCompany || data.user.company
-                      });
-                    }
-                  }}
-                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+  const renderSubscriptions = () => (
+    <div>
+      {/* Subscription Stats */}
+      <div style={styles.statsGrid}>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getActiveSubscriptionsTotal())}</div>
+          <div style={styles.statLabel}>Monthly Subscriptions</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getActiveSubscriptionsTotal() * 12)}</div>
+          <div style={styles.statLabel}>Yearly Cost</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{data.subscriptions.filter(s => s.status === 'active').length}</div>
+          <div style={styles.statLabel}>Active Subscriptions</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getYearlySubscriptionSavings())}</div>
+          <div style={styles.statLabel}>Potential Yearly Savings</div>
+        </div>
+      </div>
+
+      {/* Savings Alert */}
+      {getYearlySubscriptionSavings() > 0 && (
+        <div style={styles.savingsAlert}>
+          <strong>💡 Savings Opportunity!</strong> You could save {formatCurrency(getYearlySubscriptionSavings())} per year by switching to annual billing on some subscriptions.
+        </div>
+      )}
+
+      {/* Add Subscription Button */}
+      <div style={{textAlign: 'center', marginBottom: '20px'}}>
+        <button 
+          style={{...styles.button, ...styles.buttonSuccess}}
+          onClick={() => setShowAddSubscriptionModal(true)}
+        >
+          + Add New Subscription
+        </button>
+      </div>
+
+      {/* Subscriptions Grid */}
+      <div style={styles.subscriptionGrid}>
+        {data.subscriptions.map(subscription => (
+          <div key={subscription.id} style={styles.subscriptionCard}>
+            <div style={styles.subscriptionHeader}>
+              <div>
+                <div style={styles.subscriptionName}>
+                  {subscription.name}
+                </div>
+                <div style={styles.paycheckAmount}>
+                  {formatCurrency(subscription.amount)}/mo
+                </div>
+              </div>
+              <div style={{
+                ...styles.statusBadge,
+                ...(subscription.status === 'active' ? styles.statusActive :
+                   subscription.status === 'trial' ? styles.statusTrial :
+                   subscription.status === 'paused' ? styles.statusPaused :
+                   styles.statusCancelled)
+              }}>
+                {subscription.status}
+              </div>
+            </div>
+
+            <div style={styles.subscriptionDetails}>
+              <div><strong>Provider:</strong> {subscription.provider}</div>
+              <div><strong>Description:</strong> {subscription.description}</div>
+              <div><strong>Next Billing:</strong> {formatDate(subscription.nextBilling)}</div>
+              <div><strong>Connected Account:</strong> {subscription.connectedAccount}</div>
+              {subscription.trialEnds && (
+                <div><strong>⏰ Trial Ends:</strong> {formatDate(subscription.trialEnds)}</div>
+              )}
+              {subscription.yearlyDiscount > 0 && (
+                <div style={{color: '#27ae60', fontWeight: '500'}}>
+                  💰 Save {formatCurrency(subscription.yearlyDiscount)}/year with annual billing
+                </div>
+              )}
+            </div>
+
+            <div style={styles.buttonGroup}>
+              {subscription.status === 'active' && (
+                <>
+                  <button 
+                    style={{...styles.button, ...styles.buttonDanger}}
+                    onClick={() => setShowCancelModal(subscription)}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    style={{...styles.button, ...styles.buttonWarning}}
+                    onClick={() => pauseSubscription(subscription.id)}
+                  >
+                    Pause
+                  </button>
+                </>
+              )}
+              
+              {subscription.status === 'paused' && (
+                <button 
+                  style={{...styles.button, ...styles.buttonSuccess}}
+                  onClick={() => resumeSubscription(subscription.id)}
                 >
-                  Edit Current User
+                  Resume
                 </button>
-                
-                <button
-                  onClick={() => setShowAddUserModal(true)}
-                  className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
+              )}
+
+              {subscription.status === 'trial' && (
+                <button 
+                  style={{...styles.button, ...styles.buttonDanger}}
+                  onClick={() => setShowCancelModal(subscription)}
                 >
-                  + Add New User
+                  Cancel Before Trial Ends
                 </button>
-                
-                <button
+              )}
+
+              {(subscription.status === 'active' || subscription.status === 'trial') && (
+                <button 
+                  style={styles.button}
+                  onClick={() => addSubscriptionToBudget(subscription)}
+                >
+                  Add to Budget
+                </button>
+              )}
+
+              {subscription.cancellationUrl && (
+                <button 
+                  style={{...styles.button, ...styles.buttonSecondary}}
+                  onClick={() => window.open(subscription.cancellationUrl, '_blank')}
+                >
+                  Manage Online
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderManage = () => (
+    <div>
+      {/* Copy from Previous Month */}
+      {Object.keys(data.months).length > 1 && (
+        <div style={styles.card}>
+          <div style={styles.formTitle}>🔄 Quick Setup</div>
+          <p>Copy recurring bills from your previous month to get started quickly.</p>
+          <button style={styles.button} onClick={copyFromPreviousMonth}>
+            Copy Bills from Previous Month
+          </button>
+        </div>
+      )}
+
+      {/* Add Bill Form */}
+      <div style={styles.card}>
+        <div style={styles.formSection}>
+          <div style={styles.formTitle}>💰 Add New Bill</div>
+          <div style={styles.formGrid}>
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Bill name"
+              value={newBill.name}
+              onChange={(e) => setNewBill({...newBill, name: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="number"
+              step="0.01"
+              placeholder="Amount"
+              value={newBill.amount}
+              onChange={(e) => setNewBill({...newBill, amount: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="number"
+              min="1"
+              max="31"
+              placeholder="Due date (1-31)"
+              value={newBill.dueDate}
+              onChange={(e) => setNewBill({...newBill, dueDate: e.target.value})}
+            />
+            <select
+              style={styles.select}
+              value={newBill.category}
+              onChange={(e) => setNewBill({...newBill, category: e.target.value})}
+            >
+              <option value="Housing">Housing</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Transportation">Transportation</option>
+              <option value="Food">Food</option>
+              <option value="Health">Health</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Debt">Debt</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <label style={{display: 'flex', alignItems: 'center', marginBottom: '15px'}}>
+            <input 
+              type="checkbox" 
+              checked={newBill.isSubscription}
+              onChange={(e) => setNewBill({...newBill, isSubscription: e.target.checked})}
+              style={{marginRight: '10px'}}
+            />
+            This is a subscription
+          </label>
+          <button style={styles.button} onClick={addBill}>
+            Add Bill
+          </button>
+        </div>
+      </div>
+
+      {/* Add Paycheck Form */}
+      <div style={styles.card}>
+        <div style={styles.formSection}>
+          <div style={styles.formTitle}>💵 Add New Paycheck</div>
+          <div style={styles.formGrid}>
+            <input
+              style={styles.input}
+              type="date"
+              value={newPaycheck.date}
+              onChange={(e) => setNewPaycheck({...newPaycheck, date: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="number"
+              step="0.01"
+              placeholder="Amount"
+              value={newPaycheck.amount}
+              onChange={(e) => setNewPaycheck({...newPaycheck, amount: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Source (e.g., Equitas Health)"
+              value={newPaycheck.source}
+              onChange={(e) => setNewPaycheck({...newPaycheck, source: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Label (e.g., First Paycheck)"
+              value={newPaycheck.label}
+              onChange={(e) => setNewPaycheck({...newPaycheck, label: e.target.value})}
+            />
+          </div>
+          <button style={styles.button} onClick={addPaycheck}>
+            Add Paycheck
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderHistory = () => {
+    const historicalData = getHistoricalData();
+    
+    return (
+      <div style={styles.card}>
+        <h3>📊 Historical Overview</h3>
+        <div style={styles.historicalChart}>
+          {historicalData.map((month, index) => (
+            <div key={index} style={styles.historicalCard}>
+              <h4 style={{marginBottom: '10px', color: '#2c3e50'}}>{month.month}</h4>
+              <div style={{fontSize: '14px', marginBottom: '5px'}}>
+                <strong>Income:</strong> {formatCurrency(month.income)}
+              </div>
+              <div style={{fontSize: '14px', marginBottom: '5px'}}>
+                <strong>Expenses:</strong> {formatCurrency(month.expenses)}
+              </div>
+              <div style={{
+                fontSize: '16px', 
+                fontWeight: '600',
+                color: month.remaining >= 0 ? '#27ae60' : '#e74c3c'
+              }}>
+                <strong>Remaining:</strong> {formatCurrency(month.remaining)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderUserProfile = () => (
+    <div style={styles.card}>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+        <h3>👤 User Profile</h3>
+        <div>
+          <button 
+            style={styles.button}
+            onClick={() => setShowUserManagement(true)}
+          >
+            ⚙️ Manage Users
+          </button>
+        </div>
+      </div>
+
+      {editingUser ? (
+        <div>
+          <h4>✏️ Edit Profile</h4>
+          <div style={styles.formGrid}>
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Full Name"
+              value={editingUser.name}
+              onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="email"
+              placeholder="Email Address"
+              value={editingUser.email}
+              onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+            />
+            <input
+              style={styles.input}
+              type="text"
+              placeholder="Company (optional)"
+              value={editingUser.company || ''}
+              onChange={(e) => setEditingUser({...editingUser, company: e.target.value})}
+            />
+          </div>
+          <div>
+            <button style={styles.button} onClick={saveUserEdit}>
+              Save Changes
+            </button>
+            <button 
+              style={{...styles.button, ...styles.buttonSecondary}} 
+              onClick={cancelUserEdit}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div style={{marginBottom: '20px'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
+              <div>
+                <div><strong>Name:</strong> {data.user.name}</div>
+                <div><strong>Email:</strong> {data.user.email}</div>
+                <div><strong>Company:</strong> {data.user.company || 'N/A'}</div>
+                <div><strong>Member Since:</strong> {formatDate(data.user.createdAt)}</div>
+              </div>
+              <div>
+                <button 
+                  style={styles.editButton}
+                  onClick={startEditUser}
+                >
+                  Edit Profile
+                </button>
+                <button 
+                  style={styles.deleteButton}
                   onClick={() => setShowDeleteUserModal(true)}
-                  className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors"
                 >
-                  Delete Current User
-                </button>
-                
-                <button
-                  onClick={() => setShowUserManagement(false)}
-                  className="w-full bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-                >
-                  Close
+                  Delete User
                 </button>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
+      
+      <h4>🔗 Connected Accounts</h4>
+      <div style={{marginBottom: '15px'}}>
+        <div style={{
+          backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.1)' : '#fff3cd',
+          border: isDarkMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #ffeaa7',
+          borderRadius: '8px',
+          padding: '15px',
+          marginBottom: '15px',
+          color: isDarkMode ? '#f59e0b' : '#856404'
+        }}>
+          <strong>⚠️ For Demo/Personal Use Only</strong><br />
+          This is for tracking your accounts manually. Never enter real banking credentials in any app unless it's from your actual bank or uses certified services like Plaid.
+        </div>
+        
+        <button 
+          style={{...styles.button, ...styles.buttonSuccess}}
+          onClick={() => setShowAddAccountModal(true)}
+        >
+          + Add Account (Manual)
+        </button>
+      </div>
 
-        {/* Add User Modal */}
-        {showAddUserModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Add New User</h3>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Full name"
-                  value={newUser.name}
-                  onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <input
-                  type="text"
-                  placeholder="Company name"
-                  value={newUser.company}
-                  onChange={(e) => setNewUser({ ...newUser, company: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div className="flex space-x-3 mt-6">
-                <button
-                  onClick={handleAddNewUser}
-                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  Create User
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAddUserModal(false);
-                    setNewUser({ name: '', email: '', company: '' });
-                  }}
-                  className="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
+      <div style={{marginBottom: '20px'}}>
+        {data.connectedAccounts.length > 0 ? (
+          data.connectedAccounts.map(account => (
+            <div key={account.id} style={{
+              ...styles.accountCard,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              {editingAccount && editingAccount.id === account.id ? (
+                <div style={{flex: 1}}>
+                  <div style={styles.formGrid}>
+                    <input
+                      style={styles.input}
+                      type="text"
+                      placeholder="Account name"
+                      value={editingAccount.name}
+                      onChange={(e) => setEditingAccount({...editingAccount, name: e.target.value})}
+                    />
+                    <select
+                      style={styles.select}
+                      value={editingAccount.type}
+                      onChange={(e) => setEditingAccount({...editingAccount, type: e.target.value})}
+                    >
+                      <option value="checking">Checking</option>
+                      <option value="savings">Savings</option>
+                      <option value="credit_card">Credit Card</option>
+                      <option value="investment">Investment</option>
+                    </select>
+                    <input
+                      style={styles.input}
+                      type="text"
+                      placeholder="Bank/Provider"
+                      value={editingAccount.provider}
+                      onChange={(e) => setEditingAccount({...editingAccount, provider: e.target.value})}
+                    />
+                    <input
+                      style={styles.input}
+                      type="text"
+                      placeholder="Last 4 digits"
+                      maxLength="4"
+                      value={editingAccount.last4}
+                      onChange={(e) => setEditingAccount({...editingAccount, last4: e.target.value.replace(/\D/g, '')})}
+                    />
+                  </div>
+                  <div style={{marginTop: '10px'}}>
+                    <button style={styles.button} onClick={saveAccountEdit}>
+                      Save
+                    </button>
+                    <button 
+                      style={{...styles.button, ...styles.buttonSecondary}}
+                      onClick={() => setEditingAccount(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <div><strong>{account.name}</strong> ****{account.last4}</div>
+                    <div style={{fontSize: '14px', opacity: '0.7'}}>
+                      {account.provider} • {account.type.replace('_', ' ')}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{
+                      ...styles.statusBadge,
+                      ...styles.statusActive,
+                      marginBottom: '5px'
+                    }}>
+                      Manual Entry
+                    </div>
+                    <div>
+                      <button 
+                        style={styles.editButton}
+                        onClick={() => startEditAccount(account)}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        style={styles.deleteButton}
+                        onClick={() => deleteConnectedAccount(account.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
-          </div>
-        )}
-
-        {/* Delete User Modal */}
-        {showDeleteUserModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-4">⚠️ Delete User Account</h3>
-              <p className="text-gray-700 dark:text-gray-300 mb-4">
-                This will permanently delete your user account and ALL associated data including:
-              </p>
-              <ul className="text-sm text-gray-600 dark:text-gray-400 mb-6 space-y-1">
-                <li>• All months and financial data ({Object.keys(data.months).length} months)</li>
-                <li>• All subscriptions ({data.subscriptions.length} subscriptions)</li>
-                <li>• All connected accounts ({data.user.connectedAccounts.length} accounts)</li>
-                <li>• User profile and settings</li>
-              </ul>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                Consider creating a new user instead if you want to start fresh while keeping your current data.
-              </p>
-              <div className="flex space-x-3">
-                <button
-                  onClick={handleDeleteCurrentUser}
-                  className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Yes, Delete Everything
-                </button>
-                <button
-                  onClick={() => setShowDeleteUserModal(false)}
-                  className="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Add Account Modal */}
-        {showAccountModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Add Connected Account (Manual)</h3>
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg mb-4">
-                <p className="text-sm text-yellow-800 dark:text-yellow-400">
-                  ⚠️ This is for tracking purposes only. No real bank connection is made.
-                </p>
-              </div>
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Account name (e.g., Wells Fargo Checking)"
-                  value={newAccount.name}
-                  onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-                <select
-                  value={newAccount.type}
-                  onChange={(e) => setNewAccount({ ...newAccount, type: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  {accountTypes.map(type => (
-                    <option key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  placeholder="Last 4 digits (e.g., 1234)"
-                  value={newAccount.lastFour}
-                  onChange={(e) => setNewAccount({ ...newAccount, lastFour: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  maxLength="4"
-                />
-                <input
-                  type="number"
-                  placeholder="Current balance (optional)"
-                  value={newAccount.balance}
-                  onChange={(e) => setNewAccount({ ...newAccount, balance: e.target.value })}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div className="flex space-x-3 mt-6">
-                <button
-                  onClick={handleAddConnectedAccount}
-                  className="flex-1 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  Add Account
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAccountModal(false);
-                    setNewAccount({ name: '', type: 'checking', lastFour: '', balance: '' });
-                  }}
-                  className="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+          ))
+        ) : (
+          <div style={{textAlign: 'center', color: isDarkMode ? '#a0aec0' : '#666', padding: '20px'}}>
+            No connected accounts yet. Add your accounts manually for tracking.
           </div>
         )}
       </div>
+
+      <h4>⚙️ Settings</h4>
+      <div>
+        <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
+          <input 
+            type="checkbox" 
+            checked={data.user.settings.notifications} 
+            onChange={(e) => updateUser({
+              settings: { ...data.user.settings, notifications: e.target.checked }
+            })}
+            style={{marginRight: '10px'}} 
+          />
+          Email Notifications
+        </label>
+        <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
+          <input 
+            type="checkbox" 
+            checked={data.user.settings.darkMode} 
+            onChange={(e) => updateUser({
+              settings: { ...data.user.settings, darkMode: e.target.checked }
+            })}
+            style={{marginRight: '10px'}} 
+          />
+          Dark Mode
+        </label>
+      </div>
+    </div>
+  );
+
+  // Main component render
+  return (
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <button 
+          style={styles.userButton}
+          onClick={() => setShowUserProfile(!showUserProfile)}
+        >
+          👤 {data.user.name}
+        </button>
+        <h1 style={styles.title}>💼 FinanceHub Pro</h1>
+        <p style={{fontSize: '16px', opacity: '0.9'}}>
+          Complete Financial Management • Subscriptions • Budgeting
+        </p>
+      </div>
+
+      {/* Month Selector */}
+      <div style={styles.monthSelector}>
+        {Object.values(data.months)
+          .sort((a, b) => new Date(`${a.year}-${a.name}`) - new Date(`${b.year}-${b.name}`))
+          .map(month => (
+            <button
+              key={month.id}
+              style={{
+                ...styles.monthButton,
+                ...(data.currentMonthId === month.id ? styles.monthButtonActive : {})
+              }}
+              onClick={() => switchMonth(month.id)}
+            >
+              {month.name} {month.year}
+            </button>
+          ))}
+        <button
+          style={styles.newMonthButton}
+          onClick={() => setShowNewMonthForm(true)}
+        >
+          + New Month
+        </button>
+      </div>
+
+      {/* Navigation */}
+      <div style={styles.nav}>
+        <button
+          style={{
+            ...styles.navButton,
+            ...(activeView === 'overview' ? styles.navButtonActive : {})
+          }}
+          onClick={() => setActiveView('overview')}
+        >
+          📊 Overview
+        </button>
+        <button
+          style={{
+            ...styles.navButton,
+            ...(activeView === 'subscriptions' ? styles.navButtonActive : {})
+          }}
+          onClick={() => setActiveView('subscriptions')}
+        >
+          📱 Subscriptions
+        </button>
+        <button
+          style={{
+            ...styles.navButton,
+            ...(activeView === 'manage' ? styles.navButtonActive : {})
+          }}
+          onClick={() => setActiveView('manage')}
+        >
+          ⚙️ Manage
+        </button>
+        <button
+          style={{
+            ...styles.navButton,
+            ...(activeView === 'history' ? styles.navButtonActive : {})
+          }}
+          onClick={() => setActiveView('history')}
+        >
+          📈 History
+        </button>
+      </div>
+
+      {/* Main Content */}
+      {showUserProfile && renderUserProfile()}
+      {activeView === 'overview' && renderOverview()}
+      {activeView === 'subscriptions' && renderSubscriptions()}
+      {activeView === 'manage' && renderManage()}
+      {activeView === 'history' && renderHistory()}
+
+      {/* All Modals - keeping them all for completeness */}
+      {showNewMonthForm && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>🗓️ Create New Month</div>
+            <div style={styles.formGrid}>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Month name (e.g., September)"
+                value={newMonth.name}
+                onChange={(e) => setNewMonth({...newMonth, name: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="number"
+                placeholder="Year"
+                value={newMonth.year}
+                onChange={(e) => setNewMonth({...newMonth, year: e.target.value})}
+              />
+            </div>
+            <div>
+              <button style={styles.button} onClick={createNewMonth}>
+                Create Month
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}} 
+                onClick={() => setShowNewMonthForm(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingItem && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>
+              ✏️ Edit {editType === 'bill' ? 'Bill' : 'Paycheck'}
+            </div>
+            
+            {editType === 'bill' ? (
+              <div style={styles.formGrid}>
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Bill name"
+                  value={editingItem.name}
+                  onChange={(e) => setEditingItem({...editingItem, name: e.target.value})}
+                />
+                <input
+                  style={styles.input}
+                  type="number"
+                  step="0.01"
+                  placeholder="Amount"
+                  value={editingItem.amount}
+                  onChange={(e) => setEditingItem({...editingItem, amount: parseFloat(e.target.value) || 0})}
+                />
+                <input
+                  style={styles.input}
+                  type="number"
+                  min="1"
+                  max="31"
+                  placeholder="Due date"
+                  value={editingItem.dueDate}
+                  onChange={(e) => setEditingItem({...editingItem, dueDate: parseInt(e.target.value) || 1})}
+                />
+                <select
+                  style={styles.select}
+                  value={editingItem.category}
+                  onChange={(e) => setEditingItem({...editingItem, category: e.target.value})}
+                >
+                  <option value="Housing">Housing</option>
+                  <option value="Utilities">Utilities</option>
+                  <option value="Transportation">Transportation</option>
+                  <option value="Food">Food</option>
+                  <option value="Health">Health</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Debt">Debt</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            ) : (
+              <div style={styles.formGrid}>
+                <input
+                  style={styles.input}
+                  type="date"
+                  value={editingItem.date}
+                  onChange={(e) => setEditingItem({...editingItem, date: e.target.value})}
+                />
+                <input
+                  style={styles.input}
+                  type="number"
+                  step="0.01"
+                  placeholder="Amount"
+                  value={editingItem.amount}
+                  onChange={(e) => setEditingItem({...editingItem, amount: parseFloat(e.target.value) || 0})}
+                />
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Source"
+                  value={editingItem.source}
+                  onChange={(e) => setEditingItem({...editingItem, source: e.target.value})}
+                />
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Label"
+                  value={editingItem.label}
+                  onChange={(e) => setEditingItem({...editingItem, label: e.target.value})}
+                />
+              </div>
+            )}
+            
+            <div>
+              <button style={styles.button} onClick={saveEdit}>
+                Save Changes
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}} 
+                onClick={cancelEdit}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCancelModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <h3>🚫 Cancel Subscription</h3>
+            <p>Are you sure you want to cancel <strong>{showCancelModal.name}</strong>?</p>
+            <div style={{backgroundColor: '#f8f9fa', padding: '15px', borderRadius: '8px', marginBottom: '20px'}}>
+              <div><strong>Current Plan:</strong> {showCancelModal.description}</div>
+              <div><strong>Monthly Cost:</strong> {formatCurrency(showCancelModal.amount)}</div>
+              <div><strong>Next Billing:</strong> {formatDate(showCancelModal.nextBilling)}</div>
+              {showCancelModal.trialEnds && (
+                <div><strong>Trial Ends:</strong> {formatDate(showCancelModal.trialEnds)}</div>
+              )}
+            </div>
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, ...styles.buttonDanger}}
+                onClick={() => cancelSubscription(showCancelModal)}
+              >
+                Yes, Cancel Subscription
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}}
+                onClick={() => setShowCancelModal(null)}
+              >
+                Keep Subscription
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUserManagement && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>👥 User Management</div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <h4>Current User</h4>
+              <div style={{
+                backgroundColor: '#f8f9fa',
+                padding: '15px',
+                borderRadius: '8px',
+                marginBottom: '15px'
+              }}>
+                <div><strong>{data.user.name}</strong></div>
+                <div style={{fontSize: '14px', color: '#666'}}>{data.user.email}</div>
+                <div style={{fontSize: '14px', color: '#666'}}>Member since {formatDate(data.user.createdAt)}</div>
+              </div>
+            </div>
+
+            <div style={{marginBottom: '20px'}}>
+              <h4>🔄 Switch User</h4>
+              <p style={{fontSize: '14px', color: '#666', marginBottom: '10px'}}>
+                In a full version, you'd see all your users here and could switch between them.
+              </p>
+              <div style={{
+                backgroundColor: '#e9ecef',
+                padding: '15px',
+                borderRadius: '8px',
+                textAlign: 'center',
+                color: '#6c757d'
+              }}>
+                <em>Multi-user switching coming soon!</em>
+              </div>
+            </div>
+
+            <div style={{marginBottom: '20px'}}>
+              <h4>👤 User Actions</h4>
+              <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                <button 
+                  style={{...styles.button, ...styles.buttonSuccess}}
+                  onClick={() => {
+                    setShowUserManagement(false);
+                    setShowAddUserModal(true);
+                  }}
+                >
+                  + Add New User
+                </button>
+                <button 
+                  style={styles.editButton}
+                  onClick={() => {
+                    setShowUserManagement(false);
+                    startEditUser();
+                  }}
+                >
+                  Edit Current User
+                </button>
+                <button 
+                  style={{...styles.button, ...styles.buttonDanger}}
+                  onClick={() => {
+                    setShowUserManagement(false);
+                    setShowDeleteUserModal(true);
+                  }}
+                >
+                  Delete Current User
+                </button>
+              </div>
+            </div>
+
+            <button 
+              style={{...styles.button, ...styles.buttonSecondary}}
+              onClick={() => setShowUserManagement(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showAddUserModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>👤 Add New User</div>
+            <p style={{marginBottom: '20px', color: '#666'}}>
+              Create a new user profile with separate financial data.
+            </p>
+            
+            <div style={styles.formGrid}>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Full Name *"
+                value={newUser.name}
+                onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="email"
+                placeholder="Email Address *"
+                value={newUser.email}
+                onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Company (optional)"
+                value={newUser.company}
+                onChange={(e) => setNewUser({...newUser, company: e.target.value})}
+              />
+            </div>
+            
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, ...styles.buttonSuccess}}
+                onClick={addNewUser}
+                disabled={!newUser.name || !newUser.email}
+              >
+                Create User
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}}
+                onClick={() => {
+                  setShowAddUserModal(false);
+                  setNewUser({ name: '', email: '', company: '' });
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAddSubscriptionModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>📱 Add New Subscription</div>
+            <p style={{marginBottom: '20px', color: isDarkMode ? '#a0aec0' : '#666'}}>
+              Add a subscription you want to track and manage.
+            </p>
+            
+            <div style={styles.formGrid}>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Subscription Name (e.g., Netflix) *"
+                value={newSubscription.name}
+                onChange={(e) => setNewSubscription({...newSubscription, name: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="number"
+                step="0.01"
+                placeholder="Monthly Amount *"
+                value={newSubscription.amount}
+                onChange={(e) => setNewSubscription({...newSubscription, amount: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Provider (e.g., Netflix Inc.) *"
+                value={newSubscription.provider}
+                onChange={(e) => setNewSubscription({...newSubscription, provider: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Description (e.g., Premium Plan)"
+                value={newSubscription.description}
+                onChange={(e) => setNewSubscription({...newSubscription, description: e.target.value})}
+              />
+              <select
+                style={styles.select}
+                value={newSubscription.category}
+                onChange={(e) => setNewSubscription({...newSubscription, category: e.target.value})}
+              >
+                <option value="Entertainment">Entertainment</option>
+                <option value="Productivity">Productivity</option>
+                <option value="Health">Health & Fitness</option>
+                <option value="Music">Music</option>
+                <option value="Gaming">Gaming</option>
+                <option value="News">News & Media</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Other">Other</option>
+              </select>
+              <select
+                style={styles.select}
+                value={newSubscription.billingCycle}
+                onChange={(e) => setNewSubscription({...newSubscription, billingCycle: e.target.value})}
+              >
+                <option value="monthly">Monthly</option>
+                <option value="annually">Annually</option>
+                <option value="weekly">Weekly</option>
+              </select>
+              <input
+                style={styles.input}
+                type="date"
+                placeholder="Next Billing Date"
+                value={newSubscription.nextBilling}
+                onChange={(e) => setNewSubscription({...newSubscription, nextBilling: e.target.value})}
+              />
+            </div>
+            
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, ...styles.buttonSuccess}}
+                onClick={addNewSubscription}
+                disabled={!newSubscription.name || !newSubscription.amount || !newSubscription.provider}
+              >
+                Add Subscription
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}}
+                onClick={() => {
+                  setShowAddSubscriptionModal(false);
+                  setNewSubscription({ 
+                    name: '', 
+                    amount: '', 
+                    provider: '', 
+                    description: '', 
+                    billingCycle: 'monthly',
+                    category: 'Entertainment',
+                    nextBilling: ''
+                  });
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAddAccountModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>🔗 Add Connected Account</div>
+            <div style={{
+              backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.1)' : '#fff3cd',
+              border: isDarkMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #ffeaa7',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '20px',
+              color: isDarkMode ? '#f59e0b' : '#856404'
+            }}>
+              <strong>📝 Manual Entry Only</strong><br />
+              Add your account details for personal tracking. This information stays in your browser only.
+            </div>
+            
+            <div style={styles.formGrid}>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Account Name (e.g., Main Checking) *"
+                value={newAccount.name}
+                onChange={(e) => setNewAccount({...newAccount, name: e.target.value})}
+              />
+              <select
+                style={styles.select}
+                value={newAccount.type}
+                onChange={(e) => setNewAccount({...newAccount, type: e.target.value})}
+              >
+                <option value="checking">Checking Account</option>
+                <option value="savings">Savings Account</option>
+                <option value="credit_card">Credit Card</option>
+                <option value="investment">Investment Account</option>
+              </select>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Bank/Provider (e.g., Wells Fargo) *"
+                value={newAccount.provider}
+                onChange={(e) => setNewAccount({...newAccount, provider: e.target.value})}
+              />
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Last 4 digits (for reference) *"
+                maxLength="4"
+                value={newAccount.last4}
+                onChange={(e) => setNewAccount({...newAccount, last4: e.target.value.replace(/\D/g, '')})}
+              />
+            </div>
+            
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, ...styles.buttonSuccess}}
+                onClick={addConnectedAccount}
+                disabled={!newAccount.name || !newAccount.provider || !newAccount.last4}
+              >
+                Add Account
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}}
+                onClick={() => {
+                  setShowAddAccountModal(false);
+                  setNewAccount({ name: '', type: 'checking', provider: '', last4: '' });
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteUserModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>⚠️ Delete User Account</div>
+            <p><strong>Warning:</strong> This action cannot be undone!</p>
+            
+            <div style={{
+              backgroundColor: '#f8d7da',
+              border: '1px solid #f5c6cb',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '20px',
+              color: '#721c24'
+            }}>
+              <h4>This will permanently delete:</h4>
+              <ul style={{marginLeft: '20px', marginTop: '10px'}}>
+                <li>User profile: <strong>{data.user.name}</strong></li>
+                <li>All financial data ({Object.keys(data.months).length} months)</li>
+                <li>All bills and paychecks</li>
+                <li>All subscription data</li>
+                <li>All connected accounts</li>
+              </ul>
+            </div>
+
+            <div style={{
+              backgroundColor: '#d1ecf1',
+              border: '1px solid #bee5eb',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '20px',
+              color: '#0c5460'
+            }}>
+              <strong>💡 Alternative:</strong> Consider creating a new user instead if you just want to start fresh while keeping this data.
+            </div>
+
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, ...styles.buttonDanger}}
+                onClick={deleteCurrentUser}
+              >
+                Yes, Delete Everything
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSecondary}}
+                onClick={() => setShowDeleteUserModal(false)}
+              >
+                Cancel - Keep User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
