@@ -680,6 +680,42 @@ const FinanceHubPro = () => {
     setShowUserProfile(false);
   };
 
+  // Toggle bill paid status
+  const toggleBillPaid = (billId, isPaid) => {
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: currentMonth.bills.map(bill => 
+            bill.id === billId 
+              ? { ...bill, isPaid: isPaid, actualAmount: isPaid ? bill.actualAmount : null }
+              : bill
+          )
+        }
+      }
+    }));
+  };
+
+  // Update actual amount for a bill
+  const updateActualAmount = (billId, actualAmount) => {
+    setData(prev => ({
+      ...prev,
+      months: {
+        ...prev.months,
+        [data.currentMonthId]: {
+          ...currentMonth,
+          bills: currentMonth.bills.map(bill => 
+            bill.id === billId 
+              ? { ...bill, actualAmount: actualAmount }
+              : bill
+          )
+        }
+      }
+    }));
+  };
+
   // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
@@ -1211,24 +1247,75 @@ const FinanceHubPro = () => {
               
               <div style={styles.billsList}>
                 {assignedBills.map(bill => (
-                  <div key={bill.id} style={styles.billItem}>
-                    <span style={{...styles.billName, display: 'flex', alignItems: 'center'}}>
-                      {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
-                      {bill.name}
-                    </span>
-                    <span style={styles.billAmount}>{formatCurrency(bill.amount)}</span>
-                    <button 
-                      style={styles.editButton}
-                      onClick={() => startEdit(bill, 'bill')}
-                    >
-                      Edit
-                    </button>
-                    <button 
-                      style={styles.deleteButton}
-                      onClick={() => assignBillToPaycheck(bill.id, null)}
-                    >
-                      Remove
-                    </button>
+                  <div key={bill.id} style={{
+                    ...styles.billItem,
+                    backgroundColor: bill.isPaid ? (isDarkMode ? 'rgba(16, 185, 129, 0.1)' : '#d5f4e6') : 'transparent',
+                    border: bill.isPaid ? (isDarkMode ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #10b981') : 'none',
+                    borderRadius: bill.isPaid ? '8px' : '0',
+                    padding: bill.isPaid ? '10px' : '10px 0',
+                    flexDirection: 'column',
+                    alignItems: 'stretch'
+                  }}>
+                    <div style={{display: 'flex', alignItems: 'center', marginBottom: bill.isPaid ? '10px' : '0'}}>
+                      <input
+                        type="checkbox"
+                        checked={bill.isPaid || false}
+                        onChange={(e) => toggleBillPaid(bill.id, e.target.checked)}
+                        style={{marginRight: '10px', transform: 'scale(1.2)'}}
+                      />
+                      <span style={{
+                        ...styles.billName, 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        textDecoration: bill.isPaid ? 'line-through' : 'none',
+                        opacity: bill.isPaid ? 0.7 : 1,
+                        flex: 1
+                      }}>
+                        {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
+                        {bill.name}
+                      </span>
+                      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: '10px'}}>
+                        <span style={styles.billAmount}>{formatCurrency(bill.amount)}</span>
+                        {bill.isPaid && bill.actualAmount && (
+                          <span style={{fontSize: '12px', color: '#10b981', fontWeight: '500'}}>
+                            Paid: {formatCurrency(bill.actualAmount)}
+                          </span>
+                        )}
+                      </div>
+                      <button 
+                        style={styles.editButton}
+                        onClick={() => startEdit(bill, 'bill')}
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        style={styles.deleteButton}
+                        onClick={() => assignBillToPaycheck(bill.id, null)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    {bill.isPaid && (
+                      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                        <span style={{fontSize: '14px', color: isDarkMode ? '#a0aec0' : '#666'}}>
+                          Actual amount paid:
+                        </span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="Enter amount"
+                          value={bill.actualAmount || ''}
+                          onChange={(e) => updateActualAmount(bill.id, e.target.value)}
+                          style={{
+                            ...styles.input,
+                            fontSize: '14px',
+                            padding: '6px 10px',
+                            width: '120px',
+                            marginLeft: '10px'
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
                 {assignedBills.length === 0 && (
@@ -1268,8 +1355,19 @@ const FinanceHubPro = () => {
               }}>
                 <div>
                   <div style={{fontWeight: '500', display: 'flex', alignItems: 'center'}}>
+                    <input
+                      type="checkbox"
+                      checked={bill.isPaid || false}
+                      onChange={(e) => toggleBillPaid(bill.id, e.target.checked)}
+                      style={{marginRight: '10px', transform: 'scale(1.2)'}}
+                    />
                     {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
-                    {bill.name}
+                    <span style={{
+                      textDecoration: bill.isPaid ? 'line-through' : 'none',
+                      opacity: bill.isPaid ? 0.7 : 1
+                    }}>
+                      {bill.name}
+                    </span>
                   </div>
                   <div style={{fontSize: '14px', color: '#666'}}>
                     Due: {bill.dueDate}{bill.dueDate === 1 ? 'st' : bill.dueDate === 2 ? 'nd' : bill.dueDate === 3 ? 'rd' : 'th'} • {formatCurrency(bill.amount)}
