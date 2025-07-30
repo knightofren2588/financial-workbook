@@ -33,17 +33,17 @@ const FinanceHubPro = () => {
           name: 'July',
           year: 2025,
           bills: [
-            { id: 1, name: 'Rent', amount: 826.00, dueDate: 11, category: 'Housing', assignedPaycheck: 1, isPaid: false, actualAmount: null, isSubscription: false },
-            { id: 2, name: 'Electric', amount: 46.00, dueDate: 18, category: 'Utilities', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
-            { id: 3, name: 'Gas', amount: 46.00, dueDate: 3, category: 'Utilities', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
-            { id: 4, name: 'Internet', amount: 50.00, dueDate: 20, category: 'Utilities', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
-            { id: 5, name: 'Car Payment', amount: 570.00, dueDate: 28, category: 'Transportation', assignedPaycheck: null, isPaid: false, actualAmount: null, isSubscription: false },
-            { id: 6, name: 'Health Insurance', amount: 160.00, dueDate: 28, category: 'Health', assignedPaycheck: 1, isPaid: false, actualAmount: null, isSubscription: false },
-            { id: 7, name: 'Dental Insurance', amount: 80.00, dueDate: 21, category: 'Health', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
-            { id: 8, name: 'Netflix', amount: 15.99, dueDate: 4, category: 'Entertainment', assignedPaycheck: null, isPaid: false, actualAmount: null, isSubscription: true },
-            { id: 9, name: 'Spotify Premium', amount: 10.99, dueDate: 13, category: 'Entertainment', assignedPaycheck: null, isPaid: false, actualAmount: null, isSubscription: true },
-            { id: 10, name: 'Student Loan', amount: 50.32, dueDate: 29, category: 'Debt', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
-            { id: 11, name: 'Groceries', amount: 400.00, dueDate: 15, category: 'Food', assignedPaycheck: 1, isPaid: false, actualAmount: null, isSubscription: false }
+            { id: 1, name: 'Rent', amount: 826.00, dueDate: 11, category: 'Housing', assignedPaycheck: 1, isPaid: false, isSubscription: false },
+            { id: 2, name: 'Electric', amount: 46.00, dueDate: 18, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 3, name: 'Gas', amount: 46.00, dueDate: 3, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 4, name: 'Internet', amount: 50.00, dueDate: 20, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 5, name: 'Car Payment', amount: 570.00, dueDate: 28, category: 'Transportation', assignedPaycheck: null, isPaid: false, isSubscription: false },
+            { id: 6, name: 'Health Insurance', amount: 160.00, dueDate: 28, category: 'Health', assignedPaycheck: 1, isPaid: false, isSubscription: false },
+            { id: 7, name: 'Dental Insurance', amount: 80.00, dueDate: 21, category: 'Health', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 8, name: 'Netflix', amount: 15.99, dueDate: 4, category: 'Entertainment', assignedPaycheck: null, isPaid: false, isSubscription: true },
+            { id: 9, name: 'Spotify Premium', amount: 10.99, dueDate: 13, category: 'Entertainment', assignedPaycheck: null, isPaid: false, isSubscription: true },
+            { id: 10, name: 'Student Loan', amount: 50.32, dueDate: 29, category: 'Debt', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 11, name: 'Groceries', amount: 400.00, dueDate: 15, category: 'Food', assignedPaycheck: 1, isPaid: false, isSubscription: false }
           ],
           paychecks: [
             { id: 1, date: '2025-07-11', amount: 1600.00, source: 'Equitas Health', label: 'First Paycheck' },
@@ -55,9 +55,9 @@ const FinanceHubPro = () => {
           name: 'August',
           year: 2025,
           bills: [
-            { id: 1, name: 'Rent', amount: 826.00, dueDate: 1, category: 'Housing', assignedPaycheck: 1, isPaid: false, actualAmount: null, isSubscription: false },
-            { id: 2, name: 'Electric', amount: 46.00, dueDate: 10, category: 'Utilities', assignedPaycheck: 2, isPaid: false, actualAmount: null, isSubscription: false },
-            { id: 3, name: 'Car Payment', amount: 570.00, dueDate: 28, category: 'Transportation', assignedPaycheck: null, isPaid: false, actualAmount: null, isSubscription: false }
+            { id: 1, name: 'Rent', amount: 826.00, dueDate: 1, category: 'Housing', assignedPaycheck: 1, isPaid: false, isSubscription: false },
+            { id: 2, name: 'Electric', amount: 46.00, dueDate: 10, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
+            { id: 3, name: 'Car Payment', amount: 570.00, dueDate: 28, category: 'Transportation', assignedPaycheck: null, isPaid: false, isSubscription: false }
           ],
           paychecks: [
             { id: 1, date: '2025-08-08', amount: 1600.00, source: 'Equitas Health', label: 'First Paycheck' },
@@ -234,7 +234,6 @@ const FinanceHubPro = () => {
         ...bill,
         id: Date.now() + Math.random(),
         isPaid: false,
-        actualAmount: null,
         assignedPaycheck: null
       }));
       
@@ -263,7 +262,6 @@ const FinanceHubPro = () => {
       category: newBill.category,
       assignedPaycheck: null,
       isPaid: false,
-      actualAmount: null,
       isSubscription: newBill.isSubscription
     };
     
@@ -372,40 +370,40 @@ const FinanceHubPro = () => {
     }));
   };
 
-  // Payment tracking functions
-  const toggleBillPaid = (billId, isPaid) => {
-    setData(prev => ({
-      ...prev,
-      months: {
-        ...prev.months,
-        [data.currentMonthId]: {
-          ...currentMonth,
-          bills: currentMonth.bills.map(bill => 
-            bill.id === billId 
-              ? { ...bill, isPaid: isPaid, actualAmount: isPaid ? bill.actualAmount : null }
-              : bill
-          )
-        }
+  // Add these RIGHT AFTER your existing handler functions
+const toggleBillPaid = (billId, isPaid) => {
+  setData(prev => ({
+    ...prev,
+    months: {
+      ...prev.months,
+      [data.currentMonthId]: {
+        ...currentMonth,
+        bills: currentMonth.bills.map(bill => 
+          bill.id === billId 
+            ? { ...bill, isPaid: isPaid, actualAmount: isPaid ? bill.actualAmount : null }
+            : bill
+        )
       }
-    }));
-  };
+    }
+  }));
+};
 
-  const updateActualAmount = (billId, actualAmount) => {
-    setData(prev => ({
-      ...prev,
-      months: {
-        ...prev.months,
-        [data.currentMonthId]: {
-          ...currentMonth,
-          bills: currentMonth.bills.map(bill => 
-            bill.id === billId 
-              ? { ...bill, actualAmount: actualAmount }
-              : bill
-          )
-        }
+const updateActualAmount = (billId, actualAmount) => {
+  setData(prev => ({
+    ...prev,
+    months: {
+      ...prev.months,
+      [data.currentMonthId]: {
+        ...currentMonth,
+        bills: currentMonth.bills.map(bill => 
+          bill.id === billId 
+            ? { ...bill, actualAmount: actualAmount }
+            : bill
+        )
       }
-    }));
-  };
+    }
+  }));
+};
 
   // Start editing
   const startEdit = (item, type) => {
@@ -450,20 +448,9 @@ const FinanceHubPro = () => {
     return getBillsByPaycheck(paycheckId).reduce((sum, bill) => sum + bill.amount, 0);
   };
 
-  // Updated paycheck remaining calculation with actual amounts
   const getPaycheckRemaining = (paycheckId) => {
     const paycheck = currentMonth.paychecks.find(p => p.id === paycheckId);
-    if (!paycheck) return 0;
-    
-    const assignedBills = getBillsByPaycheck(paycheckId);
-    const actualTotal = assignedBills.reduce((sum, bill) => {
-      if (bill.isPaid && bill.actualAmount) {
-        return sum + parseFloat(bill.actualAmount || 0);
-      }
-      return sum + (bill.isPaid ? bill.amount : 0);
-    }, 0);
-    
-    return paycheck.amount - actualTotal;
+    return paycheck ? paycheck.amount - getPaycheckTotal(paycheckId) : 0;
   };
 
   const getTotalIncome = () => {
@@ -557,7 +544,6 @@ const FinanceHubPro = () => {
       category: subscription.category,
       assignedPaycheck: null,
       isPaid: false,
-      actualAmount: null,
       isSubscription: true,
       subscriptionId: subscription.id
     };
@@ -1194,54 +1180,24 @@ const FinanceHubPro = () => {
 
   const renderOverview = () => (
     <div>
-      {/* Stats Cards - Updated with payment tracking */}
+      {/* Stats Cards */}
       <div style={styles.statsGrid}>
-        {(() => {
-          const totalIncome = getTotalIncome();
-          const budgetedExpenses = getTotalExpenses();
-          const actualExpenses = currentMonth.bills.reduce((sum, bill) => {
-            if (bill.isPaid && bill.actualAmount) {
-              return sum + parseFloat(bill.actualAmount || 0);
-            }
-            return sum + (bill.isPaid ? bill.amount : 0);
-          }, 0);
-          const paidBills = currentMonth.bills.filter(b => b.isPaid).length;
-          
-          return (
-            <>
-              <div style={styles.statCard}>
-                <div style={styles.statValue}>{formatCurrency(totalIncome)}</div>
-                <div style={styles.statLabel}>Total Income</div>
-              </div>
-              <div style={styles.statCard}>
-                <div style={styles.statValue}>{formatCurrency(budgetedExpenses)}</div>
-                <div style={styles.statLabel}>Budgeted Expenses</div>
-              </div>
-              <div style={styles.statCard}>
-                <div style={styles.statValue}>{formatCurrency(actualExpenses)}</div>
-                <div style={styles.statLabel}>Actual Expenses</div>
-                {actualExpenses > 0 && budgetedExpenses !== actualExpenses && (
-                  <div style={{
-                    fontSize: '12px',
-                    marginTop: '5px',
-                    color: budgetedExpenses > actualExpenses ? '#10b981' : '#ef4444'
-                  }}>
-                    {budgetedExpenses > actualExpenses ? 'Under' : 'Over'} by {formatCurrency(Math.abs(budgetedExpenses - actualExpenses))}
-                  </div>
-                )}
-              </div>
-              <div style={styles.statCard}>
-                <div style={styles.statValue}>{formatCurrency(totalIncome - (actualExpenses > 0 ? actualExpenses : budgetedExpenses))}</div>
-                <div style={styles.statLabel}>
-                  {actualExpenses > 0 ? 'Actual' : 'Projected'} Remaining
-                </div>
-                <div style={{fontSize: '12px', marginTop: '5px', opacity: 0.9}}>
-                  Bills paid: {paidBills}/{currentMonth.bills.length}
-                </div>
-              </div>
-            </>
-          );
-        })()}
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getTotalIncome())}</div>
+          <div style={styles.statLabel}>Total Income</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getTotalExpenses())}</div>
+          <div style={styles.statLabel}>Total Expenses</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{formatCurrency(getTotalIncome() - getTotalExpenses())}</div>
+          <div style={styles.statLabel}>Remaining</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statValue}>{getUnassignedBills().length}</div>
+          <div style={styles.statLabel}>Unassigned Bills</div>
+        </div>
       </div>
 
       {/* Quick subscription summary */}
@@ -1260,7 +1216,6 @@ const FinanceHubPro = () => {
       <div style={styles.paycheckGrid}>
         {currentMonth.paychecks.map(paycheck => {
           const assignedBills = getBillsByPaycheck(paycheck.id);
-          const remaining = getPaycheckRemaining(paycheck.id);
           
           return (
             <div key={paycheck.id} style={styles.paycheckCard}>
@@ -1290,127 +1245,78 @@ const FinanceHubPro = () => {
               </div>
               
               <div style={styles.billsList}>
-                {assignedBills.map(bill => (
-                  <div key={bill.id} style={{
-                    ...styles.billItem,
-                    backgroundColor: bill.isPaid ? (isDarkMode ? 'rgba(16, 185, 129, 0.1)' : '#d5f4e6') : 'transparent',
-                    border: bill.isPaid ? (isDarkMode ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #10b981') : 'none',
-                    borderRadius: bill.isPaid ? '8px' : '0',
-                    padding: bill.isPaid ? '10px' : '10px 0',
-                    flexDirection: 'column',
-                    alignItems: 'stretch'
-                  }}>
-                    <div style={{display: 'flex', alignItems: 'center', marginBottom: bill.isPaid ? '10px' : '0'}}>
-                      <input
-                        type="checkbox"
-                        checked={bill.isPaid || false}
-                        onChange={(e) => toggleBillPaid(bill.id, e.target.checked)}
-                        style={{marginRight: '10px', transform: 'scale(1.2)'}}
-                      />
-                      <span style={{
-                        ...styles.billName, 
-                        display: 'flex', 
-                        alignItems: 'center',
-                        textDecoration: bill.isPaid ? 'line-through' : 'none',
-                        opacity: bill.isPaid ? 0.7 : 1,
-                        flex: 1
-                      }}>
-                        {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
-                        {bill.name}
-                      </span>
-                      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: '10px'}}>
-                        <span style={styles.billAmount}>{formatCurrency(bill.amount)}</span>
-                        {bill.isPaid && bill.actualAmount && (
-                          <span style={{fontSize: '12px', color: '#10b981', fontWeight: '500'}}>
-                            Paid: {formatCurrency(bill.actualAmount)}
-                          </span>
-                        )}
-                      </div>
-                      <button 
-                        style={styles.editButton}
-                        onClick={() => startEdit(bill, 'bill')}
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        style={styles.deleteButton}
-                        onClick={() => assignBillToPaycheck(bill.id, null)}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                    {bill.isPaid && (
-                      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                        <span style={{fontSize: '14px', color: isDarkMode ? '#a0aec0' : '#666'}}>
-                          Actual amount paid:
-                        </span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          placeholder="Enter amount"
-                          value={bill.actualAmount || ''}
-                          onChange={(e) => updateActualAmount(bill.id, e.target.value)}
-                          style={{
-                            ...styles.input,
-                            fontSize: '14px',
-                            padding: '6px 10px',
-                            width: '120px',
-                            marginLeft: '10px'
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {assignedBills.length === 0 && (
-                  <div style={{textAlign: 'center', color: '#999', padding: '20px'}}>
-                    No bills assigned yet
-                  </div>
-                )}
-              </div>
-              
-              <div style={{
-                ...styles.remainingAmount,
-                ...(remaining >= 0 ? styles.positiveRemaining : styles.negativeRemaining)
-              }}>
-                {(() => {
-                  const budgetedTotal = assignedBills.reduce((sum, bill) => sum + bill.amount, 0);
-                  const actualTotal = assignedBills.reduce((sum, bill) => {
-                    if (bill.isPaid && bill.actualAmount) {
-                      return sum + parseFloat(bill.actualAmount || 0);
-                    }
-                    return sum + (bill.isPaid ? bill.amount : 0);
-                  }, 0);
-                  const budgetedRemaining = paycheck.amount - budgetedTotal;
-                  const actualRemaining = paycheck.amount - actualTotal;
-                  const paidCount = assignedBills.filter(b => b.isPaid).length;
-                  
-                  return (
-                    <div>
-                      <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '5px'}}>
-                        <span>Budgeted:</span>
-                        <span>{formatCurrency(budgetedRemaining)}</span>
-                      </div>
-                      {actualTotal > 0 && (
-                        <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '5px'}}>
-                          <span>Actual:</span>
-                          <span>{formatCurrency(actualRemaining)}</span>
-                        </div>
-                      )}
-                      <div style={{fontSize: '12px', textAlign: 'center', opacity: 0.8}}>
-                        Paid: {paidCount}/{assignedBills.length} bills
-                        {budgetedTotal !== actualTotal && actualTotal > 0 && (
-                          <span style={{
-                            marginLeft: '10px',
-                            color: budgetedTotal > actualTotal ? '#10b981' : '#ef4444'
-                          }}>
-                            ({budgetedTotal > actualTotal ? 'Under' : 'Over'} by {formatCurrency(Math.abs(budgetedTotal - actualTotal))})
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()}
+  {assignedBills.map(bill => (
+  <div key={bill.id} style={{
+    ...styles.billItem,
+    backgroundColor: bill.isPaid ? (isDarkMode ? 'rgba(16, 185, 129, 0.1)' : '#d5f4e6') : 'transparent',
+    border: bill.isPaid ? (isDarkMode ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #10b981') : 'none',
+    borderRadius: bill.isPaid ? '8px' : '0',
+    padding: bill.isPaid ? '10px' : '10px 0',
+    flexDirection: 'column',
+    alignItems: 'stretch'
+  }}>
+    <div style={{display: 'flex', alignItems: 'center', marginBottom: bill.isPaid ? '10px' : '0'}}>
+      <input
+        type="checkbox"
+        checked={bill.isPaid || false}
+        onChange={(e) => toggleBillPaid(bill.id, e.target.checked)}
+        style={{marginRight: '10px', transform: 'scale(1.2)'}}
+      />
+      <span style={{
+        ...styles.billName, 
+        display: 'flex', 
+        alignItems: 'center',
+        textDecoration: bill.isPaid ? 'line-through' : 'none',
+        opacity: bill.isPaid ? 0.7 : 1,
+        flex: 1
+      }}>
+        {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
+        {bill.name}
+      </span>
+      <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: '10px'}}>
+        <span style={styles.billAmount}>{formatCurrency(bill.amount)}</span>
+        {bill.isPaid && bill.actualAmount && (
+          <span style={{fontSize: '12px', color: '#10b981', fontWeight: '500'}}>
+            Paid: {formatCurrency(bill.actualAmount)}
+          </span>
+        )}
+      </div>
+      <button 
+        style={styles.editButton}
+        onClick={() => startEdit(bill, 'bill')}
+      >
+        Edit
+      </button>
+      <button 
+        style={styles.deleteButton}
+        onClick={() => assignBillToPaycheck(bill.id, null)}
+      >
+        Remove
+      </button>
+    </div>
+    {bill.isPaid && (
+      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+        <span style={{fontSize: '14px', color: isDarkMode ? '#a0aec0' : '#666'}}>
+          Actual amount paid:
+        </span>
+        <input
+          type="number"
+          step="0.01"
+          placeholder="Enter amount"
+          value={bill.actualAmount || ''}
+          onChange={(e) => updateActualAmount(bill.id, e.target.value)}
+          style={{
+            ...styles.input,
+            fontSize: '14px',
+            padding: '6px 10px',
+            width: '120px',
+            marginLeft: '10px'
+          }}
+        />
+      </div>
+    )}
+  </div>
+))}
               </div>
             </div>
           );
@@ -1426,65 +1332,28 @@ const FinanceHubPro = () => {
           <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px'}}>
             {getUnassignedBills().map(bill => (
               <div key={bill.id} style={{
-                backgroundColor: bill.isPaid ? (isDarkMode ? 'rgba(16, 185, 129, 0.1)' : '#d5f4e6') : 'white',
+                backgroundColor: 'white',
                 padding: '15px',
                 borderRadius: '8px',
                 display: 'flex',
-                flexDirection: 'column',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                border: bill.isPaid ? (isDarkMode ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #10b981') : 'none'
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
               }}>
-                <div style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
-                  <input
-                    type="checkbox"
-                    checked={bill.isPaid || false}
-                    onChange={(e) => toggleBillPaid(bill.id, e.target.checked)}
-                    style={{marginRight: '10px', transform: 'scale(1.2)'}}
-                  />
-                  <div style={{flex: 1}}>
-                    <div style={{fontWeight: '500', display: 'flex', alignItems: 'center'}}>
-                      {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
-                      <span style={{
-                        textDecoration: bill.isPaid ? 'line-through' : 'none',
-                        opacity: bill.isPaid ? 0.7 : 1
-                      }}>
-                        {bill.name}
-                      </span>
-                    </div>
-                    <div style={{fontSize: '14px', color: '#666'}}>
-                      Due: {bill.dueDate}{bill.dueDate === 1 ? 'st' : bill.dueDate === 2 ? 'nd' : bill.dueDate === 3 ? 'rd' : 'th'} • {formatCurrency(bill.amount)}
-                      {bill.isPaid && bill.actualAmount && (
-                        <span style={{color: '#10b981', marginLeft: '10px'}}>
-                          (Paid: {formatCurrency(bill.actualAmount)})
-                        </span>
-                      )}
-                    </div>
+                <div>
+                  <div style={{fontWeight: '500', display: 'flex', alignItems: 'center'}}>
+                    {bill.isSubscription && <span style={{marginRight: '5px'}}>📱</span>}
+                    {bill.name}
+                  </div>
+                  <div style={{fontSize: '14px', color: '#666'}}>
+                    Due: {bill.dueDate}{bill.dueDate === 1 ? 'st' : bill.dueDate === 2 ? 'nd' : bill.dueDate === 3 ? 'rd' : 'th'} • {formatCurrency(bill.amount)}
                   </div>
                 </div>
-                
-                {bill.isPaid && (
-                  <div style={{marginBottom: '10px'}}>
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="Actual amount paid"
-                      value={bill.actualAmount || ''}
-                      onChange={(e) => updateActualAmount(bill.id, e.target.value)}
-                      style={{
-                        ...styles.input,
-                        fontSize: '14px',
-                        padding: '6px 10px',
-                        width: '100%'
-                      }}
-                    />
-                  </div>
-                )}
-                
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <div>
                   <select
                     value=""
                     onChange={(e) => assignBillToPaycheck(bill.id, parseInt(e.target.value))}
-                    style={{...styles.select, flex: 1, marginRight: '10px'}}
+                    style={styles.select}
                   >
                     <option value="">Assign to...</option>
                     {currentMonth.paychecks.map(paycheck => (
@@ -2113,7 +1982,7 @@ const FinanceHubPro = () => {
       {activeView === 'manage' && renderManage()}
       {activeView === 'history' && renderHistory()}
 
-      {/* All Modals - keeping them all for completeness */}
+      {/* New Month Modal */}
       {showNewMonthForm && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
@@ -2149,6 +2018,7 @@ const FinanceHubPro = () => {
         </div>
       )}
 
+      {/* Edit Modal */}
       {editingItem && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
@@ -2245,6 +2115,7 @@ const FinanceHubPro = () => {
         </div>
       )}
 
+      {/* Cancel Subscription Modal */}
       {showCancelModal && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
@@ -2276,6 +2147,7 @@ const FinanceHubPro = () => {
         </div>
       )}
 
+      {/* User Management Modal */}
       {showUserManagement && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
@@ -2354,6 +2226,7 @@ const FinanceHubPro = () => {
         </div>
       )}
 
+      {/* Add New User Modal */}
       {showAddUserModal && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
@@ -2408,6 +2281,7 @@ const FinanceHubPro = () => {
         </div>
       )}
 
+      {/* Add New Subscription Modal */}
       {showAddSubscriptionModal && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
@@ -2508,6 +2382,7 @@ const FinanceHubPro = () => {
         </div>
       )}
 
+      {/* Add Connected Account Modal */}
       {showAddAccountModal && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
@@ -2581,6 +2456,7 @@ const FinanceHubPro = () => {
         </div>
       )}
 
+      {/* Delete User Confirmation Modal */}
       {showDeleteUserModal && (
         <div style={styles.modal}>
           <div style={styles.modalContent}>
