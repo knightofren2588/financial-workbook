@@ -9,6 +9,8 @@ const FinanceHubPro = () => {
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [backupFile, setBackupFile] = useState(null);
   const [importError, setImportError] = useState(null);
+  const [manualUserId, setManualUserId] = useState('');
+  const [showUserIdSection, setShowUserIdSection] = useState(false);
 
   // Load data from cloud storage
   const loadData = async () => {
@@ -2551,7 +2553,97 @@ const FinanceHubPro = () => {
                     <div><strong>User ID:</strong> {syncStatus.userId}</div>
                     <div><strong>Last Sync:</strong> {syncStatus.lastSync ? new Date(syncStatus.lastSync).toLocaleString() : 'Never'}</div>
                     <div><strong>Pending Changes:</strong> {syncStatus.pendingChanges}</div>
+                    <div><strong>LocalStorage:</strong> {syncStatus.localStorageAvailable ? '✅ Available' : '❌ Not Available'}</div>
+                    <div><strong>SessionStorage:</strong> {syncStatus.sessionStorageAvailable ? '✅ Available' : '❌ Not Available'}</div>
                   </div>
+                </div>
+
+                {/* User ID Management Section */}
+                <div style={{
+                  backgroundColor: isDarkMode ? 'rgba(6, 182, 212, 0.1)' : '#d1ecf1',
+                  border: isDarkMode ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid #bee5eb',
+                  borderRadius: '8px',
+                  padding: '15px',
+                  marginBottom: '15px',
+                  color: isDarkMode ? '#67e8f9' : '#0c5460'
+                }}>
+                  <h4>🔧 Cross-Device Sync Fix</h4>
+                  <p style={{fontSize: '14px', marginBottom: '10px'}}>
+                    If your data isn't syncing between devices, you can manually set the same User ID on all devices.
+                  </p>
+                  
+                  <button 
+                    style={{...styles.button, fontSize: '12px', padding: '8px 12px', marginBottom: '10px'}}
+                    onClick={() => setShowUserIdSection(!showUserIdSection)}
+                  >
+                    {showUserIdSection ? 'Hide' : 'Show'} User ID Management
+                  </button>
+                  
+                  {showUserIdSection && (
+                    <div style={{marginTop: '10px'}}>
+                      <div style={{marginBottom: '10px'}}>
+                        <label style={{fontSize: '14px', fontWeight: '500'}}>
+                          Current User ID: <span style={{fontFamily: 'monospace', backgroundColor: 'rgba(0,0,0,0.1)', padding: '2px 6px', borderRadius: '4px'}}>{syncStatus.userId}</span>
+                        </label>
+                      </div>
+                      
+                      <div style={{marginBottom: '10px'}}>
+                        <input
+                          type="text"
+                          placeholder="Enter User ID from another device"
+                          value={manualUserId}
+                          onChange={(e) => setManualUserId(e.target.value)}
+                          style={{
+                            ...styles.input,
+                            fontSize: '12px',
+                            padding: '8px 10px',
+                            width: '100%',
+                            marginBottom: '10px'
+                          }}
+                        />
+                        <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                          <button 
+                            style={{...styles.button, ...styles.buttonSuccess, fontSize: '12px', padding: '8px 12px'}}
+                            onClick={() => {
+                              if (manualUserId && cloudStorage.setUserId(manualUserId)) {
+                                setManualUserId('');
+                                setSyncStatus(cloudStorage.getSyncStatus());
+                                alert('User ID updated! Please refresh the page for changes to take effect.');
+                              }
+                            }}
+                            disabled={!manualUserId}
+                          >
+                            Set User ID
+                          </button>
+                          <button 
+                            style={{...styles.button, fontSize: '12px', padding: '8px 12px'}}
+                            onClick={() => {
+                              navigator.clipboard.writeText(syncStatus.userId);
+                              alert('User ID copied to clipboard!');
+                            }}
+                          >
+                            Copy Current ID
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div style={{
+                        backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.1)' : '#fff3cd',
+                        border: isDarkMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #ffeaa7',
+                        borderRadius: '6px',
+                        padding: '10px',
+                        fontSize: '12px',
+                        color: isDarkMode ? '#f59e0b' : '#856404'
+                      }}>
+                        <strong>💡 How to sync across devices:</strong><br />
+                        1. Copy the User ID from this device<br />
+                        2. Open the app on another device<br />
+                        3. Go to Cloud Sync Status → User ID Management<br />
+                        4. Paste the same User ID and click "Set User ID"<br />
+                        5. Refresh both devices
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{

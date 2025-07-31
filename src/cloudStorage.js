@@ -38,11 +38,43 @@ class CloudStorage {
 
   // Generate a unique user ID for privacy
   generateUserId() {
+    // First, try to get existing user ID from localStorage
     let userId = localStorage.getItem('financeHubUserId');
+    
+    // Debug logging to help identify the issue
+    console.log('🔍 User ID Debug:', {
+      existingUserId: userId,
+      localStorageAvailable: typeof localStorage !== 'undefined',
+      userAgent: navigator.userAgent,
+      timestamp: new Date().toISOString()
+    });
+    
     if (!userId) {
-      userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('financeHubUserId', userId);
+      // Create a more stable user ID using multiple sources
+      const timestamp = Date.now();
+      const randomPart = Math.random().toString(36).substr(2, 9);
+      const deviceInfo = navigator.userAgent.replace(/[^a-zA-Z0-9]/g, '').substr(0, 10);
+      
+      userId = 'user_' + timestamp + '_' + randomPart + '_' + deviceInfo;
+      
+      // Store the user ID
+      try {
+        localStorage.setItem('financeHubUserId', userId);
+        console.log('✅ Created new user ID:', userId);
+      } catch (error) {
+        console.error('❌ Failed to store user ID:', error);
+        // Fallback: use sessionStorage if localStorage fails
+        try {
+          sessionStorage.setItem('financeHubUserId', userId);
+          console.log('⚠️ Using sessionStorage as fallback');
+        } catch (sessionError) {
+          console.error('❌ Failed to store in sessionStorage too:', sessionError);
+        }
+      }
+    } else {
+      console.log('✅ Using existing user ID:', userId);
     }
+    
     return userId;
   }
 
@@ -220,13 +252,38 @@ class CloudStorage {
   getSyncStatus() {
     const lastSync = localStorage.getItem('financeHubLastSync');
     const queue = JSON.parse(localStorage.getItem('financeHubSyncQueue') || '[]');
+    const userId = this.generateUserId();
     
     return {
       isOnline: this.isOnline,
       lastSync: lastSync ? new Date(lastSync) : null,
       pendingChanges: queue.length,
-      userId: this.generateUserId()
+      userId: userId,
+      localStorageAvailable: typeof localStorage !== 'undefined',
+      sessionStorageAvailable: typeof sessionStorage !== 'undefined'
     };
+  }
+
+  // Manually set user ID for cross-device sync
+  setUserId(manualUserId) {
+    if (!manualUserId || typeof manualUserId !== 'string') {
+      console.error('Invalid user ID provided');
+      return false;
+    }
+    
+    try {
+      localStorage.setItem('financeHubUserId', manualUserId);
+      console.log('✅ Manually set user ID:', manualUserId);
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to set user ID:', error);
+      return false;
+    }
+  }
+
+  // Get current user ID without generating a new one
+  getCurrentUserId() {
+    return localStorage.getItem('financeHubUserId') || sessionStorage.getItem('financeHubUserId');
   }
 
   // Export data for backup
