@@ -1,161 +1,31 @@
 import React, { useState, useEffect } from 'react';
+import cloudStorage from './cloudStorage';
 
 const FinanceHubPro = () => {
-  // Load data from localStorage
-  const loadData = () => {
+  // State for cloud sync status
+  const [syncStatus, setSyncStatus] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [showBackupModal, setShowBackupModal] = useState(false);
+  const [backupFile, setBackupFile] = useState(null);
+  const [importError, setImportError] = useState(null);
+
+  // Load data from cloud storage
+  const loadData = async () => {
     try {
-      const savedData = localStorage.getItem('financeHubProData');
-      if (savedData) {
-        return JSON.parse(savedData);
-      }
+      setIsLoading(true);
+      const data = await cloudStorage.loadData();
+      setSyncStatus(cloudStorage.getSyncStatus());
+      return data;
     } catch (error) {
       console.error('Error loading data:', error);
+      return cloudStorage.getDefaultData();
+    } finally {
+      setIsLoading(false);
     }
-    
-    return {
-      user: {
-        id: 'user-1',
-        name: 'John Doe',
-        email: 'john@equitashealth.com',
-        company: 'Equitas Health',
-        createdAt: '2025-07-01',
-        settings: {
-          notifications: true,
-          darkMode: false,
-          currency: 'USD'
-        }
-      },
-      currentMonthId: 'july-2025',
-      months: {
-        'july-2025': {
-          id: 'july-2025',
-          name: 'July',
-          year: 2025,
-          bills: [
-            { id: 1, name: 'Rent', amount: 826.00, dueDate: 11, category: 'Housing', assignedPaycheck: 1, isPaid: false, isSubscription: false },
-            { id: 2, name: 'Electric', amount: 46.00, dueDate: 18, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
-            { id: 3, name: 'Gas', amount: 46.00, dueDate: 3, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
-            { id: 4, name: 'Internet', amount: 50.00, dueDate: 20, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
-            { id: 5, name: 'Car Payment', amount: 570.00, dueDate: 28, category: 'Transportation', assignedPaycheck: null, isPaid: false, isSubscription: false },
-            { id: 6, name: 'Health Insurance', amount: 160.00, dueDate: 28, category: 'Health', assignedPaycheck: 1, isPaid: false, isSubscription: false },
-            { id: 7, name: 'Dental Insurance', amount: 80.00, dueDate: 21, category: 'Health', assignedPaycheck: 2, isPaid: false, isSubscription: false },
-            { id: 8, name: 'Netflix', amount: 15.99, dueDate: 4, category: 'Entertainment', assignedPaycheck: null, isPaid: false, isSubscription: true },
-            { id: 9, name: 'Spotify Premium', amount: 10.99, dueDate: 13, category: 'Entertainment', assignedPaycheck: null, isPaid: false, isSubscription: true },
-            { id: 10, name: 'Student Loan', amount: 50.32, dueDate: 29, category: 'Debt', assignedPaycheck: 2, isPaid: false, isSubscription: false },
-            { id: 11, name: 'Groceries', amount: 400.00, dueDate: 15, category: 'Food', assignedPaycheck: 1, isPaid: false, isSubscription: false }
-          ],
-          paychecks: [
-            { id: 1, date: '2025-07-11', amount: 1600.00, source: 'Equitas Health', label: 'First Paycheck' },
-            { id: 2, date: '2025-07-25', amount: 2100.00, source: 'Equitas Health', label: 'Second Paycheck' }
-          ]
-        },
-        'august-2025': {
-          id: 'august-2025',
-          name: 'August',
-          year: 2025,
-          bills: [
-            { id: 1, name: 'Rent', amount: 826.00, dueDate: 1, category: 'Housing', assignedPaycheck: 1, isPaid: false, isSubscription: false },
-            { id: 2, name: 'Electric', amount: 46.00, dueDate: 10, category: 'Utilities', assignedPaycheck: 2, isPaid: false, isSubscription: false },
-            { id: 3, name: 'Car Payment', amount: 570.00, dueDate: 28, category: 'Transportation', assignedPaycheck: null, isPaid: false, isSubscription: false }
-          ],
-          paychecks: [
-            { id: 1, date: '2025-08-08', amount: 1600.00, source: 'Equitas Health', label: 'First Paycheck' },
-            { id: 2, date: '2025-08-22', amount: 1600.00, source: 'Equitas Health', label: 'Second Paycheck' }
-          ]
-        }
-      },
-      subscriptions: [
-        {
-          id: 'sub-1',
-          name: 'Netflix',
-          amount: 15.99,
-          billingCycle: 'monthly',
-          nextBilling: '2025-08-04',
-          category: 'Entertainment',
-          status: 'active',
-          provider: 'Netflix',
-          cancellationUrl: 'https://netflix.com/cancelplan',
-          description: 'Standard Plan',
-          connectedAccount: 'Chase Credit Card ****1234',
-          lastCharged: '2025-07-04',
-          autoRenew: true,
-          trialEnds: null,
-          yearlyDiscount: 0
-        },
-        {
-          id: 'sub-2',
-          name: 'Spotify Premium',
-          amount: 10.99,
-          billingCycle: 'monthly',
-          nextBilling: '2025-08-13',
-          category: 'Entertainment',
-          status: 'active',
-          provider: 'Spotify',
-          cancellationUrl: 'https://spotify.com/account/subscription',
-          description: 'Individual Plan',
-          connectedAccount: 'Chase Credit Card ****1234',
-          lastCharged: '2025-07-13',
-          autoRenew: true,
-          trialEnds: null,
-          yearlyDiscount: 10.99 * 2
-        },
-        {
-          id: 'sub-3',
-          name: 'Apple iCloud+',
-          amount: 2.99,
-          billingCycle: 'monthly',
-          nextBilling: '2025-08-18',
-          category: 'Productivity',
-          status: 'active',
-          provider: 'Apple',
-          cancellationUrl: 'https://apple.com/icloud/settings',
-          description: '200GB Storage',
-          connectedAccount: 'Apple ID Payment',
-          lastCharged: '2025-07-18',
-          autoRenew: true,
-          trialEnds: null,
-          yearlyDiscount: 0
-        },
-        {
-          id: 'sub-4',
-          name: 'Adobe Creative Cloud',
-          amount: 54.99,
-          billingCycle: 'monthly',
-          nextBilling: '2025-08-22',
-          category: 'Productivity',
-          status: 'trial',
-          provider: 'Adobe',
-          cancellationUrl: 'https://adobe.com/account/cancel',
-          description: 'All Apps Plan',
-          connectedAccount: 'Chase Credit Card ****1234',
-          lastCharged: null,
-          autoRenew: true,
-          trialEnds: '2025-08-22',
-          yearlyDiscount: 120.00
-        }
-      ],
-      connectedAccounts: [
-        {
-          id: 'acc-1',
-          type: 'credit_card',
-          name: 'Chase Freedom',
-          last4: '1234',
-          provider: 'Chase',
-          status: 'connected'
-        },
-        {
-          id: 'acc-2',
-          type: 'bank_account',
-          name: 'Checking Account',
-          last4: '5678',
-          provider: 'Wells Fargo',
-          status: 'connected'
-        }
-      ]
-    };
   };
 
-  const [data, setData] = useState(loadData);
+  const [data, setData] = useState(null);
   const [activeView, setActiveView] = useState('overview');
   const [editingItem, setEditingItem] = useState(null);
   const [editType, setEditType] = useState(null);
@@ -186,12 +56,25 @@ const FinanceHubPro = () => {
 
   const currentMonth = data.months[data.currentMonthId];
 
-  // Save data to localStorage
+  // Initialize data on component mount
   useEffect(() => {
-    try {
-      localStorage.setItem('financeHubProData', JSON.stringify(data));
-    } catch (error) {
-      console.error('Error saving data:', error);
+    const initializeData = async () => {
+      const initialData = await loadData();
+      setData(initialData);
+    };
+    initializeData();
+  }, []);
+
+  // Save data to cloud storage
+  useEffect(() => {
+    if (data) {
+      const saveData = async () => {
+        const result = await cloudStorage.saveData(data);
+        if (result.success) {
+          setSyncStatus(cloudStorage.getSyncStatus());
+        }
+      };
+      saveData();
     }
   }, [data]);
 
@@ -1703,6 +1586,43 @@ const FinanceHubPro = () => {
         </div>
       </div>
 
+      {/* Cloud Sync Status */}
+      {syncStatus && (
+        <div style={{
+          backgroundColor: isDarkMode ? 'rgba(6, 182, 212, 0.1)' : '#d1ecf1',
+          border: isDarkMode ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid #bee5eb',
+          borderRadius: '8px',
+          padding: '15px',
+          marginBottom: '20px',
+          color: isDarkMode ? '#67e8f9' : '#0c5460'
+        }}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <div>
+              <strong>☁️ Cloud Sync Status</strong>
+              <div style={{fontSize: '14px', marginTop: '5px'}}>
+                {syncStatus.isOnline ? '🟢 Online' : '🔴 Offline'}
+                {syncStatus.lastSync && ` • Last sync: ${new Date(syncStatus.lastSync).toLocaleString()}`}
+                {syncStatus.pendingChanges > 0 && ` • ${syncStatus.pendingChanges} pending changes`}
+              </div>
+            </div>
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button 
+                style={{...styles.button, fontSize: '12px', padding: '8px 12px'}}
+                onClick={() => setShowSyncModal(true)}
+              >
+                Sync Status
+              </button>
+              <button 
+                style={{...styles.button, ...styles.buttonSuccess, fontSize: '12px', padding: '8px 12px'}}
+                onClick={() => setShowBackupModal(true)}
+              >
+                Backup/Restore
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {editingUser ? (
         <div>
           <h4>✏️ Edit Profile</h4>
@@ -1918,6 +1838,11 @@ const FinanceHubPro = () => {
       </div>
     </div>
   );
+
+  // Don't render if data is still loading
+  if (!data) {
+    return null;
+  }
 
   return (
     <div style={styles.container}>
@@ -2528,6 +2453,195 @@ const FinanceHubPro = () => {
               >
                 Cancel - Keep User
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cloud Sync Status Modal */}
+      {showSyncModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>☁️ Cloud Sync Status</div>
+            
+            {syncStatus && (
+              <div style={{marginBottom: '20px'}}>
+                <div style={{
+                  backgroundColor: isDarkMode ? 'rgba(45, 55, 72, 0.5)' : '#f8f9fa',
+                  padding: '15px',
+                  borderRadius: '8px',
+                  marginBottom: '15px'
+                }}>
+                  <h4>📊 Sync Information</h4>
+                  <div style={{fontSize: '14px', lineHeight: '1.6'}}>
+                    <div><strong>Status:</strong> {syncStatus.isOnline ? '🟢 Online' : '🔴 Offline'}</div>
+                    <div><strong>User ID:</strong> {syncStatus.userId}</div>
+                    <div><strong>Last Sync:</strong> {syncStatus.lastSync ? new Date(syncStatus.lastSync).toLocaleString() : 'Never'}</div>
+                    <div><strong>Pending Changes:</strong> {syncStatus.pendingChanges}</div>
+                  </div>
+                </div>
+
+                <div style={{
+                  backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.1)' : '#fff3cd',
+                  border: isDarkMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #ffeaa7',
+                  borderRadius: '8px',
+                  padding: '15px',
+                  marginBottom: '15px',
+                  color: isDarkMode ? '#f59e0b' : '#856404'
+                }}>
+                  <strong>🔒 Privacy Protection</strong><br />
+                  Your data is isolated by a unique user ID. Other users cannot access your financial information.
+                </div>
+
+                <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                  <button 
+                    style={{...styles.button, ...styles.buttonSuccess}}
+                    onClick={async () => {
+                      await cloudStorage.syncPendingChanges();
+                      setSyncStatus(cloudStorage.getSyncStatus());
+                    }}
+                    disabled={!syncStatus.isOnline || syncStatus.pendingChanges === 0}
+                  >
+                    Sync Now
+                  </button>
+                  <button 
+                    style={{...styles.button, ...styles.buttonDanger}}
+                    onClick={async () => {
+                      const result = await cloudStorage.clearAllData();
+                      if (result.success) {
+                        window.location.reload();
+                      }
+                    }}
+                  >
+                    Clear All Data
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button 
+              style={{...styles.button, ...styles.buttonSecondary}}
+              onClick={() => setShowSyncModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Backup/Restore Modal */}
+      {showBackupModal && (
+        <div style={styles.modal}>
+          <div style={styles.modalContent}>
+            <div style={styles.modalTitle}>💾 Backup & Restore</div>
+            
+            <div style={{marginBottom: '20px'}}>
+              <h4>📤 Export Data</h4>
+              <p style={{fontSize: '14px', color: isDarkMode ? '#a0aec0' : '#666', marginBottom: '15px'}}>
+                Download a backup of your financial data as a JSON file.
+              </p>
+              <button 
+                style={{...styles.button, ...styles.buttonSuccess}}
+                onClick={() => cloudStorage.exportData()}
+              >
+                Export Backup
+              </button>
+            </div>
+
+            <div style={{marginBottom: '20px'}}>
+              <h4>📥 Import Data</h4>
+              <p style={{fontSize: '14px', color: isDarkMode ? '#a0aec0' : '#666', marginBottom: '15px'}}>
+                Restore your data from a previously exported backup file.
+              </p>
+              <input
+                type="file"
+                accept=".json"
+                onChange={(e) => setBackupFile(e.target.files[0])}
+                style={{marginBottom: '10px'}}
+              />
+              {importError && (
+                <div style={{
+                  backgroundColor: '#f8d7da',
+                  border: '1px solid #f5c6cb',
+                  borderRadius: '8px',
+                  padding: '10px',
+                  marginBottom: '10px',
+                  color: '#721c24',
+                  fontSize: '14px'
+                }}>
+                  {importError}
+                </div>
+              )}
+              <button 
+                style={{...styles.button, ...styles.buttonSuccess}}
+                onClick={async () => {
+                  if (!backupFile) return;
+                  try {
+                    setImportError(null);
+                    const importedData = await cloudStorage.importData(backupFile);
+                    setData(importedData);
+                    setBackupFile(null);
+                    setShowBackupModal(false);
+                  } catch (error) {
+                    setImportError(error.message);
+                  }
+                }}
+                disabled={!backupFile}
+              >
+                Import Backup
+              </button>
+            </div>
+
+            <div style={{
+              backgroundColor: isDarkMode ? 'rgba(245, 158, 11, 0.1)' : '#fff3cd',
+              border: isDarkMode ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid #ffeaa7',
+              borderRadius: '8px',
+              padding: '15px',
+              marginBottom: '15px',
+              color: isDarkMode ? '#f59e0b' : '#856404'
+            }}>
+              <strong>⚠️ Important:</strong> Importing will replace your current data. Make sure to export a backup first if needed.
+            </div>
+
+            <button 
+              style={{...styles.button, ...styles.buttonSecondary}}
+              onClick={() => {
+                setShowBackupModal(false);
+                setBackupFile(null);
+                setImportError(null);
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 2000
+        }}>
+          <div style={{
+            backgroundColor: isDarkMode ? '#2d3748' : 'white',
+            color: isDarkMode ? '#e2e8f0' : '#2d3748',
+            padding: '30px',
+            borderRadius: '16px',
+            textAlign: 'center'
+          }}>
+            <div style={{fontSize: '24px', marginBottom: '10px'}}>⏳</div>
+            <div>Loading your financial data...</div>
+            <div style={{fontSize: '14px', opacity: 0.7, marginTop: '10px'}}>
+              Syncing with cloud storage
             </div>
           </div>
         </div>
