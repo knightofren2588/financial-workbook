@@ -59,6 +59,10 @@ const FinanceHubPro = () => {
   // Initialize data on component mount
   useEffect(() => {
     const initializeData = async () => {
+      // Test Supabase connection first
+      const connectionTest = await cloudStorage.testConnection();
+      console.log('Supabase connection test:', connectionTest);
+      
       const initialData = await loadData();
       setData(initialData);
     };

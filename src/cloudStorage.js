@@ -5,7 +5,19 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'YOUR_SUPABASE_URL';
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Debug: Log the configuration (remove in production)
+console.log('Supabase Config:', {
+  url: supabaseUrl,
+  hasKey: !!supabaseAnonKey,
+  keyLength: supabaseAnonKey?.length || 0
+});
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
 
 class CloudStorage {
   constructor() {
@@ -136,18 +148,29 @@ class CloudStorage {
 
   // Save to Supabase cloud
   async saveToCloud(userId, data) {
-    const { error } = await supabase
-      .from('user_data')
-      .upsert({
-        user_id: userId,
-        data: JSON.stringify(data),
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id'
-      });
-    
-    if (error) {
-      throw new Error(`Cloud save failed: ${error.message}`);
+    try {
+      console.log('Attempting to save to cloud for user:', userId);
+      
+      const { data: result, error } = await supabase
+        .from('user_data')
+        .upsert({
+          user_id: userId,
+          data: JSON.stringify(data),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
+      
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw new Error(`Cloud save failed: ${error.message} (Code: ${error.code})`);
+      }
+      
+      console.log('Successfully saved to cloud');
+      return result;
+    } catch (error) {
+      console.error('saveToCloud error:', error);
+      throw error;
     }
   }
 
@@ -170,6 +193,27 @@ class CloudStorage {
     // Clear the queue after successful sync
     localStorage.removeItem('financeHubSyncQueue');
     this.syncQueue = [];
+  }
+
+  // Test Supabase connection
+  async testConnection() {
+    try {
+      const { data, error } = await supabase
+        .from('user_data')
+        .select('count')
+        .limit(1);
+      
+      if (error) {
+        console.error('Supabase connection test failed:', error);
+        return { success: false, error: error.message };
+      }
+      
+      console.log('Supabase connection test successful');
+      return { success: true };
+    } catch (error) {
+      console.error('Supabase connection test error:', error);
+      return { success: false, error: error.message };
+    }
   }
 
   // Get sync status
