@@ -1841,7 +1841,23 @@ const FinanceHubPro = () => {
 
   // Don't render if data is still loading
   if (!data) {
-    return null;
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
+        color: 'white',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+      }}>
+        <div style={{textAlign: 'center'}}>
+          <div style={{fontSize: '48px', marginBottom: '20px'}}>⏳</div>
+          <h2>Loading FinanceHub Pro...</h2>
+          <p>Connecting to cloud storage...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

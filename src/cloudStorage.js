@@ -42,11 +42,24 @@ class CloudStorage {
       // Always save locally first for immediate access
       localStorage.setItem('financeHubProData', JSON.stringify(data));
       
+      // Check if Supabase is properly configured
+      if (supabaseUrl === 'YOUR_SUPABASE_URL' || supabaseAnonKey === 'YOUR_SUPABASE_ANON_KEY') {
+        console.warn('Supabase not configured - using local storage only');
+        return { success: true, synced: false, reason: 'Supabase not configured' };
+      }
+      
       // If online, save to cloud
       if (this.isOnline) {
-        await this.saveToCloud(userId, data);
-        this.lastSyncTime = new Date().toISOString();
-        localStorage.setItem('financeHubLastSync', this.lastSyncTime);
+        try {
+          await this.saveToCloud(userId, data);
+          this.lastSyncTime = new Date().toISOString();
+          localStorage.setItem('financeHubLastSync', this.lastSyncTime);
+        } catch (cloudError) {
+          console.error('Cloud save failed:', cloudError);
+          // Queue for later sync
+          this.syncQueue.push({ userId, data, timestamp: Date.now() });
+          localStorage.setItem('financeHubSyncQueue', JSON.stringify(this.syncQueue));
+        }
       } else {
         // Queue for later sync
         this.syncQueue.push({ userId, data, timestamp: Date.now() });
@@ -68,31 +81,44 @@ class CloudStorage {
       // First try to load from local storage
       const localData = localStorage.getItem('financeHubProData');
       
-      if (this.isOnline) {
-        // Try to get latest from cloud
-        const { data: cloudData, error } = await supabase
-          .from('user_data')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
-        
-        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-          console.error('Error loading from cloud:', error);
+      // Check if Supabase is properly configured
+      if (supabaseUrl === 'YOUR_SUPABASE_URL' || supabaseAnonKey === 'YOUR_SUPABASE_ANON_KEY') {
+        console.warn('Supabase not configured - using local storage only');
+        if (localData) {
+          return JSON.parse(localData);
         }
-        
-        if (cloudData) {
-          const cloudTimestamp = new Date(cloudData.updated_at).getTime();
-          const localTimestamp = localStorage.getItem('financeHubLastSync') 
-            ? new Date(localStorage.getItem('financeHubLastSync')).getTime() 
-            : 0;
+        return this.getDefaultData();
+      }
+      
+      if (this.isOnline) {
+        try {
+          // Try to get latest from cloud
+          const { data: cloudData, error } = await supabase
+            .from('user_data')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
           
-          // Use cloud data if it's newer
-          if (cloudTimestamp > localTimestamp) {
-            localStorage.setItem('financeHubProData', cloudData.data);
-            this.lastSyncTime = cloudData.updated_at;
-            localStorage.setItem('financeHubLastSync', this.lastSyncTime);
-            return JSON.parse(cloudData.data);
+          if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+            console.error('Error loading from cloud:', error);
           }
+          
+          if (cloudData) {
+            const cloudTimestamp = new Date(cloudData.updated_at).getTime();
+            const localTimestamp = localStorage.getItem('financeHubLastSync') 
+              ? new Date(localStorage.getItem('financeHubLastSync')).getTime() 
+              : 0;
+            
+            // Use cloud data if it's newer
+            if (cloudTimestamp > localTimestamp) {
+              localStorage.setItem('financeHubProData', cloudData.data);
+              this.lastSyncTime = cloudData.updated_at;
+              localStorage.setItem('financeHubLastSync', this.lastSyncTime);
+              return JSON.parse(cloudData.data);
+            }
+          }
+        } catch (cloudError) {
+          console.error('Cloud sync failed, using local data:', cloudError);
         }
       }
       
