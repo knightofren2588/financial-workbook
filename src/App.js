@@ -108,10 +108,14 @@ const FinanceHubPro = () => {
 
   // Copy previous month's recurring bills
   const copyFromPreviousMonth = () => {
+    if (!data?.months || !data?.currentMonthId) return;
+    
     const monthIds = Object.keys(data.months);
     const currentIndex = monthIds.indexOf(data.currentMonthId);
     if (currentIndex > 0) {
       const previousMonth = data.months[monthIds[currentIndex - 1]];
+      if (!previousMonth?.bills) return;
+      
       const recurringBills = previousMonth.bills.map(bill => ({
         ...bill,
         id: Date.now() + Math.random(),
@@ -125,7 +129,7 @@ const FinanceHubPro = () => {
           ...prev.months,
           [data.currentMonthId]: {
             ...currentMonth,
-            bills: [...currentMonth.bills, ...recurringBills]
+            bills: [...(currentMonth?.bills || []), ...recurringBills]
           }
         }
       }));
@@ -134,7 +138,7 @@ const FinanceHubPro = () => {
 
   // Add new bill
   const addBill = () => {
-    if (!newBill.name || !newBill.amount) return;
+    if (!newBill.name || !newBill.amount || !data?.currentMonthId) return;
     
     const bill = {
       id: Date.now(),
@@ -153,7 +157,7 @@ const FinanceHubPro = () => {
         ...prev.months,
         [data.currentMonthId]: {
           ...currentMonth,
-          bills: [...currentMonth.bills, bill]
+          bills: [...(currentMonth?.bills || []), bill]
         }
       }
     }));
@@ -163,14 +167,14 @@ const FinanceHubPro = () => {
 
   // Add new paycheck
   const addPaycheck = () => {
-    if (!newPaycheck.date || !newPaycheck.amount) return;
+    if (!newPaycheck.date || !newPaycheck.amount || !data?.currentMonthId) return;
     
     const paycheck = {
       id: Date.now(),
       date: newPaycheck.date,
       amount: parseFloat(newPaycheck.amount),
       source: newPaycheck.source,
-      label: newPaycheck.label || `Paycheck ${currentMonth.paychecks.length + 1}`
+      label: newPaycheck.label || `Paycheck ${(currentMonth?.paychecks?.length || 0) + 1}`
     };
     
     setData(prev => ({
@@ -179,7 +183,7 @@ const FinanceHubPro = () => {
         ...prev.months,
         [data.currentMonthId]: {
           ...currentMonth,
-          paychecks: [...currentMonth.paychecks, paycheck]
+          paychecks: [...(currentMonth?.paychecks || []), paycheck]
         }
       }
     }));
@@ -189,6 +193,8 @@ const FinanceHubPro = () => {
 
   // Update bill
   const updateBill = (billId, updates) => {
+    if (!data?.currentMonthId || !currentMonth?.bills) return;
+    
     setData(prev => ({
       ...prev,
       months: {
@@ -221,6 +227,8 @@ const FinanceHubPro = () => {
 
   // Delete bill
   const deleteBill = (billId) => {
+    if (!data?.currentMonthId || !currentMonth?.bills) return;
+    
     setData(prev => ({
       ...prev,
       months: {
@@ -235,6 +243,8 @@ const FinanceHubPro = () => {
 
   // Delete paycheck
   const deletePaycheck = (paycheckId) => {
+    if (!data?.currentMonthId || !currentMonth?.paychecks || !currentMonth?.bills) return;
+    
     setData(prev => ({
       ...prev,
       months: {
@@ -409,15 +419,15 @@ const FinanceHubPro = () => {
 
   // Calculate subscription totals
   const getActiveSubscriptionsTotal = () => {
-    return data.subscriptions
-      .filter(sub => sub.status === 'active')
-      .reduce((sum, sub) => sum + sub.amount, 0);
+    return data?.subscriptions
+      ?.filter(sub => sub.status === 'active')
+      ?.reduce((sum, sub) => sum + sub.amount, 0) || 0;
   };
 
   const getYearlySubscriptionSavings = () => {
-    return data.subscriptions
-      .filter(sub => sub.status === 'active' && sub.yearlyDiscount > 0)
-      .reduce((sum, sub) => sum + sub.yearlyDiscount, 0);
+    return data?.subscriptions
+      ?.filter(sub => sub.status === 'active' && sub.yearlyDiscount > 0)
+      ?.reduce((sum, sub) => sum + sub.yearlyDiscount, 0) || 0;
   };
 
   // Connected Accounts Management
@@ -473,7 +483,9 @@ const FinanceHubPro = () => {
   };
 
   const startEditUser = () => {
-    setEditingUser({ ...data.user });
+    if (data?.user) {
+      setEditingUser({ ...data.user });
+    }
   };
 
   const saveUserEdit = () => {
@@ -610,7 +622,67 @@ const FinanceHubPro = () => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const isDarkMode = data.user.settings.darkMode;
+  const isDarkMode = data?.user?.settings?.darkMode || false;
+
+  // Don't create styles if data is null
+  if (!data) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
+        color: 'white',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+      }}>
+        <div style={{textAlign: 'center'}}>
+          <div style={{fontSize: '48px', marginBottom: '20px'}}>⏳</div>
+          <h2>Loading FinanceHub Pro...</h2>
+          <p>Connecting to cloud storage...</p>
+          {isLoading && <p style={{fontSize: '14px', opacity: 0.7}}>Please wait...</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // Validate data structure
+  if (!data.user || !data.months || !data.currentMonthId) {
+    console.error('Invalid data structure:', data);
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+        color: 'white',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
+      }}>
+        <div style={{textAlign: 'center'}}>
+          <div style={{fontSize: '48px', marginBottom: '20px'}}>⚠️</div>
+          <h2>Data Error</h2>
+          <p>Unable to load your financial data.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{
+              backgroundColor: 'white',
+              color: '#ef4444',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              marginTop: '20px'
+            }}
+          >
+            Reload App
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const styles = {
     container: {
@@ -1086,7 +1158,7 @@ const FinanceHubPro = () => {
       {/* Quick subscription summary */}
       <div style={styles.card}>
         <h3>📱 Subscription Summary</h3>
-        <p>You have <strong>{data.subscriptions.filter(s => s.status === 'active').length} active subscriptions</strong> costing <strong>{formatCurrency(getActiveSubscriptionsTotal())}/month</strong></p>
+        <p>You have <strong>{data?.subscriptions?.filter(s => s.status === 'active')?.length || 0} active subscriptions</strong> costing <strong>{formatCurrency(getActiveSubscriptionsTotal())}/month</strong></p>
         <button 
           style={styles.button}
           onClick={() => setActiveView('subscriptions')}
@@ -1303,7 +1375,7 @@ const FinanceHubPro = () => {
           <div style={styles.statLabel}>Yearly Cost</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statValue}>{data.subscriptions.filter(s => s.status === 'active').length}</div>
+          <div style={styles.statValue}>{data?.subscriptions?.filter(s => s.status === 'active')?.length || 0}</div>
           <div style={styles.statLabel}>Active Subscriptions</div>
         </div>
         <div style={styles.statCard}>
@@ -1331,7 +1403,7 @@ const FinanceHubPro = () => {
 
       {/* Subscriptions Grid */}
       <div style={styles.subscriptionGrid}>
-        {data.subscriptions.map(subscription => (
+        {data?.subscriptions?.map(subscription => (
           <div key={subscription.id} style={styles.subscriptionCard}>
             <div style={styles.subscriptionHeader}>
               <div>
@@ -1666,10 +1738,10 @@ const FinanceHubPro = () => {
           <div style={{marginBottom: '20px'}}>
             <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px'}}>
               <div>
-                <div><strong>Name:</strong> {data.user.name}</div>
-                <div><strong>Email:</strong> {data.user.email}</div>
-                <div><strong>Company:</strong> {data.user.company || 'N/A'}</div>
-                <div><strong>Member Since:</strong> {formatDate(data.user.createdAt)}</div>
+                <div><strong>Name:</strong> {data?.user?.name || 'N/A'}</div>
+                <div><strong>Email:</strong> {data?.user?.email || 'N/A'}</div>
+                <div><strong>Company:</strong> {data?.user?.company || 'N/A'}</div>
+                <div><strong>Member Since:</strong> {formatDate(data?.user?.createdAt || new Date())}</div>
               </div>
               <div>
                 <button 
@@ -1816,9 +1888,9 @@ const FinanceHubPro = () => {
         <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
           <input 
             type="checkbox" 
-            checked={data.user.settings.notifications} 
+            checked={data?.user?.settings?.notifications || false} 
             onChange={(e) => updateUser({
-              settings: { ...data.user.settings, notifications: e.target.checked }
+              settings: { ...data?.user?.settings, notifications: e.target.checked }
             })}
             style={{marginRight: '10px'}} 
           />
@@ -1827,9 +1899,9 @@ const FinanceHubPro = () => {
         <label style={{display: 'flex', alignItems: 'center', marginBottom: '10px'}}>
           <input 
             type="checkbox" 
-            checked={data.user.settings.darkMode} 
+            checked={data?.user?.settings?.darkMode || false} 
             onChange={(e) => updateUser({
-              settings: { ...data.user.settings, darkMode: e.target.checked }
+              settings: { ...data?.user?.settings, darkMode: e.target.checked }
             })}
             style={{marginRight: '10px'}} 
           />
@@ -1839,26 +1911,7 @@ const FinanceHubPro = () => {
     </div>
   );
 
-  // Don't render if data is still loading
-  if (!data) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)',
-        color: 'white',
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
-      }}>
-        <div style={{textAlign: 'center'}}>
-          <div style={{fontSize: '48px', marginBottom: '20px'}}>⏳</div>
-          <h2>Loading FinanceHub Pro...</h2>
-          <p>Connecting to cloud storage...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div style={styles.container}>
@@ -1867,7 +1920,7 @@ const FinanceHubPro = () => {
           style={styles.userButton}
           onClick={() => setShowUserProfile(!showUserProfile)}
         >
-          👤 {data.user.name}
+          👤 {data?.user?.name || 'User'}
         </button>
         <h1 style={styles.title}>💼 FinanceHub Pro</h1>
         <p style={{fontSize: '16px', opacity: '0.9'}}>
@@ -2125,9 +2178,9 @@ const FinanceHubPro = () => {
                 borderRadius: '8px',
                 marginBottom: '15px'
               }}>
-                <div><strong>{data.user.name}</strong></div>
-                <div style={{fontSize: '14px', color: '#666'}}>{data.user.email}</div>
-                <div style={{fontSize: '14px', color: '#666'}}>Member since {formatDate(data.user.createdAt)}</div>
+                <div><strong>{data?.user?.name || 'N/A'}</strong></div>
+                <div style={{fontSize: '14px', color: '#666'}}>{data?.user?.email || 'N/A'}</div>
+                <div style={{fontSize: '14px', color: '#666'}}>Member since {formatDate(data?.user?.createdAt || new Date())}</div>
               </div>
             </div>
 
@@ -2437,8 +2490,8 @@ const FinanceHubPro = () => {
             }}>
               <h4>This will permanently delete:</h4>
               <ul style={{marginLeft: '20px', marginTop: '10px'}}>
-                <li>User profile: <strong>{data.user.name}</strong></li>
-                <li>All financial data ({Object.keys(data.months).length} months)</li>
+                <li>User profile: <strong>{data?.user?.name || 'N/A'}</strong></li>
+                <li>All financial data ({Object.keys(data?.months || {}).length} months)</li>
                 <li>All bills and paychecks</li>
                 <li>All subscription data</li>
                 <li>All connected accounts</li>
