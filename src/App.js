@@ -54,7 +54,7 @@ const FinanceHubPro = () => {
   const [newBill, setNewBill] = useState({ name: '', amount: '', dueDate: '', category: 'Other', isSubscription: false });
   const [newPaycheck, setNewPaycheck] = useState({ date: '', amount: '', source: 'Equitas Health', label: '' });
 
-  const currentMonth = data.months[data.currentMonthId];
+  const currentMonth = data?.months?.[data?.currentMonthId];
 
   // Initialize data on component mount
   useEffect(() => {
@@ -211,7 +211,7 @@ const FinanceHubPro = () => {
         ...prev.months,
         [data.currentMonthId]: {
           ...currentMonth,
-          paychecks: currentMonth.paychecks.map(paycheck => 
+          paychecks: currentMonth?.paychecks?.map(paycheck => 
             paycheck.id === paycheckId ? { ...paycheck, ...updates } : paycheck
           )
         }
@@ -282,12 +282,12 @@ const FinanceHubPro = () => {
 
   // Get bills by paycheck
   const getBillsByPaycheck = (paycheckId) => {
-    return currentMonth.bills.filter(bill => bill.assignedPaycheck === paycheckId);
+    return currentMonth?.bills?.filter(bill => bill.assignedPaycheck === paycheckId) || [];
   };
 
   // Get unassigned bills
   const getUnassignedBills = () => {
-    return currentMonth.bills.filter(bill => bill.assignedPaycheck === null);
+    return currentMonth?.bills?.filter(bill => bill.assignedPaycheck === null) || [];
   };
 
   // Calculate totals
@@ -296,16 +296,16 @@ const FinanceHubPro = () => {
   };
 
   const getPaycheckRemaining = (paycheckId) => {
-    const paycheck = currentMonth.paychecks.find(p => p.id === paycheckId);
+    const paycheck = currentMonth?.paychecks?.find(p => p.id === paycheckId);
     return paycheck ? paycheck.amount - getPaycheckTotal(paycheckId) : 0;
   };
 
   const getTotalIncome = () => {
-    return currentMonth.paychecks.reduce((sum, paycheck) => sum + paycheck.amount, 0);
+    return currentMonth?.paychecks?.reduce((sum, paycheck) => sum + paycheck.amount, 0) || 0;
   };
 
   const getTotalExpenses = () => {
-    return currentMonth.bills.reduce((sum, bill) => sum + bill.amount, 0);
+    return currentMonth?.bills?.reduce((sum, bill) => sum + bill.amount, 0) || 0;
   };
 
   // Get historical data
@@ -1097,7 +1097,7 @@ const FinanceHubPro = () => {
 
       {/* Paycheck Cards */}
       <div style={styles.paycheckGrid}>
-        {currentMonth.paychecks.map(paycheck => {
+        {currentMonth?.paychecks?.map(paycheck => {
           const assignedBills = getBillsByPaycheck(paycheck.id);
           const remaining = getPaycheckRemaining(paycheck.id);
           
@@ -1263,7 +1263,7 @@ const FinanceHubPro = () => {
                     style={styles.select}
                   >
                     <option value="">Assign to...</option>
-                    {currentMonth.paychecks.map(paycheck => (
+                    {currentMonth?.paychecks?.map(paycheck => (
                       <option key={paycheck.id} value={paycheck.id}>
                         {paycheck.label}
                       </option>
